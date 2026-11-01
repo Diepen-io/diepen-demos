@@ -124,7 +124,7 @@ export function KeynoteSlot({ day, time, title }: { day: string; time: string; t
         <span className="text-[17px] font-semibold">{day}</span>
       </div>
       <div className="flex flex-col justify-center px-6 py-5">
-        <p className="text-[clamp(30px,2.8vw,44px)] font-semibold leading-none tabular-nums">{time}</p>
+        <p className="text-[clamp(30px,2.8vw,44px)] font-semibold leading-none">{time}</p>
         <p className="mt-2 text-[18px] text-muted">{title}</p>
       </div>
     </div>
@@ -159,7 +159,7 @@ export function KeynoteFigures({ figures }: { figures: { value: string; label: s
       {figures.slice(0, 3).map((figure) => (
         <div key={figure.label} className={cx(surface, "flex flex-col-reverse items-center px-3 py-6 md:px-5")}>
           <dt className="mt-2 text-[16px] font-medium leading-tight text-muted md:text-[18px]">{figure.label}</dt>
-          <dd className="text-[clamp(36px,4vw,64px)] font-semibold leading-none tracking-[-0.03em] tabular-nums">{figure.value}</dd>
+          <dd className="text-[clamp(36px,4vw,64px)] font-semibold leading-none tracking-[-0.03em]">{figure.value}</dd>
         </div>
       ))}
     </dl>

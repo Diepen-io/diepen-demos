@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { cx } from "../primitives/class-names";
 import { Icon } from "../primitives/icon";
 import { EASE_OUT } from "./film-easing";
-import type { FilmLane } from "./film-script";
+import type { FilmLane } from "./film-lane";
 
 export type LaneProps = {
   lane: FilmLane;

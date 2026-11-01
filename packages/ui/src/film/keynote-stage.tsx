@@ -117,7 +117,7 @@ function Finale({ film, liveHref }: { film: KeynoteFilm; liveHref: string }): Re
   return (
     <div data-keynote-finale className="flex flex-col items-center">
       <p className="text-[clamp(18px,1.6vw,26px)] font-medium text-muted">{finale.label}</p>
-      <p className="mt-3 flex flex-wrap items-baseline justify-center gap-x-[0.35em] text-[clamp(56px,8vw,128px)] font-semibold leading-none tracking-[-0.04em] tabular-nums">
+      <p className="mt-3 flex flex-wrap items-baseline justify-center gap-x-[0.35em] text-[clamp(56px,8vw,128px)] font-semibold leading-none tracking-[-0.04em]">
         <span className="text-muted/70">{finale.before}</span>
         <span aria-label="to" className="text-[0.6em] text-muted/60">
           →

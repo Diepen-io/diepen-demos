@@ -3,7 +3,7 @@
 import type { KeyboardEvent } from "react";
 import { cx } from "../primitives/class-names";
 import { Icon } from "../primitives/icon";
-import type { FilmLane } from "./film-script";
+import type { FilmLane } from "./film-lane";
 import type { LaneAnchors } from "./use-lane-anchors";
 
 export type LaneTabsProps = {

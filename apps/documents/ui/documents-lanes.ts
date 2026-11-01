@@ -1,5 +1,5 @@
 import type { FilmLayout } from "@diepen/ui/film/film-layout";
-import type { FilmLane } from "@diepen/ui/film/film-script";
+import type { FilmLane } from "@diepen/ui/film/film-lane";
 import type { CompanyProfile } from "@diepen/voice/profile";
 
 /** The four parties of live mode, in the order that keeps the busiest paths short. */

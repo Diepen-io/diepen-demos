@@ -282,21 +282,6 @@ input[type="range"] {
   }
 }
 
-/* A focus film's highlight (`film/film-highlight`). Colour only, so reduced motion needs no variant.
-   The ring waits for the beat's panel transition, then fades in. */
-[data-film-highlight] {
-  outline: 3px solid transparent;
-  outline-offset: 5px;
-  transition:
-    outline-color 350ms var(--ease-out),
-    box-shadow 350ms var(--ease-out);
-}
-
-[data-film-highlight][data-highlighted] {
-  outline-color: var(--brand);
-  box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--brand) 55%, transparent);
-  transition-delay: 380ms;
-}
 
 /* Keynote films: each beat rises a few pixels into place while it fades in. One move per beat. */
 .keynote-rise {

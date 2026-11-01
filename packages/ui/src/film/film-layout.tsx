@@ -1,4 +1,4 @@
-import type { FilmLane } from "./film-script";
+import type { FilmLane } from "./film-lane";
 
 /**
  * The desktop arrangement of lanes. Each column holds one lane, or several stacked top to bottom
