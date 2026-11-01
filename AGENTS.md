@@ -72,5 +72,6 @@ Code for one demo stays in its app. It moves into a package when a second demo n
 ## Known traps
 
 - `next dev` and e2e share an app folder. e2e uses `NEXT_DIST_DIR=.next-e2e` so the two never fight over `.next`.
+- e2e runs on `next dev`, which compiles a route on its first request. Each app's `e2e/support/warm-up.ts` requests every page and API route once before the tests start, so a loaded machine does not time out first page loads. A new route goes into that list.
 - TypeScript stays on 6.0: typescript-eslint supports TypeScript below 6.1.
 - In-memory rate limits and the daily cap count per server instance. See `docs/decisions.md`.

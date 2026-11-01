@@ -100,8 +100,7 @@ function LiveInboxBody({ profile, providerName, fallbackHref }: BodyProps) {
           />
           <ChannelThread
             key={active}
-            // The shared slot chips have no inactive look yet, so after a handover the thread dims them.
-            className={cx("min-h-0 flex-1", handedOver && "[&_[aria-label='Offered_times']]:opacity-45 [&_[aria-label='Offered_times']]:saturate-0")}
+            className="min-h-0 flex-1"
             thread={threadView(active, thread)}
             profile={profile}
             seenBy="customer"
@@ -109,8 +108,8 @@ function LiveInboxBody({ profile, providerName, fallbackHref }: BodyProps) {
             controls={{
               onSend: (text, subject) => send(active, text, subject),
               starters: starterPrompts(profile),
-              // After a handover the offered times are no longer on offer.
-              onPickSlot: handedOver ? undefined : (iso) => void send(active, `${formatSlot(iso)} works for me.`),
+              // The mockups grey these out and stop picks once the thread is handed over.
+              onPickSlot: (iso) => void send(active, `${formatSlot(iso)} works for me.`),
               sending: thread.sending,
               notice: thread.notice,
               handover: handedOver

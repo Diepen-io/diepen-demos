@@ -1,8 +1,3 @@
-/**
- * Names as people say them. `@diepen/voice/person-name` will hold `firstName` with the same rule;
- * until then this app keeps its own.
- */
-
 /** Titles that come before a name. A greeting skips them: "Dr. Lena Okafor" is "Lena". */
 const titles = new Set(["dr", "mr", "mrs", "ms", "miss", "mx", "prof", "sir", "dame"]);
 
@@ -12,10 +7,13 @@ export const unnamedContact = "New contact";
 /** Labels for a role or a group, not a person: "the team", "Prospect", "Speaker", "New contact". */
 const notAPerson = /^(?:the\s|prospect$|speaker$|you$|unknown\b|new contact$|client$|customer$)/i;
 
+// Same rule as `firstName` in `@diepen/voice/person-name`, which domain code may not import; change both together.
 export function firstName(fullName: string): string {
-  const words = fullName.trim().split(/\s+/).filter(Boolean);
-  const named = words.find((word) => !titles.has(word.toLowerCase().replace(/\.$/, "")));
-  return named ?? words[0] ?? fullName.trim();
+  const name = fullName.trim();
+  if (/^the\s/i.test(name)) return name;
+  const words = name.split(/\s+/).filter(Boolean);
+  const first = words.find((word) => !titles.has(word.toLowerCase().replace(/\.$/, "")));
+  return first ?? name;
 }
 
 /** False for a label such as "the team" or "Prospect", so a sentence never greets it by name. */

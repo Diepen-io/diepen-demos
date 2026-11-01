@@ -5,6 +5,9 @@ import { lane } from "./support/film";
 import { expectAllOutputs, inputTab, output, transcriptBox, turnIntoProposal } from "./support/live";
 import { expect, test } from "./support/test";
 
+// A flow waits for a dev compile, then up to 30 s per output (`outputTimeout`) and the 700 ms reveal steps; a loaded machine needs the margin.
+test.describe.configure({ timeout: 90_000 });
+
 const brand = encodeProfile(testProfile);
 const price = "GBP 29 per flat per month";
 

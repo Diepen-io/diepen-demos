@@ -30,7 +30,7 @@ It runs from recorded fixtures with no key and no network.
 Fixtures and captions hold tokens that `domain/profile-tokens.ts` fills from a `CompanyProfile`.
 The film always tells Brickfern's story (decision F1), so it fills them from the meetings preset.
 Live mode fills the sample call from the visitor's profile, so every token reads well when the owner is a person with a title ("Dr. Lena Okafor"), a group ("the team", which brand extraction writes when a site names nobody), or when no service has a price.
-`domain/seller.ts` decides how the seller is named; `domain/person-name.ts` holds `firstName`, which skips titles, until `@diepen/voice/person-name` ships the same rule.
+`domain/seller.ts` decides how the seller is named; `domain/person-name.ts` holds its own `firstName`, because domain code may not import `@diepen/voice/person-name`; both skip titles and keep a group name such as "the team" whole, and change together.
 
 | Token | Value |
 | --- | --- |
@@ -354,7 +354,7 @@ Inside `apps/meetings`. Dependencies point inwards; `eslint.config.mjs` enforces
 | --- | --- |
 | `domain/transcript.ts` | `SpeakerTurn { atSeconds?: number; speaker: string; text: string }`, `parseTranscript(text)`, `formatTranscript(turns)`, `transcriptLimits`, `checkTranscript(text)` returning the issues of section 4 |
 | `domain/call-sides.ts` | `identifySides(turns, profile)` returning `{ seller, prospect }` |
-| `domain/person-name.ts` | `firstName` (skips titles), `isPersonName` (false for "the team", "Prospect", "New contact"), `speakerLabel` (40 characters, no colon) |
+| `domain/person-name.ts` | `firstName` (skips titles, keeps "the team" whole; the same rule as `@diepen/voice/person-name`), `isPersonName` (false for "the team", "Prospect", "New contact"), `speakerLabel` (40 characters, no colon) |
 | `domain/seller.ts` | `sellerOf(profile)`: how every sentence names the seller, for a person or a team |
 | `domain/proposal-sent.ts` | `markProposalSent(outputs)`: stage "Proposal sent" and the meeting as the next step; `meetingMoment(start)` |
 | `domain/calendar-week.ts` | `mondayOf`, `workingDays`, `weekLabel` ("9 to 13 November") for the calendar lane header |

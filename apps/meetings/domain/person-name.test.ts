@@ -7,6 +7,13 @@ describe("person names @meetings.make-it-yours", () => {
     expect(firstName("Dr. Lena Okafor")).toBe("Lena");
     expect(firstName("Prof Anna Weber")).toBe("Anna");
     expect(firstName("Mrs. Priya Nair")).toBe("Priya");
+    expect(firstName("Miss Ada Byrne")).toBe("Ada");
+  });
+
+  it("keeps a group name and a bare title whole, as @diepen/voice/person-name does", () => {
+    expect(firstName("the team")).toBe("the team");
+    expect(firstName("Dr.")).toBe("Dr.");
+    expect(firstName("")).toBe("");
   });
 
   it("tells a person from a group or a role", () => {

@@ -5,7 +5,7 @@ import { cx } from "../primitives/class-names";
 import { Icon } from "../primitives/icon";
 import { ChannelFrame } from "./channel-frame";
 import type { ConversationControls } from "./conversation";
-import { ConversationFooter, ThreadEnd } from "./conversation-parts";
+import { ConversationFooter, slotsOnOffer, ThreadEnd } from "./conversation-parts";
 import { EmailMessage, type EmailMessageProps } from "./email-message";
 import { EmailThreadRow } from "./email-thread-row";
 import { useScrollToLatest } from "./scroll-to-latest";
@@ -53,6 +53,7 @@ export function EmailInbox({ account, threads, openThreadId, drafting, composeSu
     pick: "last",
   });
   const showThread = Boolean(open) || live;
+  const offer = slotsOnOffer(controls);
 
   return (
     <ChannelFrame channel="Email" icon="mail" accent="var(--channel-email)" meta={account} className={className}>
@@ -92,7 +93,12 @@ export function EmailInbox({ account, threads, openThreadId, drafting, composeSu
                 </div>
                 {messages.map((message, index) => (
                   <div key={index} data-email-message="" className={cx(index > 0 && "border-t border-border pt-4")}>
-                    <EmailMessage {...message} subject={undefined} onPickSlot={message.onPickSlot ?? controls.onPickSlot} />
+                    <EmailMessage
+                      {...message}
+                      subject={undefined}
+                      onPickSlot={message.onPickSlot ?? offer.onPick}
+                      slotsDisabled={offer.disabled}
+                    />
                   </div>
                 ))}
                 {drafting && (

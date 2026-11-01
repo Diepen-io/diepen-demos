@@ -60,4 +60,6 @@ test("F17: after a handover the times offered earlier can no longer be picked @i
   await sendMessage(page, "I waited 40 minutes past my appointment time and nobody told me why. Not acceptable.");
   await expect(page.getByRole("button", { name: "Start over" })).toBeVisible();
   await expect(chips.getByRole("button")).toHaveCount(0);
+  // The shared chips show the inactive look, not only the missing buttons.
+  await expect(chips).toHaveAttribute("data-disabled", "true");
 });

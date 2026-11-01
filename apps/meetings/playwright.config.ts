@@ -7,6 +7,7 @@ const external = process.env.VERIFY_URL;
 
 export default defineConfig({
   testDir: "e2e",
+  globalSetup: "./e2e/support/warm-up.ts",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,

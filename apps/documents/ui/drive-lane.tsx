@@ -14,14 +14,6 @@ export type DriveLaneProps = {
 };
 
 /**
- * A long file name may wrap only after "_" or "-", never inside a word. A hyphen already allows a
- * break; a zero-width space after each underscore adds one there.
- */
-export function wrappableFileName(name: string): string {
-  return name.replaceAll("_", "_\u200b");
-}
-
-/**
  * Keeps the newest file in view. Once "99 Replaced" holds files, the view starts from the end of
  * the tree, where they are, and only moves up if the newest file would be out of sight.
  */
@@ -61,14 +53,14 @@ export function DriveLane({ firmName, tree, filedAt, freshId }: DriveLaneProps) 
       name: folder.name,
       files: folder.files.map((entry) => ({
         id: entry.id,
-        name: wrappableFileName(entry.name),
+        name: entry.name,
         modified: filedAt[entry.id] ?? "",
         isNew: entry.id === freshId,
       })),
     }));
   const box = useFollowNewest(tree, folders);
   return (
-    <div ref={box} className="drive-lane lane-dense h-full min-h-0">
+    <div ref={box} className="lane-dense h-full min-h-0">
       <DriveFolder path={drivePath(firmName)} folders={folders} wrapNames />
     </div>
   );

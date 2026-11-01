@@ -8,6 +8,7 @@ describe("firstName", () => {
     expect(firstName("Mrs. Ada Byrne")).toBe("Ada");
     expect(firstName("Ms. Ada Byrne")).toBe("Ada");
     expect(firstName("Mr. Tom Reed")).toBe("Tom");
+    expect(firstName("Miss Ada Byrne")).toBe("Ada");
   });
 
   it("returns the first word of a plain name", () => {

@@ -84,7 +84,7 @@ function ChatWindow({ company, assistantName, messages, typing, ...controls }: O
                 </p>
               </div>
               <div className={visitor ? "" : "pl-[34px]"}>
-                <MessageExtras message={message} onPickSlot={controls.onPickSlot} align={visitor ? "end" : "start"} />
+                <MessageExtras message={message} controls={controls} align={visitor ? "end" : "start"} />
               </div>
             </div>
           );

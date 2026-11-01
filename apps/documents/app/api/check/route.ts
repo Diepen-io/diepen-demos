@@ -19,8 +19,7 @@ const tooLarge = () => json({ error: "file_too_large", maxBytes: maxUploadBytes 
 async function readForm(request: Request): Promise<FormData | null> {
   const bytes = await readBodyBytes(request, maxBodyBytes);
   const contentType = request.headers.get("content-type") ?? "";
-  // The copy gives the bytes the plain ArrayBuffer a Response body is typed to take.
-  return new Response(new Uint8Array(bytes), { headers: { "content-type": contentType } }).formData().catch(() => null);
+  return new Response(bytes, { headers: { "content-type": contentType } }).formData().catch(() => null);
 }
 
 /**

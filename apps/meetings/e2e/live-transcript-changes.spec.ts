@@ -1,6 +1,9 @@
 import { expectAllOutputs, inputTab, output, rosaCall, runSampleCall, transcriptBox, turnIntoProposal } from "./support/live";
 import { expect, test } from "./support/test";
 
+// A flow waits for a dev compile, then up to 30 s per output (`outputTimeout`) and the 700 ms reveal steps; a loaded machine needs the margin.
+test.describe.configure({ timeout: 90_000 });
+
 // F18
 test("asks before the sample call replaces a typed transcript @meetings.live-sample", async ({ page }) => {
   await page.goto("/live");

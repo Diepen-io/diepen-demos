@@ -273,7 +273,7 @@ No streaming in this demo: one structured reply per turn, so `text-stream-client
 
 - When `status` is `needs_human`, the reply text is the profile's handover message as written by the model, the owner row gets the amber chip "Needs a human" with `handoverReason` as its summary and moves to the top.
 - The thread then shows the note "Handed to {owner}. You get a personal reply here." and the composer is replaced by a "Start over" button that clears this channel's thread.
-- Slot chips offered before the handover turn grey and can no longer be picked.
+- Slot chips offered before the handover turn grey and can no longer be picked. The shared mockups do this whenever a conversation has a handover, in film and live mode.
 - No further request goes to `/api/reply` for a conversation with status `needs_human`.
 
 ### Owner view
@@ -521,7 +521,7 @@ Prefer roles and visible text as selectors. Test ids where text is not stable: `
 | F14 | `inbox.film`, `inbox.live-chat` | At 375 px wide, on `/`, `/?t=30000`, `/?t=80000`, and `/live` on each bottom tab and each channel tab, `document.documentElement.scrollWidth` is at most 375 |
 | F15 | `inbox.film`, `inbox.live-chat` | No console errors and no failed requests on `/`, `/?t=80000` and `/live` after one sent message |
 | F16 | `inbox.film` | At 1920x1080, `/?t=7000` shows the four lanes side by side and the caption text is about 28 px (at least 27.5 px: the shared caption bar is 1.45vw) |
-| F17 | `inbox.live-handover` | On `/live`, Website chat: ask to book, then complain without the word "complaint". The thread hands over and the earlier slot chips are no longer buttons |
+| F17 | `inbox.live-handover` | On `/live`, Website chat: ask to book, then complain without the word "complaint". The thread hands over and the earlier slot chips are no longer buttons and carry the shared inactive look (`data-disabled`) |
 | F18 | `inbox.live-chat` | On `/live`, with `/api/reply` failing, click a starter. The message stays in the thread marked "Not answered"; sending it again shows it once |
 
 ## 9. Feature rows

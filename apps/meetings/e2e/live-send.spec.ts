@@ -1,6 +1,9 @@
 import { output, runSampleCall } from "./support/live";
 import { expect, test } from "./support/test";
 
+// A flow waits for a dev compile, then up to 30 s per output (`outputTimeout`) and the 700 ms reveal steps; a loaded machine needs the margin.
+test.describe.configure({ timeout: 90_000 });
+
 // F11
 test("sends the follow-up email and shows transcript to proposal sent @meetings.live-send", async ({ page }) => {
   await runSampleCall(page);

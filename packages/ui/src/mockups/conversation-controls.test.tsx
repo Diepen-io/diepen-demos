@@ -51,6 +51,15 @@ describe("conversation controls", () => {
     expect(onPickSlot).toHaveBeenCalledWith("2026-11-12T09:00");
   });
 
+  it("greys out the offered times and stops picks after a handover", () => {
+    const messages = [
+      { id: "1", from: "business" as const, text: "Which suits you?", slots: [{ iso: "2026-11-12T09:00", label: "Thu 12 Nov, 09:00" }] },
+    ];
+    render(<InstagramDm account="@studio" customer={customer} messages={messages} onPickSlot={vi.fn()} handover={{ note: "Handed to Lena." }} />);
+    expect(screen.queryByRole("button", { name: "Thu 12 Nov, 09:00" })).toBeNull();
+    expect(screen.getByRole("list", { name: "Offered times" }).getAttribute("data-disabled")).toBe("true");
+  });
+
   it("replaces the composer with the handover note", () => {
     const onStartOver = vi.fn();
     render(
