@@ -33,18 +33,9 @@ export function countByStatus(conversations: readonly Conversation[]): Record<Co
   return counts;
 }
 
-const plural = (count: number, unit: string) => `${count} ${unit}${count === 1 ? "" : "s"}`;
-
-/** "38 seconds", "12 minutes", "9 hours" or "7.5 hours". */
 /** "9 h" or "38 s", for a number that has to read at a glance. */
 export function formatDurationShort(seconds: number): string {
   if (seconds < 90) return `${Math.round(seconds)} s`;
   if (seconds < 90 * 60) return `${Math.round(seconds / 60)} min`;
   return `${Math.round(seconds / 360) / 10} h`;
-}
-
-export function formatDuration(seconds: number): string {
-  if (seconds < 90) return plural(Math.round(seconds), "second");
-  if (seconds < 90 * 60) return plural(Math.round(seconds / 60), "minute");
-  return plural(Math.round(seconds / 360) / 10, "hour");
 }

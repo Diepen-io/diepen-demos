@@ -15,7 +15,7 @@ test.use({ actionTimeout: 15_000 });
 
 const preset = defaultPresetFor("inbox");
 
-test("F9: a refund request goes to a person, stops the AI and can start over @inbox.live-handover", async ({ page }) => {
+test("F9: a refund request goes to a person, stops the AI and can start over @inbox.live-handover @inbox.owner-view", async ({ page }) => {
   const channelsAsked: string[] = [];
   page.on("request", (request) => {
     if (!isReplyRequest(request)) return;

@@ -9,7 +9,7 @@ export async function expectNoHorizontalOverflow(page: Page, where: string): Pro
   expect(scrollWidth, `${where} is ${scrollWidth} px wide in a ${innerWidth} px viewport`).toBeLessThanOrEqual(innerWidth);
 }
 
-/** Below 768 px the film shows the focus panel only and live mode uses a bottom tab bar. */
+/** Below 768 px live mode uses a bottom tab bar. */
 export function isNarrow(page: Page): boolean {
   return (page.viewportSize()?.width ?? 0) < 768;
 }

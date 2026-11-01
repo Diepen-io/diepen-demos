@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { storyClock } from "./support/film-page";
+import { keynoteFilm } from "./support/film-page";
 import { openChannel, openLive } from "./support/live-page";
 
 test.describe.configure({ timeout: 60_000 });
@@ -28,5 +28,5 @@ test("F10: a tripped cost guard sends the visitor to the film with a short note 
   await expect(
     page.getByRole("status").filter({ hasText: "Live answers are paused for now. Here is the film." }),
   ).toBeVisible();
-  await expect(storyClock(page)).toBeVisible();
+  await expect(keynoteFilm(page)).toBeVisible();
 });
