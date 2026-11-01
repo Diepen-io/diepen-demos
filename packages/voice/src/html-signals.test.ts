@@ -51,6 +51,22 @@ describe("extractHtmlSignals", () => {
     expect(long.text.length).toBeLessThanOrEqual(12_000);
   });
 
+  it.each(["<script", "<!--", "<meta", "<style", "<title", "<svg x"])(
+    "stays linear on a hostile 1.5 MB page of unclosed %s tags",
+    (open) => {
+      const html = `<p>Hi</p>${`${open} `.repeat(Math.floor(1_500_000 / (open.length + 1)))}`;
+      const started = performance.now();
+      const result = extractHtmlSignals(html, "https://acme.example/");
+      expect(performance.now() - started).toBeLessThan(1_000);
+      expect(result.text.startsWith("Hi")).toBe(true);
+    },
+  );
+
+  it("keeps text after a closed hidden element and drops an unclosed one", () => {
+    const html = "<p>One</p><script>var a = '<p>no</p>';</script><p>Two</p><style>p{}";
+    expect(extractHtmlSignals(html, "https://acme.example/").text).toBe("One Two");
+  });
+
   it("handles a page with nothing in it", () => {
     expect(extractHtmlSignals("", "https://acme.example/")).toEqual({ icons: [], text: "", colors: [] });
   });
