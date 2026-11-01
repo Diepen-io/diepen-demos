@@ -55,14 +55,14 @@ export function KeynoteStage({ film, liveHref = "/live", autoplay = true, classN
         <div
           key={step}
           data-keynote-step={step}
-          className={cx("flex w-full max-w-[44rem] flex-col items-center text-center", reducedMotion ? "keynote-fade" : "keynote-rise")}
+          className={cx("flex w-full max-w-[44rem] flex-col items-center text-center md:max-w-[min(72vw,72rem)]", reducedMotion ? "keynote-fade" : "keynote-rise")}
         >
           {beat ? (
             <>
               <h2 className="text-balance text-[clamp(30px,3.4vw,60px)] font-semibold leading-[1.08] tracking-[-0.025em]">
                 {beat.caption}
               </h2>
-              <div className="mt-[clamp(20px,3vh,40px)] flex w-full justify-center">{beat.element}</div>
+              <div className="mt-[clamp(14px,2.2vh,28px)] flex w-full justify-center">{beat.element}</div>
               {beat.chip ? (
                 <div className="mt-[clamp(16px,2.4vh,28px)]">
                   <KeynoteChip tone={beat.chip.tone}>{beat.chip.label}</KeynoteChip>
