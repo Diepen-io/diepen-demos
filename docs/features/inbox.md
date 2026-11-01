@@ -270,9 +270,9 @@ No streaming in this demo: one structured reply per turn, so `text-stream-client
 
 ### Notes on screen
 
-- Keyless mock: when `/api/health` reports `provider: "mock"`, a note above the customer side reads "Demo answers, no API key set". Decision D4.
+- Keyless mock: when `/api/health` reports `provider: "mock"`, a note above the customer side reads "Demo answers. No API key is set.". Decision D4.
 - Fictional: while a preset is active, the shell note says "{company} is a fictional company."
-- Cost guard: a 429 with `{ fallback: "film" }` sends the visitor to `/?note=limit`. The shell shows "Live answers are paused for today. Here is the film." above the film.
+- Cost guard: a 429 with `{ fallback: "film" }` sends the visitor to `/?fallback=limit`. The shell shows "Live answers are paused for now. Here is the film." above the film.
 - Any other error: the thread shows "No answer this time. Send it again." with the message kept in the composer.
 
 ### Mock provider replies
@@ -470,10 +470,10 @@ Prefer roles and visible text as selectors. Test ids where text is not stable: `
 | F4 | `inbox.film-controls` | Open `/?t=53000`. The Website chat tab is active and the clock reads 06:34 |
 | F5 | `inbox.owner-view` | Open `/?t=66000`. The owner view has four rows in this order: Daniel Moore with "Needs a human", Tom Becker with "Booked", Priya Shah with "Answered", Ana Ruiz with "Booked" |
 | F6 | `inbox.live-chat` | On `/live`, on each of the four channel tabs, send "What are your opening hours?". An assistant message appears in that tab's thread and the owner view has a row for that channel with "Answered" |
-| F7 | `inbox.live-chat` | On `/live` the provider note reads "Demo answers, no API key set" |
+| F7 | `inbox.live-chat` | On `/live` the provider note reads "Demo answers. No API key is set." |
 | F8 | `inbox.live-booking` | On `/live`, Website chat: send "Can I book an appointment?". Two slot chips appear. Click the first. The reply says the booking, a calendar block with that time appears, and the owner row shows "Booked" |
 | F9 | `inbox.live-handover` | On `/live`, Instagram: send "I'd like a refund for my last visit." The reply contains the preset's handover message, the owner row shows "Needs a human" at the top, the composer is replaced by "Start over", and no further request to `/api/reply` is made. "Start over" clears the thread |
-| F10 | `inbox.limit-fallback` | On `/live`, route `/api/reply` to answer 429 `{ fallback: "film" }`. After sending a message the page is `/` with the note "Live answers are paused for today. Here is the film." and the film stage visible |
+| F10 | `inbox.limit-fallback` | On `/live`, route `/api/reply` to answer 429 `{ fallback: "film" }`. After sending a message the page is `/` with the note "Live answers are paused for now. Here is the film." and the film stage visible |
 | F11 | `inbox.make-it-yours` | On `/`, open "Make it yours" and pick the property manager preset. The owner view header and the lane label show that preset's company and assistant names, and the brand CSS variable changes. On `/live` after the same step, a reply mentions the new company name |
 | F12 | `inbox.make-it-yours` | Open `/?t=80000&brand=<encoded test profile>` (a fictional plumbing company in `e2e/fixtures/test-profile.ts`, `fictional: false`). The end card note uses the "own profile" wording with that name. `/live?brand=<same>` shows the name in the owner view header and in a mock reply |
 | F13 | `inbox.make-it-yours` | In the panel, enter `https://example.com`, apply. The mock profile from `/api/brand` is applied (its name shows in the owner view header); under the mock provider the container's fixture page fetcher answers, so no request leaves the server |
@@ -491,7 +491,7 @@ Prefer roles and visible text as selectors. Test ids where text is not stable: `
 | `inbox.live-chat` | Write as a customer on email, Instagram, LinkedIn or website chat and get an answer in the company's voice | `/live`, channel tabs | anon | planned |
 | `inbox.live-booking` | Book a slot the AI offers and see it in the calendar | `/live`, "Can I book a time this week?", then a slot chip | anon | planned |
 | `inbox.live-handover` | Ask for a refund and see the conversation handed to the owner as "Needs a human" | `/live`, "I'd like a refund for my last visit." | anon | planned |
-| `inbox.limit-fallback` | See the film with a short note when live answers hit a limit | `/live`, then `/?note=limit` | anon | planned |
+| `inbox.limit-fallback` | See the film with a short note when live answers hit a limit | `/live`, then `/?fallback=limit` | anon | planned |
 | `inbox.make-it-yours` | Switch the film and live mode to a preset, a website or a `?brand=` profile | `/`, "Make it yours"; also on `/live` | anon | planned |
 
 ## 10. Open questions

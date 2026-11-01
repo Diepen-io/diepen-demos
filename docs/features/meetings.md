@@ -221,7 +221,7 @@ The visitor plays both sides of a call, or brings a real transcript, and gets al
 
 ### Flow
 
-1. `/live` opens with the shell's Film or Live switch, the active brand, the fictional note when `profile.fictional` is true, and "Demo answers, no API key set" when the container's provider is `mock`.
+1. `/live` opens with the shell's Film or Live switch, the active brand, the fictional note when `profile.fictional` is true, and "Demo answers. No API key is set." when the container's provider is `mock`.
 2. The input column has three tabs: "Record", "Paste" and "Sample call". "Record" is selected when the browser supports speech recognition, otherwise "Paste".
 3. Every tab ends in the same editable transcript box with a counter, for example "1,240 / 30,000".
 4. The visitor presses "Turn this call into a proposal".
@@ -289,7 +289,7 @@ It normalises `crm.stage` to a domain deal stage, defaulting to "Proposal drafte
 
 ### Keyless mock and cost guards
 
-- Without `ANTHROPIC_API_KEY`, or with `AI_PROVIDER=mock`, the container returns the mock provider and the screen shows "Demo answers, no API key set" (decision D4).
+- Without `ANTHROPIC_API_KEY`, or with `AI_PROVIDER=mock`, the container returns the mock provider and the screen shows "Demo answers. No API key is set." (decision D4).
 - When a guard trips, `/api/outputs` answers 429 `{ fallback: "film" }`. The live page then shows the film with the shell's fallback note, at `/?fallback=limit`.
 - When the provider throws or its answer fails the schema, the route answers 502 and the page shows "The draft did not come through. Try again." with a "Try again" button.
 
@@ -501,7 +501,7 @@ Every flow test fails on any `console` error or `pageerror` through one shared f
 | F2 | `meetings.film` | With every `/api/*` request except health aborted, `/?t=60000` still plays to the end card: the film needs no network |
 | F3 | `meetings.film-controls` | Pause keeps the clock text unchanged for 1 s; play moves it; restart shows 14:00:00 and the first line; speed 2x moves the clock further in 1 s than 1x |
 | F4 | `meetings.film-controls` | `/?t=49000` opens with the proposal visible in `[data-lane="proposal"]` and the clock at 14:33:50 |
-| F5 | `meetings.live-sample` | `/live`, "Sample call", "Turn this call into a proposal": all six `[data-output]` appear in sequence order, the CRM shows "Tom Becker", the proposal shows the preset's price, and "Demo answers, no API key set" is visible |
+| F5 | `meetings.live-sample` | `/live`, "Sample call", "Turn this call into a proposal": all six `[data-output]` appear in sequence order, the CRM shows "Tom Becker", the proposal shows the preset's price, and "Demo answers. No API key is set." is visible |
 | F6 | `meetings.live-paste` | Paste a fictional 6-line transcript between the preset owner and "Rosa Lindqvist" with the numbers 12 and 40: all six outputs appear, the CRM contact is "Rosa Lindqvist", and the numbers output shows 12 and 40 |
 | F7 | `meetings.live-paste` | A 10-word paste disables the button and shows the 20-word message; the counter reads "30,000 / 30,000" when the box is full |
 | F8 | `meetings.live-record` | With both constructors removed by an init script, the Record tab shows the "Recording needs Chrome, Edge or Safari" note, no Start button, and the Paste path still works |
