@@ -1,6 +1,7 @@
 import { BrandProvider } from "@diepen/ui/brand/brand-provider";
+import { DemoShell } from "@diepen/ui/shell/demo-shell";
 import { defaultPresetFor } from "@diepen/voice/presets";
-import { MeetingsFilmStage } from "@/ui/film-view/meetings-film-stage";
+import { MeetingsFilm } from "@/ui/film-view/meetings-film";
 
 type PageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -9,7 +10,9 @@ export default async function FilmPage({ searchParams }: PageProps) {
   const { brand } = await searchParams;
   return (
     <BrandProvider fixed defaultProfile={defaultPresetFor("meetings")} brandParamValue={typeof brand === "string" ? brand : null}>
-      <MeetingsFilmStage />
+      <DemoShell title="Call to close" mode="film" fit>
+        <MeetingsFilm />
+      </DemoShell>
     </BrandProvider>
   );
 }

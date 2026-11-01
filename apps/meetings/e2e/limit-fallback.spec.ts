@@ -1,4 +1,4 @@
-import { storyClock } from "./support/film";
+import { keynoteStep } from "./support/film";
 import { inputTab, transcriptBox, turnIntoProposal } from "./support/live";
 import { expect, test } from "./support/test";
 
@@ -21,5 +21,5 @@ test("lands on the film with the fallback note when a cost guard trips @meetings
 
   await expect(page).toHaveURL(/\/\?(.+&)?fallback=limit(&|$)/);
   await expect(page.getByRole("status").filter({ hasText: "Live answers are paused" })).toBeVisible();
-  await expect(storyClock(page)).toBeVisible();
+  await expect(keynoteStep(page)).toBeVisible();
 });

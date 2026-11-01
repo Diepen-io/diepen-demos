@@ -1,7 +1,7 @@
 import { presets } from "@diepen/voice/presets";
 import { encodeProfile } from "@diepen/voice/profile-codec";
 import { testProfile } from "@/test-support/test-profile";
-import { lane } from "./support/film";
+import { beatMs, keynoteStep } from "./support/film";
 import { expectAllOutputs, inputTab, output, transcriptBox, turnIntoProposal } from "./support/live";
 import { expect, test } from "./support/test";
 
@@ -25,10 +25,10 @@ test("runs live mode in the visitor's brand, owner and price @meetings.make-it-y
 
 test("plays the film in its own fictional company, even with a ?brand= link (decision F1) @meetings.make-it-yours", async ({ page }) => {
   const film = presets["brickfern-property"];
-  await page.goto(`/?brand=${brand}&t=49500`);
-  await expect(lane(page, "proposal")).toContainText(film.name);
-  await expect(lane(page, "proposal")).not.toContainText(testProfile.name);
-  await expect(lane(page, "crm")).not.toContainText(price);
+  await page.goto(`/?brand=${brand}&t=${2 * beatMs}`);
+  await expect(keynoteStep(page)).toContainText(film.name);
+  await expect(keynoteStep(page)).not.toContainText(testProfile.name);
+  await expect(keynoteStep(page)).not.toContainText(price);
 });
 
 // F15

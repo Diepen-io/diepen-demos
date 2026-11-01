@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { testProfile } from "@/test-support/test-profile";
 import { fillTokens, profileTokens } from "./profile-tokens";
 
-// U8, first half. The film half is in film/meetings-film.test.ts.
+// U8, first half. The film half is in film/meetings-keynote.test.tsx.
 describe("fillTokens @meetings.make-it-yours", () => {
   it("fills every token of the plan from the profile", () => {
     const text = [

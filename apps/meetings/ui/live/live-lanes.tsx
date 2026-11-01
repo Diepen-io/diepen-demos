@@ -74,13 +74,12 @@ export function LiveLanes({ call, profile, stale, waitingFor }: LiveLanesProps) 
       </LanePanel>
       <div className="contents lg:flex lg:flex-col lg:gap-4">
         <LanePanel id="crm">
-          <CrmLane deals={[]} record={crm ? { deal: crm.crm, isNew: isNew(2), stageIsNew: status === "sent" } : undefined} emptyText="The new deal lands here." />
+          <CrmLane record={crm ? { deal: crm.crm, isNew: isNew(2), stageIsNew: status === "sent" } : undefined} emptyText="The new deal lands here." />
         </LanePanel>
         <LanePanel id="calendar" role={meeting ? weekLabel(mondayOf(meeting.nextMeeting.start)) : undefined} className="max-lg:order-last">
           {meeting ? (
             <CalendarLane
               weekStart={mondayOf(meeting.nextMeeting.start)}
-              events={[]}
               meeting={{ event: { id: "next-meeting", ...meeting.nextMeeting }, agenda: meeting.nextMeeting.agenda, isNew: isNew(5) }}
             />
           ) : (

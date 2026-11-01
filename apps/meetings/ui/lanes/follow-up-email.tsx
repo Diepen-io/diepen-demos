@@ -14,17 +14,11 @@ export type FollowUpEmailProps = {
   sentAt?: string;
   /** The send button and the "Simulated email." line, in live mode. */
   action?: ReactNode;
-  /**
-   * The film shows the email under the folded proposal in one screen-high lane: the sender's own
-   * address steps aside, and on a screen under 1000 px tall the body fades out at the height that
-   * leaves the status and the attachment in view.
-   */
-  compact?: boolean;
   isNew: boolean;
 };
 
 /** The follow-up email with the proposal attached, as a draft and then as sent. */
-export function FollowUpEmail({ email, from, to, draftedAt, sentAt, action, compact, isNew }: FollowUpEmailProps) {
+export function FollowUpEmail({ email, from, to, draftedAt, sentAt, action, isNew }: FollowUpEmailProps) {
   return (
     <article
       data-output="email"
@@ -34,7 +28,7 @@ export function FollowUpEmail({ email, from, to, draftedAt, sentAt, action, comp
         <Avatar name={from.name} size={36} />
         <div className="min-w-0 flex-1 text-[13px] leading-snug">
           <p className="font-semibold text-foreground 2xl:text-[15px]">{from.name}</p>
-          {!compact && <p className="text-faint [overflow-wrap:anywhere]">{from.email || "you@example.com"}</p>}
+          <p className="text-faint [overflow-wrap:anywhere]">{from.email || "you@example.com"}</p>
           <p className="text-muted [overflow-wrap:anywhere]">to {to}</p>
         </div>
         <span className="flex shrink-0 flex-col items-end gap-1">
@@ -49,14 +43,7 @@ export function FollowUpEmail({ email, from, to, draftedAt, sentAt, action, comp
         </span>
       </header>
       <h3 className="text-[16px] leading-snug font-semibold tracking-[-0.01em] 2xl:text-[18px]">{email.subject}</h3>
-      <div
-        className={cx(
-          "flex flex-col gap-3 text-[14px] leading-[1.5] text-foreground 2xl:text-[15px]",
-          compact &&
-            // The rest of the lane takes about 41rem of the screen's height, 48rem on a phone.
-            "[--email-room:41rem] max-md:[--email-room:48rem] [@media(max-height:1000px)]:max-h-[max(3rem,calc(100dvh-var(--email-room)))] [@media(max-height:1000px)]:overflow-hidden [@media(max-height:1000px)]:[mask-image:linear-gradient(to_bottom,#000_calc(100%-2.5rem),transparent)]",
-        )}
-      >
+      <div className="flex flex-col gap-3 text-[14px] leading-[1.5] text-foreground 2xl:text-[15px]">
         {email.body.split(/\n{2,}/).map((paragraph, index) => (
           <p key={index} className="whitespace-pre-line">
             {paragraph}
