@@ -4,7 +4,7 @@ Written from `docs/brief.md`, the offer (`ai-consulting/offer.md`) and the demo 
 
 ## Who it is for
 
-Owners of small service businesses with 1 to 20 people where one task eats hours every week: inquiries, documents, follow-ups after calls.
+Owners of established businesses with a team, for example 10 to 100 people, where one task eats hours of paid staff time every week: inquiries, documents, admin after sales calls.
 They see the demos on diepen.ai, in a LinkedIn video, or live on an Audit Review call in their own brand.
 
 ## The problem they have today

@@ -1,6 +1,6 @@
 # diepen-demos
 
-Three open-source demos that prove diepen.ai's offer (one AI automation for a small business, live in 14 days, fixed price) before there are client case studies.
+Three open-source demos that prove diepen.ai's offer (the one task that eats a team's week, automated with AI and live in 14 days, at a fixed quote) before there are client case studies.
 Each demo is a case study page, a 60 to 90 second LinkedIn screen video and a live demo on sales calls in the prospect's own brand.
 
 ## Project facts
