@@ -28,6 +28,7 @@ Leander confirms or changes each open row.
 | N2 | Does "Make it yours" change which documents the chaser requests? | No. The six tax-return documents stay for every industry | Documents film | 2026-11-01, replaced by F1 |
 | N3 | Where does the documents end number come from? | An example calculation for a fictional firm: 40 returns a month, 3 chases each, 6 minutes per chase, against 1.5 minutes per return to read the summary. 12 hours before, 1 after | Documents end card | 2026-11-01 |
 | F1 | What does "Make it yours" change in the films? | Nothing inside the film. Each film always tells its own fictional company's story, because each story is industry-specific: swapping in another company's services gave nonsense (a dentist selling check-ups to a landlord). "Make it yours" puts the visitor's company fully into live mode; applying a profile on the film page opens live mode. Replaces I2, M1 and N2 | All films, sales calls | 2026-11-01 |
+| F3 | Which presets does "Make it yours" offer in each demo? | Documents and meetings tell industry-specific live stories, so their preset picker offers only the matching fictional company (documents: Ledgerwick, meetings: Brickfern). "Read my site" and the form work for any business. The inbox offers all three presets | Make it yours, sales calls | 2026-11-01 |
 | D4 | What does live mode do without `ANTHROPIC_API_KEY`? | The mock provider answers and the screen says "Demo answers. No API key is set." | Local testing | 2026-11-01 |
 
 ## Decided

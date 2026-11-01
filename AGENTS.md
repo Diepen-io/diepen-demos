@@ -36,8 +36,8 @@ Inside each app (`apps/inbox`, `apps/documents`, `apps/meetings`):
 | `domain/` | Core | Types and pure rules of this demo: conversation status, checklist state, CRM record | Other domain modules, zod, `@diepen/voice/profile` |
 | `application/` | Use cases | One file per use case, for example `answer-inquiry.ts`. Ports it needs are parameters or interfaces in `application/ports/` | domain, `@diepen/voice`, the port types `@diepen/ai/provider` and `@diepen/ai/models` |
 | `infrastructure/` | Adapters | Port implementations (Claude, Google Document AI, in-process scheduler) and `container.ts`, the one place that picks and wires them | Everything except ui and app |
-| `ui/` | Presentation | This demo's React components. Talks to the server only through route handlers | domain, `@diepen/ui`, `@diepen/voice`, `@diepen/ai/text-stream-client` |
-| `film/` | Presentation | The film script and its recorded fixtures | domain, `@diepen/ui` |
+| `ui/` | Presentation | This demo's React components. Talks to the server only through route handlers | domain, film, `@diepen/ui`, `@diepen/voice`, `@diepen/ai/text-stream-client` |
+| `film/` | Presentation | The film script and its recorded fixtures | domain, `@diepen/ui`, `@diepen/voice/profile` |
 | `app/` | Delivery | Next.js pages and route handlers. A route validates input, runs the guards, calls one use case through the container, and returns | Everything |
 
 Shared packages:
@@ -51,7 +51,7 @@ Shared packages:
 
 `eslint.config.mjs` enforces both tables with `no-restricted-imports`. Only `packages/ai` imports `@anthropic-ai/sdk`.
 
-Packages have no index file. Import a module by its path: `@diepen/ui/film/film-stage`, `@diepen/voice/profile`. Public modules of `@diepen/ui` are `.tsx`, of `ai` and `voice` are `.ts`. `docs/packages.md` lists every public module.
+Packages have no index file. Import a module by its path: `@diepen/ui/film/keynote-stage`, `@diepen/voice/profile`. Public modules of `@diepen/ui` are `.tsx`, of `ai` and `voice` are `.ts`. `docs/packages.md` lists every public module.
 
 Code for one demo stays in its app. It moves into a package when a second demo needs it, not before.
 
@@ -60,7 +60,8 @@ Code for one demo stays in its app. It moves into a package when a second demo n
 - Clean code for readers outside the company: names say what a thing is, one concept per module, comments say why, no dead code, no secrets.
 - Every AI call goes through `@diepen/ai` and every system prompt through `buildSystemPrompt` in `@diepen/voice/prompt`. Never a prompt string in an app.
 - Film mode runs from recorded fixtures with no key and no network. Live mode calls Claude; with no `ANTHROPIC_API_KEY` it uses the mock provider and says so on screen.
-- When a cost guard trips, the route answers 429 with `{ fallback: "film" }` and the app shows the film with a short note.
+- When a cost guard trips, the route answers 429 with `{ fallback: "film" }` and the app sends the visitor to the film with a short note (`useFilmFallback` from `@diepen/ui/shell/film-fallback`). When the model fails, the route answers 503 `unavailable` and the visitor stays to try again. `isGuardTrip` from `@diepen/ai/text-stream-client` tells the two apart.
+- A route reads its body with `readBodyText` or `readBodyBytes` from `@diepen/ai/request-body`, under a byte cap. Lint refuses `request.json()`, `request.text()` and `request.formData()` in routes.
 - Tests never call the real API. `AI_PROVIDER=mock` is set in every vitest and Playwright config.
 - Fixtures and presets hold fictional companies and people only, and the screen says they are fictional.
 - Copy is English, direct, and has no em or en dashes. Never state a client result: the demos are demos.
@@ -75,3 +76,4 @@ Code for one demo stays in its app. It moves into a package when a second demo n
 - e2e runs on `next dev`, which compiles a route on its first request. Each app's `e2e/support/warm-up.ts` requests every page and API route once before the tests start, so a loaded machine does not time out first page loads. A new route goes into that list.
 - TypeScript stays on 6.0: typescript-eslint supports TypeScript below 6.1.
 - In-memory rate limits and the daily cap count per server instance. See `docs/decisions.md`.
+- The per-IP rate limit trusts the first `x-forwarded-for` entry. That is safe on Vercel, which overwrites the header; behind another proxy a visitor could set it and pass the limit.

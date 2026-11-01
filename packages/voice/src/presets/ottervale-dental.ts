@@ -43,7 +43,7 @@ export const ottervaleDental: CompanyProfile = {
       "Anything the company knowledge does not answer",
     ],
     handoverMessage:
-      "Thank you for telling me. I have passed this to our team, and Dr. Okafor's team will reply to you personally within one working day. If you are in severe pain, please call us on +44 7700 900471.",
+      "Thank you for telling me. I have passed this to our team, and Dr. Okafor's team will reply to you personally within one working day.",
   },
   knowledge: {
     services: [

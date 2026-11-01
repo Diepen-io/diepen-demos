@@ -26,7 +26,7 @@ The script is `buildInboxKeynote(profile)` in `film/inbox-keynote.tsx`; its text
 | Step | Film ms | Caption | Element | Chip |
 | --- | --- | --- | --- | --- |
 | 0 | 0 | Saturday, 22:14. A new DM. | `KeynoteBubble`: Priya Shah's Instagram message C2-1, customer side | none |
-| 1 | 3200 | Answered in 38 seconds. | `KeynoteBubble`: the assistant's reply C2-2, in the brand colour on the business side, with the logo monogram as avatar | "Replied in 38 s", green |
+| 1 | 3200 | Answered in 38 seconds. (the number is Priya's reply time from the fixtures, `priyaReplySeconds()`) | `KeynoteBubble`: the assistant's reply C2-2, in the brand colour on the business side, with the logo monogram as avatar | none: the caption already says it |
 | 2 | 6400 | Booked straight into your calendar. | `KeynoteSlot`: Thu 12, 09:00, "{ServiceA}, Ana Ruiz" | none |
 | 3 | 9600 | Edge cases go to you. | `KeynoteNotification`: "{company} · Website chat", "Needs you: refund question", "Daniel Moore asked for a refund. The full thread is waiting." | none |
 | 4 | 12800 | (finale) | The one number, then "Try it live" | none |
@@ -172,8 +172,8 @@ The page has three parts: the customer side, the owner view and the calendar.
 - A tab strip switches between Email, Instagram, LinkedIn and Website chat. Each tab keeps its own conversation, so a visitor can run four threads at once.
 - Each tab renders the matching mockup from `@diepen/ui/mockups/*` with a composer. Email has a subject field (prefilled "Question") on the first message and a body field. The others have one text field and a Send button.
 - Every channel opens in the visitor's own app, because the visitor is the customer. The visitor shows as "You" and the visitor's messages sit on the right. Email shows the visitor's mailbox `you@example.com`; Instagram shows the business (name, `{handle}`, logo) in the header; LinkedIn shows the assistant with the company name as the headline. LinkedIn puts every message on the left under its author's name, as LinkedIn does.
-- Under an empty thread, three starter chips: "How much is {aServiceA}?" ("What are your prices?" when the profile lists no services), "Can I book a time this week?", "I'm not happy with how it went and I'd like a refund." A click sends the text.
-- The active channel tab scrolls into view, so "Website chat", the tab live mode opens on, shows on a phone.
+- Under an empty thread, three starter chips: "What does your {serviceA} cost?" ("What are your prices?" when the profile lists no services), "Can I book a time this week?", "I'm not happy with how it went and I'd like a refund." A click sends the text.
+- Live mode opens on Email, the first tab, so a phone shows the strip from its start. The active channel tab scrolls into view, and a fade at either edge of the strip shows that more tabs wait there.
 - A tab with an unread AI reply shows a dot.
 
 ### One turn
@@ -290,6 +290,7 @@ Dependencies point inwards only, as `AGENTS.md` sets out.
 | `domain/conversation-status.ts` | `ConversationStatus`, its labels, `applyReply` (statuses move forward; `needs_human` is sticky), `acceptsReplies` |
 | `domain/calendar.ts` | Working hours, the weekday busy pattern, `freeSlots(now, bookings, minutes)`, `spreadSlots`, `formatSlot`, `formatSlotChip` |
 | `domain/reply-rules.ts` | `checkReply(reply, free, lastOffered)`: offered slots within free, at most three, booked slot free and offered, the fallback reply when not |
+| `domain/message-limits.ts` | `maxCustomerMessageChars` (1000: the composer counts down over the last 100 and stops there), `maxAssistantMessageChars` (2000) and `clipAssistantText`, which live mode applies to earlier answers before it sends them back |
 | `domain/metrics.ts` | `averageFirstReplySeconds`, `averageWaitUntilOpening(conversations, "08:00")`, `countByStatus`, `formatDuration` ("38 seconds", "9 hours") |
 | `domain/message-template.ts` | `fillTemplate(text, profile)`: the slots, the optional parts in brackets, the a or an rule, the case rules |
 | `domain/inbox-snapshot.ts` | The views both modes draw from: `ThreadView`, `CalendarBlock`, `OwnerRow`; `sortOwnerRows` and the live `ownerSummary` |
@@ -310,9 +311,8 @@ No `application/ports/`: the only port is `AiProvider` from `@diepen/ai/provider
 
 | File | Holds |
 | --- | --- |
-| `infrastructure/fixture-page-fetcher.ts` | The made-up page "Make it yours" reads under the mock provider |
 | `infrastructure/typing-pace.ts` | Slows the mock provider to a typing pace in keyless live mode |
-| `infrastructure/container.ts` | Picks the provider with `createProvider` from `@diepen/ai` (mock when `AI_PROVIDER=mock` or no key), builds the cost guards from env, picks the page fetcher for "Make it yours" (a fixture page under the mock provider), and exposes `answerInquiry`, `guards`, `fetchPage` and `providerName`. Tests build a container with their own provider and guard limits |
+| `infrastructure/container.ts` | `createContainer({ provider?, guards? })` and the app's `container`. Takes the provider from `getProvider()` in `@diepen/ai` (mock when `AI_PROVIDER=mock` or no key) and the shared `guards`, picks the page fetcher for "Make it yours" with `pageFetcherFor` from `@diepen/voice/fixture-page-fetcher` (a fixture page under the mock provider), and exposes `answerInquiry`, `guards`, `fetchPage` and `providerName`. Tests build a container with their own provider and guard limits |
 
 ### film/
 
@@ -325,7 +325,6 @@ No `application/ports/`: the only port is `AiProvider` from `@diepen/ai/provider
 
 | File | Holds |
 | --- | --- |
-| `ui/inbox-film.tsx` | `KeynoteStage` with the inbox keynote, sized to the space under the shell header |
 | `ui/channel-thread.tsx` | Live mode: the mockup for a channel as the customer sees it, with messages, slot chips, handover note and composer |
 | `ui/channel-tab-strip.tsx` | The channel tabs with the active tab scrolled into view |
 | `ui/use-phone-fit.ts` | Live mode below 768 px: the customer part ends right above the bottom tab bar, so the page never scrolls the composer under it |
@@ -341,27 +340,27 @@ No `application/ports/`: the only port is `AiProvider` from `@diepen/ai/provider
 | `ui/live-snapshot.ts` | Owner rows, calendar blocks and thread views from the live state |
 | `ui/use-visitor-now.ts` | The visitor's clock, read in the browser only |
 | `ui/live-inbox-state.ts` | The client reducer: send, reply, book, hand over, start over, reset on profile change |
-| `ui/reply-client.ts` | Posts to `/api/reply`, parses the response with zod, maps 429 to the film fallback. The reply time shown is the round trip the visitor waited |
+| `ui/reply-client.ts` | Posts to `/api/reply`, parses the response with zod, maps a tripped cost guard (`isGuardTrip`) to the film fallback and anything else to an error the visitor sends again. The reply time shown is the round trip the visitor waited |
 
 ### app/
 
 | Route | Does |
 | --- | --- |
-| `app/layout.tsx` | Shell, brand provider, fonts. `/favicon.ico` is rewritten to the app icon in `next.config.ts` |
-| `app/page.tsx` (`/`) | The demo shell in Film mode with `InboxFilm`. Reads `?t=` (film ms), `?brand=`, `?record=1` |
+| `app/layout.tsx` | Fonts and global styles. `/favicon.ico` is rewritten to the app icon in `next.config.ts` |
+| `app/page.tsx` (`/`) | The brand provider and the demo shell in Film mode with `KeynoteFilmView` and the inbox keynote built from the preset. Reads `?t=` (film ms), `?brand=`, `?record=1` |
 | `app/live/page.tsx` (`/live`) | The demo shell in Live mode with `live-inbox` |
 | `app/api/reply/route.ts` | POST. Validates, runs guards, calls `answerInquiry` through the container |
-| `app/api/reply/reply-request.ts` | The zod schema for the request, read with `readBodyText` from `@diepen/ai/request-body` so the 32 KB cap holds while the body streams in |
+| `app/api/reply/reply-request.ts` | The zod schema for the request, read with `readBodyText` from `@diepen/ai/request-body` so the 48 KB cap holds while the body streams in |
 | `app/api/brand/route.ts` | POST. `createBrandHandler` from `@diepen/voice/brand-route` with the container's page fetcher, so the mock run never fetches a real page |
 | `app/api/health/route.ts` | GET. Returns the app name and the provider name |
 
-`POST /api/reply` request, validated with zod, body at most 32 KB:
+`POST /api/reply` request, validated with zod, body at most 48 KB:
 
 ```ts
 {
   channel: "email" | "instagram" | "linkedin" | "chat";
   profile: CompanyProfile; // companyProfileSchema
-  messages: { role: "customer" | "assistant"; text: string }[]; // 1 to 20, text 1 to 1000 chars, last role "customer"
+  messages: { role: "customer" | "assistant"; text: string }[]; // 1 to 20, customer text 1 to 1000 chars, assistant text 1 to 2000 chars (`domain/message-limits.ts`), last role "customer"
   bookings: string[]; // "YYYY-MM-DDTHH:mm", at most 20
   offeredSlots: string[]; // from the last assistant turn, at most 3
   now: string; // visitor's local time, "YYYY-MM-DDTHH:mm"
@@ -375,9 +374,9 @@ Responses:
 | 200 | `{ reply: InboxReply, provider: "claude" \| "mock", replyMs: number }` | A reply |
 | 400 | `{ error: "invalid_request", issues: ZodIssue[] }` | Validation failed |
 | 429 | `{ fallback: "film" }` | A cost guard tripped |
-| 503 | `{ fallback: "film", reason: "unavailable" }` | The provider threw (`unavailableResponse` from `@diepen/ai/route-responses`, the one shape every app uses). The thread shows "No answer this time. Send it again." |
+| 503 | `{ fallback: "film", reason: "unavailable" }` | The provider threw (`unavailableResponse` from `@diepen/ai/route-responses`, the one shape every app uses). The visitor stays: the thread shows "No answer this time. Send it again." |
 
-`POST /api/brand`: the shape `handleBrandRequest` defines; 429 is `{ fallback: "film" }` as everywhere.
+`POST /api/brand`: the shape `createBrandHandler` from `@diepen/voice/brand-route` defines. Every error is `{ message }`, shown in the "Make it yours" panel; a tripped guard answers 429 "Live answers are paused for now. Fill in the form instead." and the visitor stays in the panel.
 
 `GET /api/health`: `{ ok: true, app: "inbox", provider: "claude" | "mock" }`.
 
@@ -413,12 +412,12 @@ Prefer roles and visible text as selectors. Test ids where text is not stable: `
 | U3 | `inbox.live-booking` | `checkReply` keeps a valid offer and booking; it turns a booked slot that is not free, or was not offered, into `booking_offered` with two slots from `spreadSlots`; it cuts offers to at most three. `spreadSlots` never offers two slots back to back |
 | U4 | `inbox.live-handover` | `applyReply` moves answered to booking_offered to booked; after `needs_human` every later reply keeps `needs_human`, and `acceptsReplies` is false |
 | U5 | `inbox.film` | `metrics` on the fixtures: average first reply 38 seconds, average wait until 08:00 is 540 minutes, `formatDurationShort(38)` is "38 s", `formatDurationShort(32400)` is "9 h", counts booked 2, answered 1, needs_human 1 |
-| U6 | `inbox.film` | `buildInboxKeynote` with each preset: 4 beats, every caption at most 6 words, the finale reads 9 h to 38 s |
+| U6 | `inbox.film` | `buildInboxKeynote` with each preset: 4 beats, every caption at most 6 words, the finale reads 9 h to 38 s; `priyaReplySeconds()` is 38, the answered beat reads "Answered in 38 seconds." and has no chip |
 | U9 | `inbox.make-it-yours` | `fillTemplate` replaces every slot, drops an optional part with an empty slot, writes "an" before a vowel, lowercases the first letter unless the second is uppercase; with each preset, no fixture text keeps a `{` or `[` |
 | U10 | `inbox.make-it-yours` | No fixture text contains the default preset's company name, owner name or any of its prices as literal text |
 | U11 | `inbox.live-chat` | `answerInquiry` with the mock provider: "How much is it?" gives `answered` with the first service's price in the reply; "Can I book?" gives `booking_offered` with two free slots; a message with the `HH:MM` of an offered slot gives `booked` with that slot; "I want a refund" gives `needs_human`, a `handoverReason`, and the profile's handover message |
 | U12 | `inbox.live-chat` | `answerInquiry` calls the provider once with role `chat`, a system prompt that contains the company name, and at most 20 messages; a stub provider that returns an invalid booked slot ends as `booking_offered` |
-| U13 | `inbox.live-chat` | `POST /api/reply` returns 400 for a missing profile, an unknown channel, no messages, a last message from the assistant, a message over 1000 characters, more than 20 messages, and a body over 32 KB, and stops reading a streamed body with no declared length at 32 KB |
+| U13 | `inbox.live-chat` | `POST /api/reply` returns 400 for a missing profile, an unknown channel, no messages, a last message from the assistant, a customer message over 1000 characters, an earlier answer over 2000 characters (and accepts one of 1800), more than 20 messages, and a body over 48 KB, and stops reading a streamed body with no declared length at 32 KB |
 | U14 | `inbox.limit-fallback` | `POST /api/reply` with a container whose daily cap is 0 returns 429 and `{ fallback: "film" }`, and the provider is never called |
 | U15 | `inbox.live-chat` | `GET /api/health` returns `provider: "mock"` under `AI_PROVIDER=mock` |
 | U16 | `inbox.film` | Fixtures: every customer email ends in `@example.com`, every phone number starts with `07700 900` |

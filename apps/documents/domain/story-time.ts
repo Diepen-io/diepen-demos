@@ -30,6 +30,17 @@ export function addDays(time: string, days: number): string {
   return storyTimeFromMs(storyTimeToMs(time) + days * dayMs);
 }
 
+/** The same time on the first day from Monday to Friday, `time` itself when it already is one. */
+export function onWorkingDay(time: string): string {
+  const weekday = new Date(storyTimeToMs(time)).getUTCDay();
+  return weekday === 6 ? addDays(time, 2) : weekday === 0 ? addDays(time, 1) : time;
+}
+
+/** `days` later, moved past a weekend: a firm chases and calls on working days. */
+export function addWorkingDays(time: string, days: number): string {
+  return onWorkingDay(addDays(time, days));
+}
+
 export function isBefore(a: string, b: string): boolean {
   return storyTimeToMs(a) < storyTimeToMs(b);
 }

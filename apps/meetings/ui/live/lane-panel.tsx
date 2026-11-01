@@ -3,7 +3,7 @@ import { Icon, type IconName } from "@diepen/ui/primitives/icon";
 import type { ReactNode } from "react";
 import { laneById, type LaneId } from "@/domain/lanes";
 
-const icons: Record<LaneId, IconName> = { call: "mic", ai: "sparkle", crm: "briefcase", proposal: "file", calendar: "calendar" };
+const icons: Record<LaneId, IconName> = { ai: "sparkle", crm: "briefcase", proposal: "file", calendar: "calendar" };
 
 export type LanePanelProps = {
   id: LaneId;
@@ -14,7 +14,7 @@ export type LanePanelProps = {
   children: ReactNode;
 };
 
-/** One tool lane in live mode: the same header as in the film, content at its natural height. */
+/** One tool lane in live mode: an icon, the lane's name and role, then its content at its natural height. */
 export function LanePanel({ id, brand, role, className, children }: LanePanelProps) {
   const lane = laneById(id);
   return (

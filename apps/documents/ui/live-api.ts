@@ -3,10 +3,14 @@ import type { LiveSession } from "@/domain/live-session";
 import type { OutstandingEntry } from "@/domain/chase-emails";
 import type { ChaseKind } from "@/domain/live-session";
 import type { UploadItemId } from "@/domain/document-request";
-import { readFallback } from "@diepen/ai/text-stream-client";
+import { isGuardTrip } from "@diepen/ai/text-stream-client";
 import type { CompanyProfile } from "@diepen/voice/profile";
 
-/** The browser side of `/api/check` and `/api/chase`. A tripped cost guard comes back as `fallback`. */
+/**
+ * The browser side of `/api/check` and `/api/chase`. A tripped cost guard comes back as `fallback`,
+ * which sends the visitor to the film; anything else, a failed model call included, is `failed`
+ * and the visitor tries again in place.
+ */
 
 export type CheckAnswer = {
   check: CheckResult;
@@ -34,7 +38,7 @@ async function outcomeOf<T>(request: Promise<Response>): Promise<ApiOutcome<T>> 
   try {
     const response = await request;
     if (response.ok) return { kind: "ok", answer: (await response.json()) as T };
-    return (await readFallback(response)) ? { kind: "fallback" } : { kind: "failed" };
+    return (await isGuardTrip(response)) ? { kind: "fallback" } : { kind: "failed" };
   } catch {
     return { kind: "failed" };
   }

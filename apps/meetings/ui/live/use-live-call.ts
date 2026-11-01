@@ -1,5 +1,7 @@
 "use client";
 
+import { usePrefersReducedMotion } from "@diepen/ui/film/use-stage-environment";
+import { useFilmFallback } from "@diepen/ui/shell/film-fallback";
 import { useEffect, useRef, useState } from "react";
 import type { CompanyProfile } from "@diepen/voice/profile";
 import type { MeetingOutputs } from "@/domain/meeting-outputs";
@@ -7,7 +9,6 @@ import { outputSequence, revealPlan } from "@/domain/output-sequence";
 import { markProposalSent } from "@/domain/proposal-sent";
 import { parseTranscript } from "@/domain/transcript";
 import { requestOutputs } from "./outputs-client";
-import { usePrefersReducedMotion } from "./use-prefers-reduced-motion";
 
 export type LiveStatus = "ready" | "processing" | "revealing" | "revealed" | "sent" | "failed";
 
@@ -35,9 +36,10 @@ export type LiveCall = {
 
 /**
  * The live call from button press to sent email. A tripped cost guard sends the visitor to the
- * film with the fallback note, at `filmHref` plus `fallback=limit`.
+ * film with the fallback note; a failed model call leaves them here to try again.
  */
-export function useLiveCall(profile: CompanyProfile, filmHref: string): LiveCall {
+export function useLiveCall(profile: CompanyProfile): LiveCall {
+  const toFilm = useFilmFallback();
   const reducedMotion = usePrefersReducedMotion();
   const [status, setStatus] = useState<LiveStatus>("ready");
   const [outputs, setOutputs] = useState<MeetingOutputs | null>(null);
@@ -74,9 +76,7 @@ export function useLiveCall(profile: CompanyProfile, filmHref: string): LiveCall
     const result = await requestOutputs({ transcript, profile }, controller.signal).catch(() => null);
     if (!result || controller.signal.aborted) return;
     if (result.kind === "fallback") {
-      const url = new URL(filmHref, window.location.href);
-      url.searchParams.set("fallback", "limit");
-      window.location.assign(url);
+      toFilm();
       return;
     }
     if (result.kind === "failed") {

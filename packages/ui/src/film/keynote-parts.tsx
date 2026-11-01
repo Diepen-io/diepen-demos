@@ -166,9 +166,10 @@ export function KeynoteFigures({ figures }: { figures: { value: string; label: s
   return (
     <dl className="grid w-full max-w-[34rem] grid-cols-3 gap-3 md:max-w-[min(62vw,64rem)] md:gap-6">
       {figures.slice(0, 3).map((figure) => (
-        <div key={figure.label} className={cx(surface, "flex flex-col-reverse items-center px-3 py-7 md:px-6 md:py-9")}>
-          <dt className={cx("mt-3 font-medium leading-tight text-muted", metaText)}>{figure.label}</dt>
-          <dd className="text-[clamp(40px,5.4vw,92px)] font-semibold leading-none tracking-[-0.03em]">{figure.value}</dd>
+        // Value on top, label below, each card the same shape: the values share one line whatever the labels' length.
+        <div key={figure.label} className={cx(surface, "grid grid-rows-[auto_1fr] justify-items-center px-2 py-6 text-center md:px-6 md:py-9")}>
+          <dt className="order-2 mt-3 text-[15px] leading-tight font-medium text-balance text-muted md:text-[clamp(18px,1.6vw,26px)]">{figure.label}</dt>
+          <dd className="order-1 text-[clamp(40px,5.4vw,92px)] font-semibold leading-none tracking-[-0.03em]">{figure.value}</dd>
         </div>
       ))}
     </dl>

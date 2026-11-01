@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fallbackResponse, textStreamResponse, unavailableResponse } from "./route-responses.ts";
-import { providerOf, readFallback, readTextStream } from "./text-stream-client.ts";
+import { isGuardTrip, providerOf, readFallback, readTextStream } from "./text-stream-client.ts";
 
 async function* chunks(...values: string[]) {
   for (const value of values) yield await Promise.resolve(value);
@@ -22,9 +22,8 @@ describe("fallbackResponse", () => {
     });
   });
 
-  it("answers 413 for input that is too large", () => {
-    const response = fallbackResponse({ ok: false, reason: "input_too_large", message: "Long." });
-    expect(response.status).toBe(413);
+  it("counts as a guard trip, which sends the visitor to the film", async () => {
+    await expect(isGuardTrip(fallbackResponse({ ok: false, reason: "daily_cap", message: "Busy." }))).resolves.toBe(true);
   });
 });
 
@@ -35,6 +34,13 @@ describe("unavailableResponse", () => {
     expect(response.status).toBe(503);
     await expect(readFallback(response)).resolves.toMatchObject({ reason: "unavailable" });
     expect(log).toHaveBeenCalled();
+    log.mockRestore();
+  });
+
+  it("is no guard trip, so the visitor stays and can try again", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    await expect(isGuardTrip(unavailableResponse(new Error("down")))).resolves.toBe(false);
+    await expect(isGuardTrip(Response.json({ error: "too_large" }, { status: 413 }))).resolves.toBe(false);
     log.mockRestore();
   });
 });

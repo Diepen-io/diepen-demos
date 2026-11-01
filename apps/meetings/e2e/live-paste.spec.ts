@@ -31,9 +31,11 @@ test("holds back a paste under 20 words and counts up to 30,000 characters @meet
 });
 
 // F13
-test("says the draft did not come through on a 502, and Try again recovers @meetings.live-paste", async ({ page, consoleGuard }) => {
-  consoleGuard.allow(/status of 502/);
-  await page.route("**/api/outputs", (route) => route.fulfill({ status: 502, json: { error: "generation_failed" } }));
+test("says the draft did not come through on a 503, and Try again recovers @meetings.live-paste", async ({ page, consoleGuard }) => {
+  consoleGuard.allow(/status of 503/);
+  await page.route("**/api/outputs", (route) =>
+    route.fulfill({ status: 503, json: { fallback: "film", reason: "unavailable", message: "The live demo did not answer this time. Try again." } }),
+  );
   await page.goto("/live");
   await inputTab(page, "Paste").click();
   await transcriptBox(page).fill(rosaCall);

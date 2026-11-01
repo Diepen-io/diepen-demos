@@ -3,9 +3,9 @@
  * imports nothing: no SDK, no server code.
  */
 
-export type AiFallbackReason = "rate_limit" | "daily_cap" | "input_too_large" | "unavailable";
+export type AiFallbackReason = "rate_limit" | "daily_cap" | "unavailable";
 
-/** The body a route sends when the demo must show the film instead of a live answer. */
+/** The body a route sends when the live answer failed: a tripped cost guard, or `unavailable` when the model failed. */
 export type AiFallback = {
   fallback: "film";
   reason: AiFallbackReason;
@@ -19,7 +19,6 @@ export const providerHeader = "x-ai-provider";
 const fallbackReasons: readonly string[] = [
   "rate_limit",
   "daily_cap",
-  "input_too_large",
   "unavailable",
 ] satisfies AiFallbackReason[];
 
@@ -59,6 +58,15 @@ export async function readFallback(response: Response): Promise<AiFallback | nul
   } catch {
     return null;
   }
+}
+
+/**
+ * True when a cost guard tripped (429). Only then does an app send the visitor to the film. A failed
+ * model call (503 `unavailable`) keeps them in place to try again.
+ */
+export async function isGuardTrip(response: Response): Promise<boolean> {
+  const fallback = await readFallback(response);
+  return fallback !== null && fallback.reason !== "unavailable";
 }
 
 /** Which provider answered, so the screen can say "Demo answers, no API key set". */

@@ -28,8 +28,8 @@ describe("processCall with the mock provider @meetings.live-sample", () => {
     expect(outputs.crm.email).toBe("tom@becker-residential.example");
     expect(outputs.numbers).toEqual([
       { label: "Apartments across three buildings", value: "14" },
-      { label: "Days on average", value: "38" },
-      { label: "Average rent a month", value: "1,150" },
+      { label: "Days empty", value: "38" },
+      { label: "Average rent a month", value: "EUR 1,150" },
     ]);
     expect(outputs.painPoints).toEqual([
       "A normal week, about nine hours.",

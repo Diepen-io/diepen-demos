@@ -4,7 +4,7 @@ import type { UploadItemId } from "@/domain/document-request";
 import type { SampleDocument } from "@/domain/sample-documents";
 import { storyTimeFromMs, storyTimeToMs } from "@/domain/story-time";
 import { useBrand } from "@diepen/ui/brand/brand-provider";
-import { useRouter } from "next/navigation";
+import { useFilmFallback } from "@diepen/ui/shell/film-fallback";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import type { LetterSignature } from "./engagement-letter";
 import { guardFile } from "./file-guard";
@@ -17,7 +17,7 @@ import { initialLiveState, liveStartsAt, sessionOf, type LiveState } from "./liv
  * holds no text written from the profile: the lanes write it with the active profile.
  */
 export function useLiveDemo() {
-  const { profile, hrefWithBrand } = useBrand();
+  const { profile } = useBrand();
   const [state, dispatch] = useReducer(liveReducer, undefined, initialLiveState);
   const clock = useRef({ story: liveStartsAt, realMs: 0 });
   const checkCount = useRef(0);
@@ -33,11 +33,7 @@ export function useLiveDemo() {
     return () => window.clearInterval(timer);
   }, [storyNow]);
 
-  const router = useRouter();
-  const toFilm = useCallback(() => {
-    const film = hrefWithBrand("/");
-    router.push(`${film}${film.includes("?") ? "&" : "?"}fallback=limit`);
-  }, [hrefWithBrand, router]);
+  const toFilm = useFilmFallback();
 
   const upload = useCallback(
     async (itemId: UploadItemId, file: File) => {

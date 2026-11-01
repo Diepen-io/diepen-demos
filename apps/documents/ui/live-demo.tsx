@@ -1,19 +1,16 @@
 "use client";
 
 import { isComplete } from "@/domain/checklist";
-import { Lane } from "@diepen/ui/film/lane";
-import { LaneTabs } from "@diepen/ui/film/lane-tabs";
 import { useNarrowScreen } from "@diepen/ui/film/use-stage-environment";
 import { cx } from "@diepen/ui/primitives/class-names";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { documentsGridColumns, documentsLanes, type DocumentsLaneId } from "./documents-lanes";
+import { Lane } from "./lane";
+import { LaneTabs } from "./lane-tabs";
 import { LiveClientLane } from "./live-client-lane";
 import { LiveDriveLane, LiveFirmLane, LiveSystemLane } from "./live-side-lanes";
 import { LiveControls, LiveHeading } from "./live-toolbar";
 import { useLiveDemo } from "./use-live-demo";
-
-/** Live mode has no travelling items, so the tabs need no anchors. */
-const noAnchor = () => () => undefined;
 
 /**
  * On a wide screen each lane fills its column and scrolls inside itself. On a phone a lane is as
@@ -38,16 +35,24 @@ export function LiveDemo({ providerName }: { providerName: string }) {
     setBusy(false);
   }
 
-  function select(lane: string) {
-    setShown(lane as DocumentsLaneId);
-    actions.seen(lane as DocumentsLaneId);
+  function select(lane: DocumentsLaneId) {
+    setShown(lane);
+    actions.seen(lane);
   }
 
   const content: Record<DocumentsLaneId, ReactNode> = {
     firm: <Fill narrow={narrow}><LiveFirmLane state={state} profile={profile} /></Fill>,
     client: (
       <Fill narrow={narrow}>
-        <LiveClientLane state={state} profile={profile} actions={actions} framed={!narrow} busy={busy} onDone={() => void run("submitted")} />
+        <LiveClientLane
+          state={state}
+          profile={profile}
+          actions={actions}
+          framed={!narrow}
+          busy={busy}
+          claudeReadsFiles={providerName === "claude"}
+          onDone={() => void run("submitted")}
+        />
       </Fill>
     ),
     system: <LiveSystemLane state={state} firmName={profile.name} />,
@@ -75,13 +80,12 @@ export function LiveDemo({ providerName }: { providerName: string }) {
           </div>
           {/* The clock, "Skip 3 days" and the tabs stay in reach while the page scrolls. */}
           <div className="sticky top-0 z-20 -mx-4 flex flex-col gap-2 bg-background/95 px-4 py-2 backdrop-blur-sm">
-            <div className="flex items-center gap-3">{controls}</div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">{controls}</div>
             <LaneTabs
               lanes={lanes}
               shownLane={shown}
               receiving={new Set(state.changed.filter((lane) => lane !== shown))}
               onSelect={select}
-              register={noAnchor}
             />
           </div>
         </>
@@ -98,12 +102,12 @@ export function LiveDemo({ providerName }: { providerName: string }) {
         {lanes.map((lane) => (
           <Lane
             key={lane.id}
-            id={`film-lane-${lane.id}`}
+            id={`live-lane-${lane.id}`}
             lane={lane}
             focused={narrow ? false : lane.id === "client"}
             className={cx(narrow && lane.id !== shown && "hidden")}
           >
-            {content[lane.id as DocumentsLaneId]}
+            {content[lane.id]}
           </Lane>
         ))}
       </div>

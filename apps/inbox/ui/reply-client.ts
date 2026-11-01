@@ -1,3 +1,4 @@
+import { isGuardTrip } from "@diepen/ai/text-stream-client";
 import type { CompanyProfile } from "@diepen/voice/profile";
 import { inboxReplySchema, type InboxReply } from "@diepen/voice/tasks/inbox-reply";
 import { z } from "zod";
@@ -16,6 +17,7 @@ export type ReplyOutcome =
   | { kind: "reply"; reply: InboxReply; replyMs: number }
   /** A cost guard tripped: the app shows the film instead. */
   | { kind: "fallback" }
+  /** Anything else, a failed model call included: the visitor sends the message again. */
   | { kind: "error" };
 
 const responseSchema = z.object({ reply: inboxReplySchema, replyMs: z.number() });
@@ -33,8 +35,7 @@ export async function requestReply(body: ReplyRequestBody): Promise<ReplyOutcome
   } catch {
     return { kind: "error" };
   }
-  if (response.status === 429) return { kind: "fallback" };
-  if (!response.ok) return { kind: "error" };
+  if (!response.ok) return (await isGuardTrip(response)) ? { kind: "fallback" } : { kind: "error" };
   const parsed = responseSchema.safeParse(await response.json().catch(() => null));
   if (!parsed.success) return { kind: "error" };
   // The visitor waits for the whole round trip, so that is the reply time they see.

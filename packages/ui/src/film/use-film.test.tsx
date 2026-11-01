@@ -1,15 +1,15 @@
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { formatFilmTime, initialPlayback, nextSpeed, playbackReducer, startFromSearch } from "./film-playback";
+import { initialPlayback, playbackReducer, startFromSearch } from "./film-playback";
 import { useFilm } from "./use-film";
 
 describe("playbackReducer", () => {
   const start = initialPlayback(10_000);
 
-  it("advances by elapsed time times speed and stops at the end", () => {
+  it("advances by elapsed time and stops at the end", () => {
     let state = playbackReducer(start, { type: "play" });
-    state = playbackReducer(playbackReducer(state, { type: "speed", speed: 2 }), { type: "tick", elapsedMs: 1000 });
-    expect(state.t).toBe(2000);
+    state = playbackReducer(state, { type: "tick", elapsedMs: 1000 });
+    expect(state.t).toBe(1000);
     state = playbackReducer(state, { type: "tick", elapsedMs: 9000 });
     expect(state).toMatchObject({ t: 10_000, playing: false });
   });
@@ -28,10 +28,6 @@ describe("playbackReducer", () => {
     expect(playbackReducer(start, { type: "seek", t: 99_000 }).t).toBe(10_000);
   });
 
-  it("cycles speeds", () => {
-    expect([nextSpeed(0.5), nextSpeed(1), nextSpeed(1.5), nextSpeed(2)]).toEqual([1, 1.5, 2, 0.5]);
-  });
-
   it("reads ?t= from the query string", () => {
     expect(startFromSearch("?t=4200", 10_000)).toBe(4200);
     expect(startFromSearch("?t=abc", 10_000)).toBeNull();
@@ -43,10 +39,6 @@ describe("playbackReducer", () => {
     const playing = { ...start, t: 6000, playing: true };
     expect(playbackReducer(playing, { type: "duration", durationMs: 12_000 })).toMatchObject({ t: 6000, playing: true, durationMs: 12_000 });
     expect(playbackReducer(playing, { type: "duration", durationMs: 4000 })).toMatchObject({ t: 4000, playing: false });
-  });
-
-  it("formats film time as minutes and seconds", () => {
-    expect(formatFilmTime(65_400)).toBe("1:05");
   });
 });
 
@@ -77,12 +69,9 @@ describe("useFilm", () => {
     expect(result.current.t).toBeLessThanOrEqual(1000);
   });
 
-  it("runs faster at a higher speed and ends at the duration", () => {
+  it("ends at the duration", () => {
     const { result } = renderHook(() => useFilm({ durationMs: 3000 }));
-    act(() => result.current.setSpeed(2));
-    advance(1000);
-    expect(result.current.t).toBeGreaterThan(1800);
-    advance(2000);
+    advance(4000);
     expect(result.current).toMatchObject({ t: 3000, playing: false, ended: true });
   });
 
@@ -108,12 +97,12 @@ describe("useFilm", () => {
     expect(result.current.playing).toBe(false);
     field.remove();
 
-    const speed = document.body.appendChild(document.createElement("button"));
-    press(" ", speed);
+    const dot = document.body.appendChild(document.createElement("button"));
+    press(" ", dot);
     expect(result.current.playing).toBe(true);
-    press(" ", speed);
+    press(" ", dot);
     expect(result.current.playing).toBe(false);
-    speed.remove();
+    dot.remove();
 
     const dialog = document.body.appendChild(document.createElement("div"));
     dialog.setAttribute("role", "dialog");

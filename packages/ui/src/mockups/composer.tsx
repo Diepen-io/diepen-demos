@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { cx } from "../primitives/class-names";
 import { Icon } from "../primitives/icon";
 import type { ChannelId } from "./channel-looks";
@@ -12,6 +12,8 @@ export type ComposerProps = {
   disabled?: boolean;
   /** Email only: shows a subject field with this starting value, for the first message of a thread. */
   subject?: string;
+  /** The longest message the field takes. A count of what is left shows over the last 100 characters. */
+  maxLength?: number;
 };
 
 const placeholders: Record<ChannelId, string> = {
@@ -25,7 +27,7 @@ const placeholders: Record<ChannelId, string> = {
 const fieldText = "text-base text-foreground placeholder:text-faint focus:outline-none sm:text-[15px]";
 
 /** A working message field in the look of each channel, for live mode. */
-export function Composer({ channel, onSend, disabled, subject: initialSubject }: ComposerProps) {
+export function Composer({ channel, onSend, disabled, subject: initialSubject, maxLength }: ComposerProps) {
   const [text, setText] = useState("");
   const [subject, setSubject] = useState(initialSubject ?? "");
   const empty = text.trim() === "";
@@ -44,17 +46,31 @@ export function Composer({ channel, onSend, disabled, subject: initialSubject }:
     if (event.key === "Enter" && !event.shiftKey && sendsOnEnter) void send(event);
   }
 
+  const left = maxLength === undefined ? undefined : maxLength - text.length;
   const field = {
+    name: "message",
     value: text,
     disabled,
+    maxLength,
     placeholder: placeholders[channel],
     "aria-label": "Message",
+    "aria-describedby": left !== undefined && left <= 100 ? `composer-left-${channel}` : undefined,
     onKeyDown,
     onChange: (event: { target: { value: string } }) => setText(event.target.value),
   };
+  const withCount = (form: ReactNode) => (
+    <>
+      {left !== undefined && left <= 100 ? (
+        <p id={`composer-left-${channel}`} aria-live="polite" className="px-4 pt-1 text-right text-meta text-muted tabular-nums">
+          {left === 0 ? "That is the most one message can hold." : `${left} ${left === 1 ? "character" : "characters"} left`}
+        </p>
+      ) : null}
+      {form}
+    </>
+  );
 
   if (channel === "instagram") {
-    return (
+    return withCount(
       <form onSubmit={send} className="px-3 pb-3">
         <div className="flex h-11 items-stretch gap-1 rounded-full pr-1.5 pl-4 shadow-[inset_0_0_0_1px_var(--border)] focus-within:shadow-[inset_0_0_0_1px_#a1a1aa]">
           <input {...field} className={cx(fieldText, "min-w-0 flex-1 bg-transparent")} />
@@ -71,7 +87,7 @@ export function Composer({ channel, onSend, disabled, subject: initialSubject }:
   }
 
   if (channel === "linkedin") {
-    return (
+    return withCount(
       <form onSubmit={send} className="border-t border-border">
         <textarea {...field} rows={2} className={cx(fieldText, "m-3 block w-[calc(100%-1.5rem)] resize-none rounded-lg bg-subtle px-3 py-2.5")} />
         <div className="flex items-center gap-3 px-3 pb-3 text-muted">
@@ -90,7 +106,7 @@ export function Composer({ channel, onSend, disabled, subject: initialSubject }:
   }
 
   if (channel === "chat") {
-    return (
+    return withCount(
       <form onSubmit={send} className="flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5 max-sm:py-2">
         <input {...field} className={cx(fieldText, "min-w-0 flex-1 bg-transparent px-1 max-sm:h-11")} />
         <button
@@ -107,10 +123,11 @@ export function Composer({ channel, onSend, disabled, subject: initialSubject }:
 
   // On a phone the email composer is compact, so the thread above it keeps its room: two lines and
   // a round Send button beside them, without the attachment and shortcut row.
-  return (
+  return withCount(
     <form onSubmit={send} className="m-3 flex flex-col rounded-xl shadow-[0_0_0_1px_var(--border),0_4px_16px_-6px_rgb(0_0_0/0.12)] max-sm:m-2">
       {initialSubject !== undefined && (
         <input
+          name="subject"
           value={subject}
           onChange={(event) => setSubject(event.target.value)}
           aria-label="Subject"

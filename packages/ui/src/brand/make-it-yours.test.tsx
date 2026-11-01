@@ -126,4 +126,14 @@ describe("MakeItYours", () => {
     expect(fields.length).toBeGreaterThan(10);
     expect(fields.filter((field) => !field.id && !field.getAttribute("name"))).toEqual([]);
   });
+
+  it("offers only the example companies the demo passes (decision F3)", () => {
+    render(
+      <BrandProvider defaultProfile={defaultProfile}>
+        <MakeItYours open onClose={() => undefined} presets={[defaultProfile]} />
+      </BrandProvider>,
+    );
+    expect(screen.getByRole("heading", { name: "Example company" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: new RegExp(other.name) })).toBeNull();
+  });
 });

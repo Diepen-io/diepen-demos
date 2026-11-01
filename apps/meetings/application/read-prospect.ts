@@ -17,6 +17,10 @@ const phraseEnd = new Set(
     " ",
   ),
 );
+/** A label that names money gets the profile's currency when the prospect said none. */
+const moneyWords = /\b(?:rent|price|cost|costs|fee|fees|budget|revenue|salary|income)\b/i;
+const currencyMark = /\b(?:EUR|USD|GBP|CHF|AUD|CAD|euros?|dollars?|pounds?)\b|[€$£]/i;
+const timeUnits = new Set(["minutes", "hours", "days", "weeks", "months", "years"]);
 /** A label never ends on one of these: "38 days on" reads as cut off. */
 const danglingWords = new Set("a an across at by for from in into near of on per to with".split(" "));
 
@@ -58,11 +62,21 @@ function askedFor(turns: readonly SpeakerTurn[], index: number): string {
   return match?.[1]?.trim().toLowerCase() ?? "";
 }
 
+/** "How long does the apartment stand empty?" before "38 days" gives "Days empty", not "Days on average". */
+function howLongFor(turns: readonly SpeakerTurn[], index: number, phrase: string): string | null {
+  const unit = phrase.split(" ")[0] ?? "";
+  if (!timeUnits.has(unit)) return null;
+  const question = turns[index - 1]?.text ?? "";
+  const what = /\bhow long\b[^?]*?([\p{L}-]+)\s*\?/iu.exec(question)?.[1]?.toLowerCase();
+  return what ? `${unit} ${what}` : null;
+}
+
 /**
  * Every figure the prospect gave, in order, with the words that say what it counts. Years, clock
- * times such as 10:00 and bare figures that nothing explains are skipped.
+ * times such as 10:00 and bare figures that nothing explains are skipped. A money figure said
+ * without a currency gets `currency`, the one the profile quotes its prices in.
  */
-export function prospectFigures(turns: readonly SpeakerTurn[], prospect: string): Figure[] {
+export function prospectFigures(turns: readonly SpeakerTurn[], prospect: string, currency?: string | null): Figure[] {
   const figures: Figure[] = [];
   for (const { text, index } of prospectTurns(turns, prospect)) {
     for (const match of text.matchAll(figurePattern)) {
@@ -71,9 +85,12 @@ export function prospectFigures(turns: readonly SpeakerTurn[], prospect: string)
       if (text[start - 1] === ":" || text[end] === ":" || isYear(match[0])) continue;
       const clause = (text.slice(end).split(/[.,;:!?]/)[0] ?? "").trim();
       const rate = ratePattern.exec(clause)?.[1]?.toLowerCase();
-      const subject = rate ? askedFor(turns, index) : phraseAfter(clause) || askedFor(turns, index);
+      const phrase = phraseAfter(clause);
+      const subject = rate ? askedFor(turns, index) : howLongFor(turns, index, phrase) ?? (phrase || askedFor(turns, index));
       if (!subject) continue;
-      figures.push({ label: capitalise(rate ? `${subject} a ${rate}` : subject), value: match[0] });
+      const label = capitalise(rate ? `${subject} a ${rate}` : subject);
+      const unpricedMoney = currency && moneyWords.test(label) && !currencyMark.test(text.slice(Math.max(0, start - 12), end + 12));
+      figures.push({ label, value: unpricedMoney ? `${currency} ${match[0]}` : match[0] });
       if (figures.length === maxFigures) return figures;
     }
   }

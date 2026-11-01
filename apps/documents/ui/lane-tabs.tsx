@@ -1,22 +1,21 @@
 "use client";
 
+import { cx } from "@diepen/ui/primitives/class-names";
+import { Icon } from "@diepen/ui/primitives/icon";
 import type { KeyboardEvent } from "react";
-import { cx } from "../primitives/class-names";
-import { Icon } from "../primitives/icon";
-import type { FilmLane } from "./film-lane";
-import type { LaneAnchors } from "./use-lane-anchors";
+import type { DocumentsLaneId, LiveLane } from "./documents-lanes";
 
 export type LaneTabsProps = {
-  lanes: FilmLane[];
-  shownLane: string | undefined;
-  receiving: Set<string>;
-  onSelect: (laneId: string) => void;
-  register: LaneAnchors["register"];
+  lanes: LiveLane[];
+  shownLane: DocumentsLaneId;
+  /** Lanes that changed while hidden. Their tab gets a dot. */
+  receiving: Set<DocumentsLaneId>;
+  onSelect: (laneId: DocumentsLaneId) => void;
   className?: string;
 };
 
-/** The narrow layout shows one lane at a time. The tabs follow the story; a tap looks elsewhere. */
-export function LaneTabs({ lanes, shownLane, receiving, onSelect, register, className }: LaneTabsProps) {
+/** The narrow layout shows one lane at a time; the tabs switch between them. */
+export function LaneTabs({ lanes, shownLane, receiving, onSelect, className }: LaneTabsProps) {
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
     const index = lanes.findIndex((lane) => lane.id === shownLane);
@@ -39,12 +38,11 @@ export function LaneTabs({ lanes, shownLane, receiving, onSelect, register, clas
         return (
           <button
             key={lane.id}
-            ref={register(lane.id, "tab")}
             type="button"
             role="tab"
-            id={`film-tab-${lane.id}`}
+            id={`live-tab-${lane.id}`}
             aria-selected={selected}
-            aria-controls={`film-lane-${lane.id}`}
+            aria-controls={`live-lane-${lane.id}`}
             tabIndex={selected ? 0 : -1}
             data-lane-tab={lane.id}
             onClick={() => onSelect(lane.id)}
@@ -58,8 +56,8 @@ export function LaneTabs({ lanes, shownLane, receiving, onSelect, register, clas
             <span
               aria-hidden="true"
               className={cx(
-                "absolute top-1.5 right-1.5 size-1.5 rounded-full transition-opacity duration-300",
-                lane.brand ? "bg-brand" : "bg-foreground",
+                // One colour for every tab: the dot means "changed", whoever the lane belongs to.
+                "absolute top-1.5 right-1.5 size-1.5 rounded-full bg-brand transition-opacity duration-300",
                 receiving.has(lane.id) && !selected ? "opacity-100" : "opacity-0",
               )}
             />

@@ -45,8 +45,9 @@ export function KeynoteStage({ film, liveHref = "/live", autoplay = true, classN
       {/* Outside a recording the demo shell already names the company above the stage. */}
       {recording ? (
         <header className="flex items-center gap-3 px-6 pt-5 md:px-10 md:pt-7">
-          <BrandMark profile={profile} size={36} />
-          <span className="truncate text-[17px] font-semibold tracking-[-0.01em]">{profile.name}</span>
+          {/* 52 px keeps even a three-letter monogram above 16 px in a phone feed. */}
+          <BrandMark profile={profile} size={52} />
+          <span className="truncate text-[20px] font-semibold tracking-[-0.01em]">{profile.name}</span>
           {profile.fictional ? <FictionalBadge size="lg" /> : null}
         </header>
       ) : null}
@@ -117,7 +118,8 @@ function Finale({ film, liveHref }: { film: KeynoteFilm; liveHref: string }): Re
   return (
     <div data-keynote-finale className="flex flex-col items-center">
       <p className="text-[clamp(18px,1.6vw,26px)] font-medium text-muted">{finale.label}</p>
-      <p className="mt-3 flex flex-wrap items-baseline justify-center gap-x-[0.35em] text-[clamp(56px,8vw,128px)] font-semibold leading-none tracking-[-0.04em]">
+      {/* Before, arrow and after stay on one line; the size follows the width so "2 days → 4 min" fits a phone. */}
+      <p className="mt-3 flex flex-nowrap items-baseline justify-center gap-x-[0.35em] text-[clamp(32px,10.5vw,128px)] font-semibold leading-none tracking-[-0.04em] whitespace-nowrap md:text-[clamp(56px,8vw,128px)]">
         <span className="text-muted/70">{finale.before}</span>
         <span aria-label="to" className="text-[0.6em] text-muted/60">
           →
@@ -131,7 +133,7 @@ function Finale({ film, liveHref }: { film: KeynoteFilm; liveHref: string }): Re
         Try it live
         <Icon name="arrowRight" size={18} />
       </a>
-      <p className="mt-5 max-w-[40rem] text-pretty text-[16px] text-muted">{finale.note}</p>
+      <p className="mt-5 max-w-[40rem] text-balance text-[16px] text-muted">{finale.note}</p>
     </div>
   );
 }

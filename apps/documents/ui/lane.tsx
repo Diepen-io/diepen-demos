@@ -1,21 +1,17 @@
 "use client";
 
-import { useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { cx } from "../primitives/class-names";
-import { Icon } from "../primitives/icon";
-import { EASE_OUT } from "./film-easing";
-import type { FilmLane } from "./film-lane";
+import { EASE_OUT } from "@diepen/ui/film/film-easing";
+import { usePrefersReducedMotion } from "@diepen/ui/film/use-stage-environment";
+import { cx } from "@diepen/ui/primitives/class-names";
+import { Icon } from "@diepen/ui/primitives/icon";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { LiveLane } from "./documents-lanes";
 
 export type LaneProps = {
-  lane: FilmLane;
+  lane: LiveLane;
   id?: string;
   /** The story is happening here right now. */
   focused?: boolean;
-  /** A travelling item is about to land, or just landed. The lane glows softly. */
-  receiving?: boolean;
-  bodyRef?: (element: HTMLElement | null) => void;
-  contentRef?: (element: HTMLElement | null) => void;
   className?: string;
   children?: ReactNode;
 };
@@ -24,28 +20,14 @@ export type LaneProps = {
  * One party's column. The body keeps the newest content in view: it starts at the top, and once
  * it is full, older content slides up and fades out under the header.
  */
-export function Lane({ lane, id, focused, receiving, bodyRef, contentRef, className, children }: LaneProps) {
-  const { bodyNodeRef, contentNodeRef, overflowing } = useFeedScroll();
-  const setBody = useCallback(
-    (element: HTMLElement | null) => {
-      bodyNodeRef.current = element;
-      bodyRef?.(element);
-    },
-    [bodyNodeRef, bodyRef],
-  );
-  const setContent = useCallback(
-    (element: HTMLElement | null) => {
-      contentNodeRef.current = element;
-      contentRef?.(element);
-    },
-    [contentNodeRef, contentRef],
-  );
+export function Lane({ lane, id, focused, className, children }: LaneProps) {
+  const { bodyRef, contentRef, overflowing } = useFeedScroll();
 
   return (
     <section
       id={id}
       aria-label={`${lane.label}, ${lane.role}`}
-      data-film-lane={lane.id}
+      data-lane={lane.id}
       data-focused={focused || undefined}
       className={cx("panel relative isolate flex min-h-0 min-w-0 flex-col", className)}
     >
@@ -72,26 +54,16 @@ export function Lane({ lane, id, focused, receiving, bodyRef, contentRef, classN
         />
       </header>
       <div
-        ref={setBody}
+        ref={bodyRef}
         className="relative flex min-h-0 flex-1 flex-col justify-end overflow-hidden px-4 py-4"
         style={overflowing ? { maskImage: "linear-gradient(to bottom, transparent, #000 64px)" } : undefined}
       >
         <div className="min-h-full shrink-0">
-          <div ref={setContent} className="flex flex-col gap-3">
+          <div ref={contentRef} className="flex flex-col gap-3">
             {children}
           </div>
         </div>
       </div>
-      <span
-        aria-hidden="true"
-        className={cx(
-          "pointer-events-none absolute -inset-px -z-10 rounded-[15px] transition-opacity",
-          receiving ? "opacity-100 duration-300" : "opacity-0 duration-700",
-          lane.brand
-            ? "shadow-[0_0_0_2px_var(--brand-line),0_0_0_7px_var(--brand-soft)]"
-            : "shadow-[0_0_0_2px_rgb(0_0_0/0.14),0_0_0_7px_rgb(0_0_0/0.035)]",
-        )}
-      />
     </section>
   );
 }
@@ -103,14 +75,14 @@ export function Lane({ lane, id, focused, receiving, bodyRef, contentRef, classN
  * jump as a short slide instead (FLIP on one element, transform only).
  */
 function useFeedScroll() {
-  const bodyNodeRef = useRef<HTMLElement | null>(null);
-  const contentNodeRef = useRef<HTMLElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const [overflowing, setOverflowing] = useState(false);
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    const bodyElement = bodyNodeRef.current;
-    const contentElement = contentNodeRef.current;
+    const bodyElement = bodyRef.current;
+    const contentElement = contentRef.current;
     if (!bodyElement || !contentElement) return;
     let lastTop = contentElement.offsetTop;
     let lastHeight = contentElement.offsetHeight;
@@ -138,5 +110,5 @@ function useFeedScroll() {
     return () => observer.disconnect();
   }, [reduceMotion]);
 
-  return { bodyNodeRef, contentNodeRef, overflowing };
+  return { bodyRef, contentRef, overflowing };
 }

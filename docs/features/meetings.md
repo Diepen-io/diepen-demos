@@ -11,7 +11,7 @@ You read it, press send, and the prospect has your proposal 4 minutes after you 
 
 ## 2. Film script
 
-The film is a keynote film: four beats and a finale, each on screen for 3,200 ms, so it runs 16,000 ms at 1x.
+The film is a keynote film: four beats and a finale, each on screen for 3,200 ms, so it runs 16,000 ms.
 Each beat shows one caption of at most six words and one element, centred on the brand backdrop, with at most one status chip (decision F2).
 It runs from recorded fixtures with no key and no network.
 `film/meetings-keynote.tsx` builds it on the shared keynote engine in `@diepen/ui/film/keynote-script`, `keynote-stage` and `keynote-parts`.
@@ -256,8 +256,8 @@ It normalises `crm.stage` to a domain deal stage, defaulting to "Proposal drafte
 ### Keyless mock and cost guards
 
 - Without `ANTHROPIC_API_KEY`, or with `AI_PROVIDER=mock`, the container returns the mock provider and the screen shows "Demo answers. No API key is set." (decision D4).
-- When a guard trips, `/api/outputs` answers 429 `{ fallback: "film" }`. The live page then shows the film with the shell's fallback note, at `/?fallback=limit`.
-- When the provider throws or its answer fails the schema, the route answers 502 and the page shows "The draft did not come through. Try again." with a "Try again" button.
+- When a guard trips, `/api/outputs` answers 429 `{ fallback: "film" }`. The live page then sends the visitor to the film with the shell's fallback note, at `/?fallback=limit` (`useFilmFallback`).
+- When the provider throws or its answer fails the schema, the route answers 503 with `unavailableResponse`, like the other apps, and the page shows "The draft did not come through. Try again." with a "Try again" button.
 
 ### What the mock provider answers
 
@@ -269,19 +269,20 @@ It is pure and deterministic for a given transcript, profile and `localNow`, so 
 | Seller, prospect | Seller is the first speaker named with the owner's first name (case-insensitive) or labelled as the seller ("You", the company), else the first speaker. Prospect is the first other speaker, else "Prospect" |
 | Contact | The prospect's label when it is a person. A recorded "Prospect" takes the name from the seller's greeting ("Hi Rosa,"), else "New contact". Company: a name after "company" ("that's the company, Becker Residential") or a name ending in Residential, Homes, Lettings, GmbH, Ltd and the like, else the contact's own name, as for a private owner. Email: the first address the prospect says |
 | `summary` | `{Contact} of {company} spoke with {seller} over {n} turns. {First name} said: "{first pain point}" Next: send the proposal and meet on {weekday}.` The seller is "{owner} of {company}", or the company for a team profile |
-| `numbers` | Each figure in the prospect's turns, at most 6. Years (1900 to 2099) and clock times are skipped. The label is the phrase that follows the figure up to four words ("Apartments across three buildings", "Hours a month"); a bare rate such as "1,150 a month" takes its subject from the question just before ("What's the average rent?" gives "Average rent a month"). A figure nothing explains is left out |
+| `numbers` | Each figure in the prospect's turns, at most 6. Years (1900 to 2099) and clock times are skipped. The label is the phrase that follows the figure up to four words ("Apartments across three buildings", "Hours a month"); a bare rate such as "1,150 a month" takes its subject from the question just before ("What's the average rent?" gives "Average rent a month"). A time figure that answers a "how long ... empty?" question takes the question's last word ("Days empty"). A money figure (rent, price, cost, fee, budget) said without a currency gets the currency of the profile's quoted price ("EUR 1,150"). A figure nothing explains is left out |
 | `painPoints` | Prospect sentences matching `worst\|problem\|late\|drags\|empty\|hours\|chasing\|stress\|too much\|cost`, case-insensitive, first 3. Else `["The call names no pain point yet."]` |
-| `crm` | company and contact as above, contactRole "Prospect", the email when said, stage "Proposal drafted", dealValue `{servicePrice}` or "Not priced yet", nextStep "Send the proposal today. {meeting title} on {weekday day month} at 10:00." |
-| `proposal` | title `{serviceName} for {company}`, or `{serviceName} proposal` for an unnamed contact; scope `["{serviceName}: {service description}"]`, price `{servicePrice}`, timeline "Start within two weeks of signing", terms "Valid for 30 days." |
-| `followUpEmail` | subject `Your proposal from {sellerCompany}`, greets "Hi {first name}," or "Hello,", names the service and price (or "we'll agree the price when we meet"), names the meeting day, ends with `{signOffGreeting}` and `{sellerSignature}` |
-| `nextMeeting` | title `Proposal review with {contact}`, or "Proposal review"; durationMinutes `{bookingMinutes}`, start 10:00 on the first weekday at least two days after `localNow`, agenda `["Questions on the proposal", "Agree the start date", "Next steps"]` |
+| `crm` | company and contact as above, contactRole "Prospect", the email when said, stage "Proposal drafted", dealValue `{servicePrice}` or "Not priced yet", nextStep "Send the proposal today. {meeting title} on {weekday day month} at {time}." |
+| `proposal` | title `{serviceName} for {company}`, or `{serviceName} proposal` for an unnamed contact; scope `["{serviceName}: {service description}"]`, price `{servicePrice}`, timeline "Start on {day} {month}" when the call names a day of a month ("the first of January"), else "Start within two weeks of signing", terms "Valid for 30 days." |
+| `followUpEmail` | subject `Your proposal from {sellerCompany}`, greets "Hi {first name}," or "Hello,", names the service and price ("at EUR 34 per unit per month", or "from EUR 290" for a price that starts with "from"; else "we'll agree the price when we meet"), names the meeting day and time, ends with `{signOffGreeting}` and `{sellerSignature}` |
+| `nextMeeting` | title `Proposal review with {contact}`, or "Proposal review"; durationMinutes `{bookingMinutes}`, start the last weekday and time the call names ("Friday at ten" is the next Friday after `localNow` at 10:00; an hour from 1 to 7 without am or pm is the afternoon), else 10:00 on the first weekday at least two days after `localNow` (`application/read-dates.ts`), agenda `["Questions on the proposal", "Agree the start date", "Next steps"]` |
 
-For the sample call with the default preset, the mock gives contact "Tom Becker" of "Becker Residential" at tom@becker-residential.example, numbers 14 "Apartments across three buildings", 38 "Days on average" and 1,150 "Average rent a month", and pain points `["A normal week, about nine hours.", "Calls, texts, chasing the plumber, chasing rent.", "The night calls are the worst part."]`.
+For the sample call with the default preset, the mock gives contact "Tom Becker" of "Becker Residential" at tom@becker-residential.example, numbers 14 "Apartments across three buildings", 38 "Days empty" and "EUR 1,150" "Average rent a month", the meeting on Friday at 10:00, the timeline "Start on 1 January", and pain points `["A normal week, about nine hours.", "Calls, texts, chasing the plumber, chasing rent.", "The night calls are the worst part."]`.
 
 ## 5. Make it yours
 
 The visitor enters a website in the shell's "Make it yours" panel; `/api/brand` drafts a profile, the visitor edits it, and it travels in `?brand=` and local storage (decision S3).
 The film always tells Brickfern's story (decision F1); "Make it yours" puts the visitor's company fully into live mode.
+The panel's example companies list only Brickfern, since the sample call is a landlord's (decision F3). "Read my site" and the form work for any business.
 
 | What | Live (`/live`) |
 | --- | --- |
@@ -312,7 +313,7 @@ Inside `apps/meetings`. Dependencies point inwards; `eslint.config.mjs` enforces
 | `domain/calendar-week.ts` | `mondayOf`, `workingDays`, `weekLabel` ("9 to 13 November") for the calendar lane header |
 | `domain/deal-stage.ts` | `dealStages` ("Discovery", "Proposal drafted", "Proposal sent", "Won", "Lost"), `normaliseStage(text)`, `stageAfterSend` |
 | `domain/output-sequence.ts` | `OutputKind` (summary, numbers, crm, proposal, email, meeting), `outputSequence`, `laneOf(kind)`, `revealPlan(stepMs, reducedMotion)` |
-| `domain/lanes.ts` | The five lane ids, labels, roles and phone tab names of live mode |
+| `domain/lanes.ts` | The four tool lane ids, labels and roles of live mode |
 | `domain/meeting-outputs.ts` | `MeetingOutputs`: the `call-outputs` shape with `crm.stage` as a deal stage. The model contract stays the package schema |
 | `domain/timing-metric.ts` | `elapsedMs(fromIso, toIso)`, `formatDuration(ms)`: "45 seconds", "1 min 12 s", "4 minutes", "2 days" |
 | `domain/proposal-service.ts` | `proposalService(profile)` returning `{ name, description, price }` with the "Price on request" rule |
@@ -353,8 +354,7 @@ export function createSpeechRecognizer(scope: Window): SpeechRecognizer;
 
 | File | Holds |
 | --- | --- |
-| `infrastructure/container.ts` | `getContainer()`: the provider from the `@diepen/ai` factory (`claude` with a key, else `mock`), the cost guards, `providerName`, `processCall` bound to the provider, and the brand handler |
-| `infrastructure/fixture-page-fetcher.ts` | The page fetcher the brand handler uses with the mock provider, so tests and keyless runs never fetch the internet |
+| `infrastructure/container.ts` | `createContainer({ provider?, guards? })` and the app's `container`: the provider from the `@diepen/ai` factory (`claude` with a key, else `mock`), the shared cost guards, `providerName`, `processCall` bound to the provider, and the page fetcher for "Make it yours" from `pageFetcherFor` in `@diepen/voice/fixture-page-fetcher`, so tests and keyless runs never fetch the internet |
 
 ### `ui/`
 
@@ -364,7 +364,6 @@ export function createSpeechRecognizer(scope: Window): SpeechRecognizer;
 | `ui/lanes/crm-lane.tsx` | The new deal record with its stage |
 | `ui/lanes/proposal-lane.tsx`, `proposal-paper.tsx`, `follow-up-email.tsx` | Proposal page and follow-up email (on the `EmailMessage` mockup) with attachment chip, draft and sent status, optional send action |
 | `ui/lanes/calendar-lane.tsx` | The working week as an agenda, one row per day, new meeting highlighted. A week grid is unreadable in a lane under 400 px wide |
-| `ui/film-view/meetings-film.tsx` | The film: the keynote stage with the film built from the active profile and "Try it live" pointing at `/live` |
 | `ui/live/live-demo.tsx` | The live page: input column and output lanes |
 | `ui/live/use-live-call.ts` | The live state: ready, processing, revealing, revealed, sent, failed, and the submitted transcript the stale check compares with |
 | `ui/live/transcript-input.tsx`, `input-tabs.tsx` | Tabs, transcript box, counter, inline issues |
@@ -387,10 +386,10 @@ export function createSpeechRecognizer(scope: Window): SpeechRecognizer;
 
 | Route | File | Contract |
 | --- | --- | --- |
-| `/` | `page.tsx` | The film from `ui/film-view/` inside the demo shell (Film and Live switch, "Make it yours", the fallback note); reads `?t=`, `?brand=`, `?record=1` and `?fallback=limit` |
+| `/` | `page.tsx` | `KeynoteFilmView` with the film built from the Brickfern preset (decision F1) inside the demo shell (Film and Live switch, "Make it yours", the fallback note); reads `?t=`, `?brand=`, `?record=1` and `?fallback=limit` |
 | `/live` | `live/page.tsx` | Server component; passes `providerName` and the sample call to `LiveDemo` |
 | `POST /api/outputs` | `api/outputs/route.ts`, `api/outputs/request-schema.ts` | See below |
-| `POST /api/brand` | `api/brand/route.ts` | The handler from `@diepen/voice/brand-route`, wired in the container with this app's provider, guards and page fetcher; its request and response are the package's |
+| `POST /api/brand` | `api/brand/route.ts` | `createBrandHandler` from `@diepen/voice/brand-route` with the container's page fetcher, provider and guards; its request and response are the package's |
 | `GET /api/health` | `api/health/route.ts` | `{ ok: true, app: "meetings", provider: "claude" \| "mock" }` |
 
 `POST /api/outputs`:
@@ -410,7 +409,7 @@ export const outputsRequestSchema = z.object({
 | 400 | `{ error: "invalid_request", issues: { path: string, message: string }[] }`, messages from section 4 |
 | 413 | `{ error: "too_large" }` when the raw body is over 100 KB: the declared length is checked first, then the bytes as they stream in, before JSON parsing |
 | 429 | `{ fallback: "film" }` when a guard trips |
-| 502 | `{ error: "generation_failed" }` when the provider throws or the answer fails the schema |
+| 503 | `{ fallback: "film", reason: "unavailable", message }` from `unavailableResponse` when the provider throws or the answer fails the schema. The visitor stays and can try again |
 
 The route validates, runs the guards, calls `processCall` through the container, and returns. Nothing else.
 
@@ -425,7 +424,7 @@ The caption, the element and the chip sit centred on one column at most 44rem wi
 
 | Viewport | Layout |
 | --- | --- |
-| 1920x1080 and 1440x900 | Input column at 32% on the left (tabs, transcript box, button). Right side is the lane grid without the call lane: AI, then CRM over Calendar, then Proposal and email. The result bar spans the right side once sent |
+| 1920x1080 and 1440x900 | Input column at 32% on the left (tabs, transcript box, button). Right side is the lane grid: AI, then CRM over Calendar, then Proposal and email. The result bar spans the right side once sent |
 | 375 wide | One column: tabs, transcript box, button, then the six outputs as cards in sequence order. Each new card scrolls into view. Long emails and scope lines wrap; no fixed widths. Input tabs, the "Speaking now" toggle, Start, Stop, Send and Start over are at least 44 px tall |
 
 Nothing may overflow horizontally at 375 px in either mode: `document.documentElement.scrollWidth` stays at or below 375.
@@ -458,7 +457,7 @@ Every check names the feature id it proves. Flow tests carry `@<id>` in their ti
 | U8 | `meetings.make-it-yours` | `fillTokens` fills every token of section 2 and throws on an unknown one. After `buildMeetingsKeynote` with each preset, no caption, element text or note contains `{` |
 | U9 | `meetings.live-sample` | `processCall` with the mock provider on the sample call and the default preset returns a value that passes the `call-outputs` schema, contactName "Tom Becker", the numbers and pain points of section 4, `proposal.price` equal to the preset's price, `durationMinutes` equal to its `bookingMinutes`; two runs with the same `localNow` are deep-equal |
 | U10 | `meetings.live-paste` | `processCall` with a fake provider that returns another price and a 15-minute meeting returns the profile's price and `bookingMinutes`; the request it sent has role `analysis` and a system prompt that contains the profile's name |
-| U11 | `meetings.live-paste` | The route answers 400 with `path: "transcript"` for a missing, too short or too long transcript, 400 for an invalid profile or `localNow`, 413 for a 101 KB body and for an endless streamed body without a declared length, 429 `{ fallback: "film" }` when the guard trips, 502 when the provider throws, and 200 `{ outputs, provider: "mock" }` for the sample call |
+| U11 | `meetings.live-paste` | The route answers 400 with `path: "transcript"` for a missing, too short or too long transcript, 400 for an invalid profile or `localNow`, 413 for a 101 KB body and for an endless streamed body without a declared length, 429 `{ fallback: "film" }` when the guard trips, 503 `unavailable` when the provider throws, and 200 `{ outputs, provider: "mock" }` for the sample call |
 | U12 | `meetings.film` | `buildMeetingsKeynote`: the four captions of section 2 in order, "32:10", the three figures, the preset's price, "Sent 14:36", and a finale of "2 days" to "4 min" with a note that names the fictional company. The engine rejects captions over six words, dashes and more than four beats |
 | U13 | `meetings.film` | The recorded outputs pass the `call-outputs` schema after filling tokens; the sample call has 25 to 40 lines |
 | U14 | `meetings.live-record` | `createSpeechRecognizer` on a window without either constructor has `supported: false`; with a fake constructor, final results reach `onFinal`, interim results reach `onInterim`, and `not-allowed` maps to `denied` |
@@ -484,7 +483,7 @@ Every flow test fails on any `console` error or `pageerror` through one shared f
 | F10 | `meetings.live-record` | With a fake constructor that emits two final results, toggling the speaker in between, the transcript box holds two lines with the two speakers, and the button produces six outputs |
 | F11 | `meetings.live-send` | After the outputs, "Send to Tom" shows "Sent", the CRM stage "Proposal sent", the next step "Proposal sent. Next: …" and "Transcript to proposal sent:" with a duration |
 | F12 | `meetings.limit-fallback` | With `/api/outputs` routed to 429 `{ fallback: "film" }`, pressing the button lands on the film with the shell's fallback note |
-| F13 | `meetings.live-paste` | With `/api/outputs` routed to 502, the page shows "The draft did not come through. Try again." and "Try again" succeeds once the route is released |
+| F13 | `meetings.live-paste` | With `/api/outputs` routed to 503, the page shows "The draft did not come through. Try again." and "Try again" succeeds once the route is released |
 | F14 | `meetings.make-it-yours` | `/live?brand=<test profile>` (fictional, its own name, owner and price) shows its name in the header; the sample call uses its owner; the proposal shows its price |
 | F15 | `meetings.make-it-yours` | With `/api/brand` routed to return the test profile, the "Make it yours" panel applies it and the `--brand` CSS variable equals its brand colour |
 | F16 | `meetings.film` | At 375x812, each of the five film steps, `/live` and `/live` after the six outputs have `scrollWidth` at most 375 |

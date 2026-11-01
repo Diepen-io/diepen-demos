@@ -21,8 +21,24 @@ describe("draftMockOutputs reads like a careful assistant @meetings.live-sample"
   it("labels each figure with what it counts and skips the year", () => {
     const figures = draft(filledSampleCall(meetingsPreset)).numbers;
     expect(figures.map((figure) => figure.value)).not.toContain("2015");
-    expect(figures).toContainEqual({ label: "Average rent a month", value: "1,150" });
+    expect(figures).toContainEqual({ label: "Average rent a month", value: "EUR 1,150" });
+    expect(figures).toContainEqual({ label: "Days empty", value: "38" });
     expect(figures.every((figure) => /^[A-Z][a-z]/.test(figure.label))).toBe(true);
+  });
+
+  it("books the meeting and the start date the call agreed on", () => {
+    const outputs = draft(filledSampleCall(meetingsPreset));
+    expect(outputs.nextMeeting.start).toBe("2026-11-13T10:00:00");
+    expect(outputs.proposal.timeline).toBe("Start on 1 January");
+    expect(outputs.followUpEmail.body).toContain("Friday at 10:00 is in the calendar");
+  });
+
+  it("quotes a price that starts with from without a stray at", () => {
+    const fromPrice = {
+      ...meetingsPreset,
+      knowledge: { ...meetingsPreset.knowledge, services: [{ name: "Tenant search", description: "", price: "from EUR 290" }] },
+    };
+    expect(draft(filledSampleCall(meetingsPreset), fromPrice).followUpEmail.body).toContain("Tenant search from EUR 290.");
   });
 
   it("takes the company and the email address from the call", () => {

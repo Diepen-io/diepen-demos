@@ -1,5 +1,5 @@
 import { liveSessionSchema } from "@/domain/live-session";
-import { runChase } from "@/infrastructure/container";
+import { container } from "@/infrastructure/container";
 import { BodyTooLargeError, readBodyText } from "@diepen/ai/request-body";
 import { companyProfileSchema } from "@diepen/voice/profile";
 import { defaultPresetFor } from "@diepen/voice/presets";
@@ -40,5 +40,5 @@ export async function POST(request: Request): Promise<Response> {
   if (!parsed.success) return invalid(parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`));
 
   const { session, event, profile } = parsed.data;
-  return json(await runChase(session, profile ?? defaultPresetFor("documents"), event));
+  return json(await container.runChase(session, profile ?? defaultPresetFor("documents"), event));
 }

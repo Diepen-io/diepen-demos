@@ -4,10 +4,11 @@ import { identifySides } from "@/domain/call-sides";
 import { firstName } from "@/domain/person-name";
 import { profileTokens } from "@/domain/profile-tokens";
 import { meetingMoment } from "@/domain/proposal-sent";
-import { priceOnRequest, proposalService } from "@/domain/proposal-service";
+import { currencyOf, priceOnRequest, proposalService } from "@/domain/proposal-service";
 import { sellerOf } from "@/domain/seller";
 import type { SpeakerTurn } from "@/domain/transcript";
 import { readContact } from "./read-contact";
+import { agreedMeetingStart, agreedStart } from "./read-dates";
 import { prospectFigures, prospectPainPoints } from "./read-prospect";
 
 export type MockDraftInput = { turns: readonly SpeakerTurn[]; profile: CompanyProfile; localNow: string };
@@ -15,7 +16,7 @@ export type MockDraftInput = { turns: readonly SpeakerTurn[]; profile: CompanyPr
 /** What the CRM says about a deal the profile has no price for. */
 const notPriced = "Not priced yet";
 
-/** 10:00 on the first weekday at least two days after `localNow`, as a wall-clock ISO time. */
+/** 10:00 on the first weekday at least two days after `localNow`, for a call that agrees no time. */
 export function nextMeetingStart(localNow: string): string {
   const day = new Date(`${localNow.slice(0, 10)}T00:00:00Z`);
   day.setUTCDate(day.getUTCDate() + 2);
@@ -36,9 +37,12 @@ export function draftMockOutputs({ turns, profile, localNow }: MockDraftInput): 
   const sides = identifySides(turns, profile);
   const contact = readContact(turns, sides, seller);
   const painPoints = prospectPainPoints(turns, sides.prospect);
-  const start = nextMeetingStart(localNow);
+  const start = agreedMeetingStart(turns, localNow) ?? nextMeetingStart(localNow);
   const moment = meetingMoment(start) ?? "the next weekday at 10:00";
   const meetingDay = moment.split(" ")[0] ?? "Monday";
+  const meetingTime = start.slice(11, 16);
+  // "at EUR 34 per unit per month", but "from EUR 290", never "at from EUR 290".
+  const quoted = /^from\b/i.test(service.price) ? service.price : `at ${service.price}`;
 
   const client = contact.company ?? (contact.named ? contact.name : null);
   const who = contact.named ? (contact.company ? `${contact.name} of ${contact.company}` : contact.name) : "The prospect";
@@ -47,7 +51,7 @@ export function draftMockOutputs({ turns, profile, localNow }: MockDraftInput): 
 
   return {
     summary: `${who} spoke with ${seller.described} over ${turns.length} turns.${quote} Next: send the proposal and meet on ${meetingDay}.`,
-    numbers: prospectFigures(turns, sides.prospect),
+    numbers: prospectFigures(turns, sides.prospect, currencyOf(service.price)),
     painPoints: painPoints.length > 0 ? painPoints : ["The call names no pain point yet."],
     crm: {
       company: client ?? contact.name,
@@ -62,7 +66,7 @@ export function draftMockOutputs({ turns, profile, localNow }: MockDraftInput): 
       title: client ? `${service.name} for ${client}` : `${service.name} proposal`,
       scope: [service.description ? `${service.name}: ${service.description}` : service.name],
       price: service.price,
-      timeline: "Start within two weeks of signing",
+      timeline: agreedStart(turns) ?? "Start within two weeks of signing",
       terms: "Valid for 30 days.",
     },
     followUpEmail: {
@@ -70,9 +74,9 @@ export function draftMockOutputs({ turns, profile, localNow }: MockDraftInput): 
       body:
         `${contact.named ? `Hi ${firstName(contact.name)},` : "Hello,"}\n\n` +
         (priced
-          ? `Thanks for the call today. I've attached the proposal for ${service.name} at ${service.price}.\n\n`
+          ? `Thanks for the call today. I've attached the proposal for ${service.name} ${quoted}.\n\n`
           : `Thanks for the call today. I've attached the proposal for ${service.name}, and we'll agree the price when we meet.\n\n`) +
-        `${meetingDay} at 10:00 is in the calendar to go through it together.\n\n` +
+        `${meetingDay} at ${meetingTime} is in the calendar to go through it together.\n\n` +
         `${tokens.signOffGreeting}\n${seller.signature}`,
     },
     nextMeeting: {

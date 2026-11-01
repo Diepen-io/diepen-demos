@@ -14,7 +14,7 @@ demo: true
 
 This is a demo.
 Brickfern Property Management, its owner Jonas Albers and the landlord Tom Becker are fictional.
-The 4 minutes is measured on the film's clock, from the call ending at 14:32 to the email sent at 14:36.
+The 4 minutes is the simulated timeline: the call ends at 14:32 and the email goes out at 14:36.
 The 2 days is this scenario's manual routine: notes typed up that evening, proposal sent on Thursday.
 
 ## The problem
@@ -25,16 +25,14 @@ The proposal goes out two days later.
 
 ## What the system does
 
-The film plays a 32-minute discovery call between Jonas Albers of Brickfern and Tom Becker, a landlord with 14 apartments.
-
-1. The call runs as a live transcript.
-2. When it ends, Claude reads all 36 turns.
-3. A summary appears first, then Tom's numbers: 14 apartments, 9 hours a week, 38 empty days between tenants, about 8,700 in lost rent. Then his three pain points.
-4. A CRM record for Becker Residential lands on top of the pipeline, stage "Proposal drafted", with the next step.
-5. A proposal follows, with Tom's situation in the scope and Brickfern's listed price.
+1. The system takes the transcript of a sales call, recorded in the browser or pasted in.
+2. When the call ends, Claude reads every turn.
+3. A summary comes first, then the prospect's numbers and their pain points.
+4. A CRM record lands at the top of your pipeline with the stage and the next step.
+5. A proposal follows, with the prospect's situation in the scope and your listed price.
 6. A follow-up email with the proposal attached is drafted in the owner's name.
-7. Friday's walkthrough at 10:00 goes into the calendar.
-8. Jonas reads it all and sends at 14:36. The CRM stage moves to "Proposal sent".
+7. The next meeting the call agreed on goes into the calendar.
+8. You read it all and press send, and the CRM stage moves to "Proposal sent".
 
 ## What it hands to you
 

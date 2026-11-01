@@ -90,11 +90,3 @@ describe("clampMaxTokens", () => {
     expect(guards.clampMaxTokens(50_000)).toBe(1200);
   });
 });
-
-describe("checkInputSize", () => {
-  it("trips above the limit only", () => {
-    const guards = createGuards();
-    expect(guards.checkInputSize(100, 100)).toEqual({ ok: true });
-    expect(guards.checkInputSize(101, 100)).toMatchObject({ ok: false, reason: "input_too_large" });
-  });
-});

@@ -2,9 +2,9 @@ import type { Locator, Page } from "@playwright/test";
 import { expect } from "./documents-test";
 
 /**
- * The four lanes of the film and of live mode. Each is a region named "<label>, <role>", as the
- * `Lane` component of @diepen/ui names it. Below 768 px one lane shows at a time and the "Parties"
- * tabs, named Firm, Client, System and Drive, switch between them.
+ * The four lanes of live mode. Each is a region named "<label>, <role>", as `ui/lane.tsx` names it.
+ * Below 768 px one lane shows at a time and the "Parties" tabs, named Firm, Client, System and
+ * Drive, switch between them.
  */
 
 export type LaneId = "firm" | "client" | "system" | "drive";

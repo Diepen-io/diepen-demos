@@ -33,6 +33,16 @@ describe("mockInboxReply", () => {
     expect(reply.handoverReason).toBe("Raised a complaint");
   });
 
+  it("adds the phone number to an urgent handover only, never to a refund", () => {
+    const urgent = replyTo("My tooth hurts a lot since yesterday, the left side is swollen.");
+    expect(urgent).toMatchObject({ status: "needs_human", handoverReason: "Described pain or an accident" });
+    expect(urgent.reply).toContain(`please call us on ${preset.knowledge.phone ?? ""}`);
+
+    const refund = replyTo("I'm not happy with how it went and I'd like a refund.");
+    expect(refund.handoverReason).toBe("Asked for a refund");
+    expect(refund.reply).not.toContain("call us on");
+  });
+
   it("hands over a question the company knowledge does not answer, by the profile's rule", () => {
     const reply = replyTo("Do you treat dogs?");
 

@@ -1,17 +1,15 @@
-/** The five lanes of the demo. The film shows all five; live mode replaces the call lane with the input. */
-export const laneIds = ["call", "ai", "crm", "proposal", "calendar"] as const;
+/** The four tool lanes of live mode, where the call's outputs land. */
+export const laneIds = ["ai", "crm", "proposal", "calendar"] as const;
 
 export type LaneId = (typeof laneIds)[number];
 
-/** `tab` is the short name a phone shows in the row of lane tabs. */
-export type LaneDefinition = { id: LaneId; label: string; role: string; tab: string };
+export type LaneDefinition = { id: LaneId; label: string; role: string };
 
 export const lanes: readonly LaneDefinition[] = [
-  { id: "call", label: "Call", role: "Discovery call", tab: "Call" },
-  { id: "ai", label: "AI", role: "Reads the call", tab: "AI" },
-  { id: "crm", label: "CRM", role: "Pipeline", tab: "CRM" },
-  { id: "proposal", label: "Proposal and email", role: "Drafts to send", tab: "Proposal" },
-  { id: "calendar", label: "Calendar", role: "Week view", tab: "Calendar" },
+  { id: "ai", label: "AI", role: "Reads the call" },
+  { id: "crm", label: "CRM", role: "Pipeline" },
+  { id: "proposal", label: "Proposal and email", role: "Drafts to send" },
+  { id: "calendar", label: "Calendar", role: "Week view" },
 ];
 
 export function laneById(id: LaneId): LaneDefinition {

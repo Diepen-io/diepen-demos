@@ -13,7 +13,7 @@ demo: true
 ---
 
 This is a demo.
-Ottervale Dental, its team and its customers are fictional, and both numbers come from the simulated night in the film.
+Ottervale Dental, its team and its customers are fictional, and both numbers come from one simulated night of messages.
 The 9 hours is how long the night's messages would wait for the clinic to open at 08:00.
 
 ## The problem
@@ -25,13 +25,12 @@ By then the person who wanted a price has often asked someone else.
 
 ## What the system does
 
-The film follows one night at the clinic, from closing time to 08:00.
-
-1. A message arrives on any of four channels: email, Instagram, LinkedIn or the website chat.
-2. The assistant reads it against the clinic's services, prices, opening hours and policies, and replies in the clinic's voice. The Instagram message sent at 22:14:00 has its answer at 22:14:38.
-3. It asks the questions the owner would ask: is it urgent, which mornings suit you, how many people would take part.
-4. When someone wants a time, it checks the calendar, offers free slots and books the one they pick. Two bookings land overnight: a first visit and a call with the owner.
-5. At 08:00 the owner opens one list with every conversation and its status: Answered, Booked or Needs a human. The refund request is on top, with the whole thread and the customer's number.
+1. A message comes in on email, Instagram, LinkedIn or the website chat.
+2. The assistant reads it against your services, prices, opening hours and policies, and answers in your voice within a minute.
+3. It asks the questions you would ask: is it urgent, which mornings suit you, how many people would take part.
+4. When someone wants a time, it checks your calendar, offers free slots and books the one they pick.
+5. You open one list with every conversation and its status: Answered, Booked or Needs a human.
+6. Anything that needs you sits on top, with the whole thread and the customer's contact details.
 
 ## What it hands to you
 

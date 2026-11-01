@@ -9,6 +9,7 @@ import { LinkedinDm } from "@diepen/ui/mockups/linkedin-dm";
 import { Badge } from "@diepen/ui/primitives/badge";
 import type { CompanyProfile } from "@diepen/voice/profile";
 import { formatSlotChip } from "@/domain/calendar";
+import { subjectFrom } from "@/domain/email-subject";
 import type { ThreadMessage, ThreadView } from "@/domain/inbox-snapshot";
 import { templateSlots } from "@/domain/message-template";
 import { wallParts } from "@/domain/wall-clock";
@@ -39,7 +40,7 @@ function emailThreads(thread: ThreadView, parties: EmailParties, metaOf: Channel
     {
       id: thread.id,
       from: parties.customer.name,
-      subject: thread.subject ?? "Question",
+      subject: thread.subject || subjectFrom(first.text),
       snippet: thread.messages.at(-1)?.text ?? "",
       time: clock(first),
       messages: thread.messages.map((message) => {
@@ -101,7 +102,7 @@ export function ChannelThread(props: ChannelThreadProps) {
           className={className}
           openThreadId={thread.messages.length > 0 ? thread.id : null}
           drafting={thread.typing === "business" ? profile.people.assistantName : null}
-          composeSubject="Question"
+          composeSubject=""
           threads={emailThreads(thread, parties, metaOf)}
           {...live}
         />

@@ -1,5 +1,6 @@
 "use client";
 
+import type { CompanyProfile } from "@diepen/voice/profile";
 import { useState, type ReactNode } from "react";
 import { BrandMark } from "../brand/brand-mark";
 import { useBrand } from "../brand/brand-provider";
@@ -25,6 +26,8 @@ export type DemoShellProps = {
   mode: DemoMode;
   /** From 768 px up, holds the page to the viewport: main gets the height between header and footer. For a film, which must never scroll. */
   fit?: boolean;
+  /** The example companies "Make it yours" offers. Defaults to all presets (decision F3). */
+  presets?: readonly CompanyProfile[];
   children: ReactNode;
 };
 
@@ -32,7 +35,7 @@ export type DemoShellProps = {
  * The frame every demo page sits in. Needs a BrandProvider above it. `?record=1` hides the top
  * bar and footer for a clean recording; `?fallback=limit` shows the cost guard note.
  */
-export function DemoShell({ title, mode, fit, children }: DemoShellProps) {
+export function DemoShell({ title, mode, fit, presets, children }: DemoShellProps) {
   const { profile, hrefWithBrand } = useBrand();
   const [panelOpen, setPanelOpen] = useState(false);
   const recording = useRecordMode();
@@ -40,8 +43,8 @@ export function DemoShell({ title, mode, fit, children }: DemoShellProps) {
 
   if (recording) return <main className="flex h-dvh flex-col overflow-hidden">{children}</main>;
 
-  // A film runs edge to edge, so the bars use the film stage's gutters; live pages keep a reading width.
-  const frame = mode === "film" ? "w-full px-4 md:px-8 2xl:px-12" : "mx-auto w-full max-w-[1440px] px-4 sm:px-6";
+  // One set of gutters in both modes, so the header does not shift on the Film or Live switch.
+  const frame = "w-full px-4 md:px-8 2xl:px-12";
 
   return (
     <div className={cx("flex min-h-dvh flex-col", fit && "md:h-dvh md:overflow-hidden")}>
@@ -51,10 +54,14 @@ export function DemoShell({ title, mode, fit, children }: DemoShellProps) {
             <BrandMark profile={profile} size={34} />
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
-                <span className="truncate text-[15px] font-semibold tracking-[-0.01em]">{profile.name}</span>
-                <FictionalBadge className="max-sm:hidden" />
+                <span className="text-[15px] leading-tight font-semibold tracking-[-0.01em] max-sm:line-clamp-2 sm:truncate">{profile.name}</span>
+                <FictionalBadge className="shrink-0 max-sm:hidden" />
               </div>
-              <h1 className="truncate text-[13px] text-muted">{title}</h1>
+              {/* On a phone the name gets the whole first line, so the fictional mark sits beside the title. */}
+              <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                <h1 className="text-[13px] text-muted max-sm:whitespace-nowrap sm:truncate">{title}</h1>
+                <FictionalBadge short className="shrink-0 sm:hidden" />
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 max-sm:w-full max-sm:justify-between max-sm:order-last">
@@ -104,7 +111,7 @@ export function DemoShell({ title, mode, fit, children }: DemoShellProps) {
         </a>
       </footer>
 
-      <MakeItYours open={panelOpen} onClose={() => setPanelOpen(false)} />
+      <MakeItYours open={panelOpen} onClose={() => setPanelOpen(false)} presets={presets} />
     </div>
   );
 }

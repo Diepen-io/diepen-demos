@@ -1,7 +1,6 @@
 "use client";
 
-import type { CompanyProfile } from "@diepen/voice/profile";
-import { companyProfileSchema } from "@diepen/voice/profile";
+import { companyProfileSchema, type CompanyProfile } from "@diepen/voice/profile";
 import { presetList } from "@diepen/voice/presets";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Button } from "../primitives/button";
@@ -21,10 +20,15 @@ type Lookup =
   | { state: "error"; message: string }
   | { state: "done"; host: string; provider: string };
 
-export type MakeItYoursProps = { open: boolean; onClose: () => void };
+export type MakeItYoursProps = {
+  open: boolean;
+  onClose: () => void;
+  /** The example companies on offer. A demo whose story fits one industry offers only its own (decision F3). */
+  presets?: readonly CompanyProfile[];
+};
 
 /** Turns the demo into the visitor's company: read their website, edit the draft, apply it. */
-export function MakeItYours({ open, onClose }: MakeItYoursProps) {
+export function MakeItYours({ open, onClose, presets = presetList }: MakeItYoursProps) {
   const { savedProfile, setProfile, resetProfile, defaultProfile, fixed, shareHref } = useBrand();
   const [draft, setDraft] = useState(savedProfile);
   // A new draft remounts the form, so fields that keep their own text start from it.
@@ -145,8 +149,8 @@ export function MakeItYours({ open, onClose }: MakeItYoursProps) {
         {lookup.state === "done" && <ProviderNote providerName={lookup.provider} />}
       </div>
 
-      <h3 className="mt-6 mb-2 text-sm font-semibold">Example companies</h3>
-      <PresetPicker presets={presetList} activeId={savedProfile.id} onPick={onPreset} />
+      <h3 className="mt-6 mb-2 text-sm font-semibold">{presets.length === 1 ? "Example company" : "Example companies"}</h3>
+      <PresetPicker presets={presets} activeId={savedProfile.id} onPick={onPreset} />
 
       <h3 className="mt-7 text-sm font-semibold">Your profile</h3>
       <p className="mt-1 mb-4 text-[13px] text-muted">Every reply in the demo is written from these details.</p>

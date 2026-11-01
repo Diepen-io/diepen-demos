@@ -34,7 +34,7 @@ describe("nextChase @documents.chase", () => {
     expect(due(session)).toEqual({ kind: "reminder", at: storyMs(followUpSent) + 3 * dayMs });
   });
 
-  it("schedules the escalation to the firm 3 days after the reminder", () => {
+  it("schedules the escalation to the firm 3 days after the reminder, moved past the weekend to Monday", () => {
     const session = filmSession({
       submittedAt: followUpSent,
       now: reminderSent,
@@ -43,7 +43,8 @@ describe("nextChase @documents.chase", () => {
         { id: "chase-2", kind: "reminder", sentAt: reminderSent },
       ],
     });
-    expect(due(session)).toEqual({ kind: "escalation", at: storyMs(reminderSent) + 3 * dayMs });
+    // Thursday 12 March plus 3 days is a Sunday.
+    expect(due(session)).toEqual({ kind: "escalation", at: storyMs("2026-03-16T12:50") });
   });
 
   it("returns null when the request is complete", () => {

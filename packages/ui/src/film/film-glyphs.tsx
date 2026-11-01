@@ -18,12 +18,6 @@ const glyphs = {
       <path d="M4.6 14.5A8 8 0 1 0 6 7.2L4 9.5" />
     </>
   ),
-  fastForward: (
-    <>
-      <path d="M3.5 6.5v11l7.5-5.5z" fill="currentColor" />
-      <path d="M12 6.5v11l7.5-5.5z" fill="currentColor" />
-    </>
-  ),
 } satisfies Record<string, ReactNode>;
 
 export type FilmGlyphName = keyof typeof glyphs;
