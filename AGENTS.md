@@ -27,20 +27,37 @@ e2e starts its own dev server per app on ports 3201 to 3203, builds into `.next-
 
 ## Where code goes
 
+The repo is open source and follows an onion architecture. Dependencies point inwards only.
+
+Inside each app (`apps/inbox`, `apps/documents`, `apps/meetings`):
+
+| Folder | Layer | Holds | May import |
+| --- | --- | --- | --- |
+| `domain/` | Core | Types and pure rules of this demo: conversation status, checklist state, CRM record | Other domain modules, zod, `@diepen/voice/profile` |
+| `application/` | Use cases | One file per use case, for example `answer-inquiry.ts`. Ports it needs are parameters or interfaces in `application/ports/` | domain, `@diepen/voice`, the port types `@diepen/ai/provider` and `@diepen/ai/models` |
+| `infrastructure/` | Adapters | Port implementations (Claude, Google Document AI, in-process scheduler) and `container.ts`, the one place that picks and wires them | Everything except ui and app |
+| `ui/` | Presentation | This demo's React components. Talks to the server only through route handlers | domain, `@diepen/ui`, `@diepen/voice`, `@diepen/ai/text-stream-client` |
+| `film/` | Presentation | The film script and its recorded fixtures | domain, `@diepen/ui` |
+| `app/` | Delivery | Next.js pages and route handlers. A route validates input, runs the guards, calls one use case through the container, and returns | Everything |
+
+Shared packages:
+
 | Folder | Holds | May import |
 | --- | --- | --- |
-| `apps/inbox`, `apps/documents`, `apps/meetings` | One Next.js app per demo: pages, route handlers, the film script and fixtures for that demo | Any package, by name. Inside the app with the `@/` alias |
-| `packages/ui` | Design tokens, the film components (lanes, travelling message, clock, end card, controls), the channel mockups, the brand provider and the "Make it yours" panel | `@diepen/voice` |
-| `packages/voice` | `CompanyProfile`, its zod schema, the three fictional presets, the system prompt builder, brand extraction | `@diepen/ai` |
-| `packages/ai` | The Claude client, model choice, streaming, cost guards, the mock provider | Nothing in this repo |
+| `packages/ai` | The `AiProvider` port (`provider.ts`), its Claude and mock adapters, the provider factory, cost guards, streaming helpers | Nothing in this repo |
+| `packages/voice` | `CompanyProfile` (domain), the fictional presets, `buildSystemPrompt` and one file per AI task in `tasks/`, brand extraction and its HTTP handler | `@diepen/ai` |
+| `packages/ui` | Design tokens, film engine and film components, channel mockups, brand provider, "Make it yours" panel, demo shell | `@diepen/voice` |
 | `skills/company-voice` | The Claude skill that writes a `CompanyProfile` for client work | |
 
-`eslint.config.mjs` enforces the table with `no-restricted-imports`. Only `packages/ai` imports `@anthropic-ai/sdk`.
+`eslint.config.mjs` enforces both tables with `no-restricted-imports`. Only `packages/ai` imports `@anthropic-ai/sdk`.
 
-Packages have no index file. Import a module by its path: `@diepen/ui/film/film-stage`, `@diepen/voice/profile`. Public modules of `@diepen/ui` are `.tsx`, of `ai` and `voice` are `.ts`.
+Packages have no index file. Import a module by its path: `@diepen/ui/film/film-stage`, `@diepen/voice/profile`. Public modules of `@diepen/ui` are `.tsx`, of `ai` and `voice` are `.ts`. `docs/packages.md` lists every public module.
+
+Code for one demo stays in its app. It moves into a package when a second demo needs it, not before.
 
 ## Rules
 
+- Clean code for readers outside the company: names say what a thing is, one concept per module, comments say why, no dead code, no secrets.
 - Every AI call goes through `@diepen/ai` and every system prompt through `buildSystemPrompt` in `@diepen/voice/prompt`. Never a prompt string in an app.
 - Film mode runs from recorded fixtures with no key and no network. Live mode calls Claude; with no `ANTHROPIC_API_KEY` it uses the mock provider and says so on screen.
 - When a cost guard trips, the route answers 429 with `{ fallback: "film" }` and the app shows the film with a short note.
@@ -49,6 +66,7 @@ Packages have no index file. Import a module by its path: `@diepen/ui/film/film-
 - Copy is English, direct, and has no em or en dashes. Never state a client result: the demos are demos.
 - The company profile lives in the URL or local storage, never on a server.
 - A mistake that happens twice gets a lint rule or a type, not a reminder in this file.
+- Deploys go to Vercel, one project per app. Long-running or scheduled work goes behind a port; Trigger.dev is the adapter for durable jobs, Google Cloud for heavy compute such as Document AI OCR. See `docs/decisions.md`.
 - Agents never read env files. `.env.example` lists the variable names.
 
 ## Known traps

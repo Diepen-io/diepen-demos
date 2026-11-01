@@ -7,6 +7,13 @@ import tseslint from "typescript-eslint";
 import { agentGuardrails } from "./lint/agent-guardrails.mjs";
 
 /**
+ * Onion architecture. Dependencies point inwards only:
+ *
+ *   domain          pure types and rules. No I/O, no React, no framework, no adapters
+ *   application     use cases. Get their ports (LanguageModel, OcrService, JobScheduler) injected
+ *   infrastructure  adapters for the ports, and the one composition root that wires them
+ *   ui, app         React components and Next.js routes. Routes stay thin and call the container
+ *
  * Where code goes, as lint rules:
  *
  *   apps/<demo>      one Next.js app per demo. Imports packages by name, never another app
@@ -27,6 +34,11 @@ const noRelativePackages = {
 const anthropicOnlyInAi = {
   group: ["@anthropic-ai/*"],
   message: "Call Claude through @diepen/ai, which holds the guards and the mock provider.",
+};
+
+const appScope = {
+  group: ["../*", "../**", "**/apps/**"],
+  message: "Import inside an app with the @/ alias. An app never imports another app.",
 };
 
 const restrict = (...patterns) => ({
@@ -73,11 +85,43 @@ export default defineConfig([
       ...nextPlugin.configs["core-web-vitals"].rules,
       // App Router only. The rule looks for a pages/ folder that does not exist.
       "@next/next/no-html-link-for-pages": "off",
-      ...restrict(noRelativePackages, anthropicOnlyInAi, {
-        group: ["../*", "../**", "**/apps/**"],
-        message: "Import inside an app with the @/ alias. An app never imports another app.",
-      }),
+      ...restrict(appScope, noRelativePackages, anthropicOnlyInAi),
     },
+  },
+  {
+    files: ["apps/*/domain/**/*.{ts,tsx}"],
+    rules: restrict(appScope, noRelativePackages, anthropicOnlyInAi, {
+      group: [
+        "@/application/**", "@/infrastructure/**", "@/ui/**", "@/app/**", "@/film/**",
+        "react", "react-dom", "next", "next/**", "@diepen/ai", "@diepen/ai/*", "@diepen/ui", "@diepen/ui/*",
+      ],
+      message: "domain is the core. It imports only other domain modules, zod and @diepen/voice/profile.",
+    }),
+  },
+  {
+    files: ["apps/*/application/**/*.{ts,tsx}"],
+    rules: restrict(appScope, noRelativePackages, anthropicOnlyInAi, {
+      group: [
+        "@/infrastructure/**", "@/ui/**", "@/app/**", "@/film/**",
+        "react", "react-dom", "next", "next/**", "@diepen/ui", "@diepen/ui/*",
+        "@diepen/ai/*", "!@diepen/ai/provider", "!@diepen/ai/models",
+      ],
+      message: "A use case depends on ports, not adapters. Take the provider as a parameter; infrastructure/ wires it.",
+    }),
+  },
+  {
+    files: ["apps/*/infrastructure/**/*.{ts,tsx}"],
+    rules: restrict(appScope, noRelativePackages, anthropicOnlyInAi, {
+      group: ["@/ui/**", "@/app/**", "@/film/**", "react", "react-dom"],
+      message: "Adapters know nothing about screens or routes.",
+    }),
+  },
+  {
+    files: ["apps/*/ui/**/*.{ts,tsx}", "apps/*/film/**/*.{ts,tsx}"],
+    rules: restrict(appScope, noRelativePackages, anthropicOnlyInAi, {
+      group: ["@/infrastructure/**", "@/application/**", "@/app/**", "@diepen/ai", "@diepen/ai/*", "!@diepen/ai/text-stream-client"],
+      message: "UI talks to the server over HTTP through route handlers. It never runs a use case or an adapter.",
+    }),
   },
   {
     files: ["packages/ui/**/*.{ts,tsx}"],
