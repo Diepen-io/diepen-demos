@@ -6,6 +6,7 @@ import { useBrand } from "../brand/brand-provider";
 import { FictionalBadge } from "../brand/fictional-badge";
 import { MakeItYours } from "../brand/make-it-yours";
 import { Button } from "../primitives/button";
+import { cx } from "../primitives/class-names";
 import { Icon } from "../primitives/icon";
 import { Segmented } from "../primitives/segmented";
 import { FallbackNote } from "./fallback-note";
@@ -21,6 +22,8 @@ export type DemoShellProps = {
   /** The demo's name, for example "Inbox autopilot". */
   title: string;
   mode: DemoMode;
+  /** From 768 px up, holds the page to the viewport: main gets the height between header and footer. For a film, which must never scroll. */
+  fit?: boolean;
   children: ReactNode;
 };
 
@@ -28,7 +31,7 @@ export type DemoShellProps = {
  * The frame every demo page sits in. Needs a BrandProvider above it. `?record=1` hides the top
  * bar and footer for a clean recording; `?fallback=limit` shows the cost guard note.
  */
-export function DemoShell({ title, mode, children }: DemoShellProps) {
+export function DemoShell({ title, mode, fit, children }: DemoShellProps) {
   const { profile, hrefWithBrand } = useBrand();
   const [panelOpen, setPanelOpen] = useState(false);
   const recording = useRecordMode();
@@ -37,7 +40,7 @@ export function DemoShell({ title, mode, children }: DemoShellProps) {
   if (recording) return <main className="flex h-dvh flex-col overflow-hidden">{children}</main>;
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className={cx("flex min-h-dvh flex-col", fit && "md:h-dvh md:overflow-hidden")}>
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -45,7 +48,7 @@ export function DemoShell({ title, mode, children }: DemoShellProps) {
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
                 <span className="truncate text-[15px] font-semibold tracking-[-0.01em]">{profile.name}</span>
-                <FictionalBadge className="hidden sm:inline-flex" />
+                <FictionalBadge className="max-sm:hidden" />
               </div>
               <h1 className="truncate text-[13px] text-muted">{title}</h1>
             </div>

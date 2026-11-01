@@ -45,11 +45,11 @@ export function WebsitePage({ company, tagline, links = ["Services", "Prices", "
           )}
         </div>
       </div>
-      <div className="absolute right-3 bottom-3 left-3 flex flex-col items-end gap-3 @sm:left-auto">
-        <div className="flex h-[min(34rem,calc(100cqh-5.5rem))] w-full flex-col overflow-hidden rounded-2xl bg-surface shadow-[0_0_0_1px_rgb(0_0_0/0.06),0_24px_48px_-12px_rgb(0_0_0/0.25)] @sm:w-[min(22rem,calc(100cqw-5rem))]">
+      <div className="absolute inset-3 flex flex-col items-end justify-end gap-3 @sm:left-auto">
+        <div className="flex h-[min(34rem,calc(100cqh-5.5rem))] min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-surface shadow-[0_0_0_1px_rgb(0_0_0/0.06),0_24px_48px_-12px_rgb(0_0_0/0.25)] @sm:w-[min(22rem,calc(100cqw-5rem))]">
           {children}
         </div>
-        <span aria-hidden="true" className="inline-flex size-12 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-[0_8px_20px_-6px_rgb(0_0_0/0.35)]">
+        <span aria-hidden="true" className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-[0_8px_20px_-6px_rgb(0_0_0/0.35)]">
           <Icon name="close" size={20} strokeWidth={2} />
         </span>
       </div>
