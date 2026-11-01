@@ -1,6 +1,7 @@
 import { KeynoteBubble, KeynoteNotification, KeynoteSlot } from "@diepen/ui/film/keynote-parts";
 import { defineKeynoteFilm, type KeynoteFilm } from "@diepen/ui/film/keynote-script";
 import type { CompanyProfile } from "@diepen/voice/profile";
+import { firstReplySeconds } from "@/domain/conversation";
 import { averageFirstReplySeconds, averageWaitUntilOpening, formatDurationShort } from "@/domain/metrics";
 import { fillTemplate } from "@/domain/message-template";
 import { filmConversations, filmCustomers, filmMessages, openingTime } from "./fixtures";
@@ -9,6 +10,14 @@ function textOf(id: string, profile: CompanyProfile): string {
   const message = filmMessages.find((candidate) => candidate.id === id);
   if (!message) throw new Error(`No film message ${id}`);
   return fillTemplate(message.text, profile);
+}
+
+/** How long Priya waits for her answer in the film, read from the recorded messages. */
+export function priyaReplySeconds(): number {
+  const conversation = filmConversations.find((candidate) => candidate.id === "C2");
+  const seconds = conversation && firstReplySeconds(conversation);
+  if (seconds === undefined) throw new Error("The film has no answer to Priya");
+  return seconds;
 }
 
 /** The inbox film as five keynote beats: one element on screen at a time (decision F2). */
@@ -28,7 +37,7 @@ export function buildInboxKeynote(profile: CompanyProfile): KeynoteFilm {
       },
       {
         id: "answered",
-        caption: "Answered in 38 seconds.",
+        caption: `Answered in ${priyaReplySeconds()} seconds.`,
         element: (
           <KeynoteBubble
             name={profile.people.assistantName}
@@ -37,7 +46,6 @@ export function buildInboxKeynote(profile: CompanyProfile): KeynoteFilm {
             text={textOf("C2-2", profile)}
           />
         ),
-        chip: { label: "Replied in 38 s", tone: "pass" },
       },
       {
         id: "booked",

@@ -26,6 +26,8 @@ export type LiveClientLaneProps = {
   framed: boolean;
   onDone: () => void;
   busy: boolean;
+  /** Claude reads uploads; false under the mock provider. */
+  claudeReadsFiles: boolean;
 };
 
 function rowsOf(state: LiveState): UploadRow[] {
@@ -46,7 +48,7 @@ function rowsOf(state: LiveState): UploadRow[] {
 }
 
 /** Daniel's phone in live mode: the visitor plays the client. Emails are written with the active profile. */
-export function LiveClientLane({ state, profile, actions, framed, onDone, busy }: LiveClientLaneProps) {
+export function LiveClientLane({ state, profile, actions, framed, onDone, busy, claudeReadsFiles }: LiveClientLaneProps) {
   const [draft, setDraft] = useState<LetterSignature>();
   const emails = state.emails.map((record) => composeInboxEmail(profile, record));
   const open = emails.find((email) => email.id === state.openEmailId);
@@ -68,6 +70,7 @@ export function LiveClientLane({ state, profile, actions, framed, onDone, busy }
     content = (
       <UploadPage
         profile={profile}
+        claudeReadsFiles={claudeReadsFiles}
         rows={rowsOf(state)}
         onBack={() => actions.show("inbox")}
         onDone={onDone}

@@ -2,16 +2,17 @@ import { BodyTooLargeError, readBodyText } from "@diepen/ai/request-body";
 import { companyProfileSchema } from "@diepen/voice/profile";
 import { z } from "zod";
 import { channelSchema } from "@/domain/channel";
+import { maxAssistantMessageChars, maxCustomerMessageChars } from "@/domain/message-limits";
 
-/** The largest body `/api/reply` reads. A profile and twenty short messages fit well inside it. */
-export const maxReplyRequestBytes = 32 * 1024;
+/** The largest body `/api/reply` reads. A profile and twenty messages at their limits fit inside it. */
+export const maxReplyRequestBytes = 48 * 1024;
 
 const wallClockTime = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Use a local time like 2026-11-12T09:00");
 
-const turn = z.object({
-  role: z.enum(["customer", "assistant"]),
-  text: z.string().trim().min(1).max(1000),
-});
+const turn = z.discriminatedUnion("role", [
+  z.object({ role: z.literal("customer"), text: z.string().trim().min(1).max(maxCustomerMessageChars) }),
+  z.object({ role: z.literal("assistant"), text: z.string().trim().min(1).max(maxAssistantMessageChars) }),
+]);
 
 export const replyRequestSchema = z.object({
   channel: channelSchema,
@@ -39,7 +40,7 @@ export async function readReplyRequest(request: Request): Promise<ReplyRequestRe
     text = await readBodyText(request, maxReplyRequestBytes);
   } catch (error) {
     if (error instanceof BodyTooLargeError) {
-      return { success: false, issues: [{ message: "The request is larger than 32 KB", path: [] }] };
+      return { success: false, issues: [{ message: "The request is larger than 48 KB", path: [] }] };
     }
     throw error;
   }

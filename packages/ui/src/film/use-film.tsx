@@ -1,13 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
-import {
-  initialPlayback,
-  playbackReducer,
-  startFromSearch,
-  type FilmSpeed,
-  type PlaybackState,
-} from "./film-playback";
+import { initialPlayback, playbackReducer, startFromSearch, type PlaybackState } from "./film-playback";
 
 export type UseFilmOptions = {
   /** Starts playing on mount, unless the URL has `?t=`. */
@@ -21,17 +15,13 @@ export type UseFilmOptions = {
 export type FilmController = {
   t: number;
   playing: boolean;
-  speed: FilmSpeed;
   ended: boolean;
   durationMs: number;
-  /** Goes up on every seek and restart. */
-  jumps: number;
   play: () => void;
   pause: () => void;
   toggle: () => void;
   restart: () => void;
   seek: (t: number) => void;
-  setSpeed: (speed: FilmSpeed) => void;
 };
 
 /** Longest frame step. A tab that stalls for a second resumes where it was instead of jumping. */
@@ -52,7 +42,6 @@ export function useFilm(
   const toggle = useCallback(() => dispatch({ type: "toggle" }), []);
   const restart = useCallback(() => dispatch({ type: "restart" }), []);
   const seek = useCallback((t: number) => dispatch({ type: "seek", t }), []);
-  const setSpeed = useCallback((speed: FilmSpeed) => dispatch({ type: "speed", speed }), []);
 
   // A script built from a new company profile can change length while the film runs.
   useEffect(() => {
@@ -118,16 +107,15 @@ export function useFilm(
       toggle,
       restart,
       seek,
-      setSpeed,
     }),
-    [state, play, pause, toggle, restart, seek, setSpeed],
+    [state, play, pause, toggle, restart, seek],
   );
 }
 
 function keyAction(event: KeyboardEvent, t: number, step: number) {
   const target = event.target instanceof HTMLElement ? event.target : null;
-  // Space toggles the film even on a focused film button: after a click on Speed, Space must
-  // pause, not press Speed again. Arrows stay with controls that use them, such as the scrubber.
+  // Space toggles the film even on a focused film button: after a click on a progress dot, Space
+  // must pause, not press the dot again. Arrows stay with controls that use them, such as tabs.
   const ownsArrows = Boolean(target?.closest("input, [role=slider], [role=radiogroup], [role=tablist]"));
   switch (event.key) {
     case " ":

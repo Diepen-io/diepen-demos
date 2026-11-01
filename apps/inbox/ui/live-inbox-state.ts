@@ -44,7 +44,7 @@ const emptyThread = (): LiveThread => ({ messages: [], offeredSlots: [], sending
 
 export function initialLiveState(): LiveState {
   return {
-    active: "chat",
+    active: "email",
     threads: Object.fromEntries(channels.map((channel) => [channel, emptyThread()])) as Record<Channel, LiveThread>,
     bookings: [],
     nextId: 1,

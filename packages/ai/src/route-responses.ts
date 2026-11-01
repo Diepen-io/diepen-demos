@@ -4,19 +4,21 @@ import { providerHeader, type AiFallback } from "./text-stream-client.ts";
 
 type GuardTripResult = Extract<GuardResult, { ok: false }>;
 
-const unavailableMessage = "The live demo is not available right now. Here is the recorded film.";
+const unavailableMessage = "The live demo did not answer this time. Try again.";
 
 function json(body: AiFallback, status: number): Response {
   return Response.json(body, { status, headers: { "cache-control": "no-store" } });
 }
 
-/** A guard tripped: tell the app to show the film. Input that is too large is a 413, limits a 429. */
+/** A cost guard tripped: the app sends the visitor to the film. */
 export function fallbackResponse(result: GuardTripResult): Response {
-  const status = result.reason === "input_too_large" ? 413 : 429;
-  return json({ fallback: "film", reason: result.reason, message: result.message }, status);
+  return json({ fallback: "film", reason: result.reason, message: result.message }, 429);
 }
 
-/** The model failed before the answer started. The error goes to the server log, not the visitor. */
+/**
+ * The model failed before the answer started. The visitor stays and can try again, so a passing
+ * outage never ends a demo. The error goes to the server log, not the visitor.
+ */
 export function unavailableResponse(error: unknown): Response {
   console.error("AI request failed", error);
   return json({ fallback: "film", reason: "unavailable", message: unavailableMessage }, 503);

@@ -3,7 +3,7 @@
  * output tokens. Counts live in server memory, so each server instance keeps its own (decision D3).
  */
 
-export type GuardTrip = "rate_limit" | "daily_cap" | "input_too_large";
+export type GuardTrip = "rate_limit" | "daily_cap";
 
 export type GuardResult =
   | { ok: true }
@@ -25,7 +25,6 @@ export type Guards = {
   /** Counts the request when it passes. Call it once per AI request. */
   check: (request: Request) => GuardResult;
   clampMaxTokens: (requested?: number) => number;
-  checkInputSize: (chars: number, limit: number) => GuardResult;
 };
 
 const windowMs = 60_000;
@@ -33,7 +32,6 @@ const windowMs = 60_000;
 const tripMessages: Record<GuardTrip, string> = {
   rate_limit: "Too many messages in a minute. Here is the recorded film.",
   daily_cap: "The live demo is busy today. Here is the recorded film.",
-  input_too_large: "That is too long for the live demo. Here is the recorded film.",
 };
 
 function trip(reason: GuardTrip): GuardResult {
@@ -101,10 +99,6 @@ export function createGuards(options: GuardOptions = {}): Guards {
         return maxOutputTokens;
       }
       return Math.min(Math.floor(requested), maxOutputTokens);
-    },
-
-    checkInputSize(chars, limit) {
-      return chars > limit ? trip("input_too_large") : { ok: true };
     },
   };
 }

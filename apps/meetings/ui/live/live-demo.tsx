@@ -28,7 +28,7 @@ export type LiveDemoProps = {
 
 /** Live mode: a call goes in, the six outputs come out in the active company's voice and prices. */
 export function LiveDemo({ providerName, sampleCall, recognizer: injected }: LiveDemoProps) {
-  const { profile, hrefWithBrand } = useBrand();
+  const { profile } = useBrand();
   const browserRecognizer = useBrowserRecognizer();
   const recognizer = injected ?? browserRecognizer;
   const seller = sellerOf(profile);
@@ -37,7 +37,7 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
   const [transcript, setTranscript] = useState("");
   const appendLine = useCallback((line: string) => setTranscript((text) => (text.trim() ? `${text.trimEnd()}\n${line}` : line)), []);
   const recording = useRecording(recognizer, seller.short, appendLine);
-  const call = useLiveCall(profile, hrefWithBrand("/"));
+  const call = useLiveCall(profile);
   useRevealScroll(call.revealed);
 
   const filledSample = fillTokens(sampleCall, profileTokens(profile));
@@ -58,7 +58,7 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-4 py-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,32fr)_minmax(0,68fr)] lg:items-start lg:gap-6">
+    <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-4 py-5 md:px-8 lg:grid lg:grid-cols-[minmax(0,32fr)_minmax(0,68fr)] lg:items-start lg:gap-6">
       <section aria-label="Your call" className="panel flex flex-col gap-4 p-4 sm:p-5 lg:sticky lg:top-5">
         <header className="flex flex-col gap-1">
           <h2 className="text-[19px] font-semibold tracking-[-0.015em]">Turn a sales call into a proposal</h2>

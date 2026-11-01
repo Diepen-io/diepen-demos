@@ -1,6 +1,5 @@
 import { acceptedMediaTypes, detectMediaType, maxUploadBytes, sniffLength } from "@/domain/file-type";
-import { activeProviderName, checkDocument } from "@/infrastructure/container";
-import { guards } from "@diepen/ai/guards";
+import { container } from "@/infrastructure/container";
 import { BodyTooLargeError, readBodyBytes } from "@diepen/ai/request-body";
 import { fallbackResponse, unavailableResponse } from "@diepen/ai/route-responses";
 import { parseCheckForm } from "./check-request";
@@ -44,17 +43,17 @@ export async function POST(request: Request): Promise<Response> {
   const mediaType = detectMediaType(bytes.subarray(0, sniffLength));
   if (!mediaType) return json({ error: "unsupported_file_type", accepted: acceptedMediaTypes }, 415);
 
-  const guard = guards.check(request);
+  const guard = container.guards.check(request);
   if (!guard.ok) return fallbackResponse(guard);
 
   try {
-    const outcome = await checkDocument({
+    const outcome = await container.checkDocument({
       file: { name: file.name, mediaType, bytes },
       itemId,
       profile,
-      maxTokens: guards.clampMaxTokens(1200),
+      maxTokens: container.guards.clampMaxTokens(1200),
     });
-    return json({ ...outcome, provider: activeProviderName() });
+    return json({ ...outcome, provider: container.providerName });
   } catch (error) {
     return unavailableResponse(error);
   }

@@ -17,6 +17,8 @@ export type UploadPageProps = {
   doneDisabled?: boolean;
   /** Back to the inbox, in live mode. */
   onBack?: () => void;
+  /** Claude reads each file. False under the mock provider, where no file leaves the server. */
+  claudeReadsFiles?: boolean;
 };
 
 /** The host the client sees in the address bar: the firm's own site, or a neutral one. */
@@ -30,7 +32,7 @@ export function uploadHost(profile: CompanyProfile): string {
 }
 
 /** The page behind "Upload and sign": the firm's brand, the six items, one button to finish. */
-export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, onBack }: UploadPageProps) {
+export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, onBack, claudeReadsFiles }: UploadPageProps) {
   const done = rows.filter((row) => row.state === "checked").length;
   return (
     <div className="flex min-h-full flex-col bg-surface">
@@ -70,7 +72,7 @@ export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, on
       </ul>
       <div className="mt-auto flex flex-col gap-3 px-4 pt-4 pb-5">
         <p className="text-[12px] leading-snug text-faint">
-          PDF, PNG or JPEG, up to 4 MB. Your file goes to Claude for this one check. This demo keeps no copy.
+          PDF, PNG or JPEG, up to 4 MB.{claudeReadsFiles ? " Your file goes to Claude for this one check." : ""} This demo keeps no copy.
         </p>
         <Button variant="brand" className={cx("w-full", touchTarget)} onClick={onDone} disabled={doneDisabled}>
           Done for now

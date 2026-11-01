@@ -41,6 +41,8 @@ export type ConversationControls = {
   onPickSlot?: (iso: string) => void;
   /** Disables the composer while a reply is on its way. */
   sending?: boolean;
+  /** The longest message the composer takes. It counts down near the end. */
+  maxLength?: number;
   /** Replaces the composer once a person has taken over the conversation. */
   handover?: { note: string; onStartOver?: () => void };
   /** A line at the end of the thread, for example an error to retry. */

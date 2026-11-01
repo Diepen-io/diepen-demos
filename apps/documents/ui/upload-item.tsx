@@ -98,12 +98,13 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
       )}
       {canUpload && isUploadItemId(item.id) && (
         <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap gap-2">
+          {/* A tight gap and a narrow ghost button keep "Use a sample" beside "Upload again" in a phone-wide lane. */}
+          <div className="flex flex-wrap gap-1">
             <Button variant="secondary" size="sm" className={touchTarget} onClick={() => input.current?.click()}>
               <Icon name="paperclip" size={14} />
               {state === "problem" ? "Upload again" : "Upload"}
             </Button>
-            <Button variant="ghost" size="sm" className={touchTarget} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
+            <Button variant="ghost" size="sm" className="px-2 max-md:h-11 max-md:text-[14px]" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
               Use a sample
               <Icon name="chevronRight" size={14} className={cx("transition-transform duration-200", menuOpen && "rotate-90")} />
             </Button>
@@ -121,6 +122,7 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
           <input
             ref={input}
             type="file"
+            name={`file-${item.id}`}
             accept={acceptAttribute}
             className="hidden"
             tabIndex={-1}

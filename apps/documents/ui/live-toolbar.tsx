@@ -35,18 +35,18 @@ export function LiveControls({ now, canSkip, onSkip, onStartOver }: LiveControls
   return (
     <>
       <div role="timer" aria-label={`Story time ${weekday} ${time}`} className="flex shrink-0 items-center gap-2 md:gap-2.5">
-        <span className="inline-flex h-8 items-center gap-1.5 rounded-[9px] bg-subtle px-2.5 text-[14px] font-medium whitespace-nowrap">
+        <span className="inline-flex h-8 items-center gap-1.5 rounded-[9px] bg-subtle px-2 text-[13px] font-medium whitespace-nowrap md:px-2.5 md:text-[14px]">
           <span>{weekday}</span>
-          <span className="opacity-60 max-md:hidden">{date}</span>
+          <span className="opacity-60">{date}</span>
         </span>
-        <span className="tabular text-[22px] leading-none font-semibold tracking-[-0.02em] md:text-[26px]">{time}</span>
+        <span className="tabular text-[20px] leading-none font-semibold tracking-[-0.02em] md:text-[26px]">{time}</span>
       </div>
       <div className="ml-auto flex items-center gap-1.5 md:gap-2">
         <Button variant="secondary" className="max-md:h-11 max-md:px-3" onClick={onSkip} disabled={!canSkip}>
           <Icon name="clock" size={16} className="max-md:hidden" />
           Skip 3 days
         </Button>
-        <Button variant="ghost" className="max-md:h-11 max-md:px-3" onClick={onStartOver}>
+        <Button variant="ghost" className="max-md:h-11 max-md:px-2" onClick={onStartOver}>
           Start over
         </Button>
       </div>

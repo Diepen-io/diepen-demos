@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 /**
  * A keynote film: one element on screen per beat, like a product shot. Each beat has a short
- * caption, one element and at most one status chip. The last beat is the finale number.
+ * caption, one element and at most one status chip. The finale number follows the beats.
  */
 export type KeynoteChipTone = "neutral" | "pass" | "wait" | "fail" | "brand";
 
@@ -33,13 +33,15 @@ export type KeynoteFilm = {
   beatMs?: number;
 };
 
+/** Four beats and the finale, about 3 s each (decision F2). */
+export const KEYNOTE_BEATS = 4;
 export const KEYNOTE_MAX_CAPTION_WORDS = 6;
 export const KEYNOTE_DEFAULT_BEAT_MS = 3200;
 
 /** Checks the rules a keynote film must follow, so a script that breaks them fails its unit test. */
 export function defineKeynoteFilm(film: KeynoteFilm): KeynoteFilm {
-  if (film.beats.length < 1 || film.beats.length > 4) {
-    throw new Error(`${film.id}: a keynote film has 1 to 4 beats before its finale, not ${film.beats.length}.`);
+  if (film.beats.length !== KEYNOTE_BEATS) {
+    throw new Error(`${film.id}: a keynote film has ${KEYNOTE_BEATS} beats before its finale, not ${film.beats.length}.`);
   }
   for (const beat of film.beats) {
     const words = beat.caption.trim().split(/\s+/).length;

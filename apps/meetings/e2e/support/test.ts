@@ -1,7 +1,7 @@
 import { test as base, expect } from "@playwright/test";
 
 export type ConsoleGuard = {
-  /** Lets one expected console error through, for example the 502 a test routes on purpose. */
+  /** Lets one expected console error through, for example the 503 a test routes on purpose. */
   allow: (pattern: RegExp) => void;
 };
 

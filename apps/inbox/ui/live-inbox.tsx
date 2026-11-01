@@ -2,12 +2,15 @@
 
 import { useBrand } from "@diepen/ui/brand/brand-provider";
 import { cx } from "@diepen/ui/primitives/class-names";
+import { useFilmFallback } from "@diepen/ui/shell/film-fallback";
 import { ProviderNote } from "@diepen/ui/shell/provider-note";
 import type { CompanyProfile } from "@diepen/voice/profile";
 import { useMemo, useReducer, useState } from "react";
 import { formatSlot, workingDaysAfter } from "@/domain/calendar";
 import { channels, type Channel } from "@/domain/channel";
 import { acceptsReplies } from "@/domain/conversation-status";
+import { subjectFrom } from "@/domain/email-subject";
+import { clipAssistantText, maxCustomerMessageChars } from "@/domain/message-limits";
 import { CalendarView } from "./calendar-view";
 import { ChannelTabStrip } from "./channel-tab-strip";
 import { ChannelThread } from "./channel-thread";
@@ -22,16 +25,15 @@ import { useVisitorNow } from "./use-visitor-now";
 
 /** Live mode. A new company profile starts every thread and booking over, so no thread mixes two companies. */
 export function LiveInbox({ providerName }: { providerName: string }) {
-  const { profile, hrefWithBrand } = useBrand();
+  const { profile } = useBrand();
   const profileKey = useMemo(() => JSON.stringify(profile), [profile]);
-  const filmHref = hrefWithBrand("/");
-  const fallbackHref = `${filmHref}${filmHref.includes("?") ? "&" : "?"}fallback=limit`;
-  return <LiveInboxBody key={profileKey} profile={profile} providerName={providerName} fallbackHref={fallbackHref} />;
+  return <LiveInboxBody key={profileKey} profile={profile} providerName={providerName} />;
 }
 
-type BodyProps = { profile: CompanyProfile; providerName: string; fallbackHref: string };
+type BodyProps = { profile: CompanyProfile; providerName: string };
 
-function LiveInboxBody({ profile, providerName, fallbackHref }: BodyProps) {
+function LiveInboxBody({ profile, providerName }: BodyProps) {
+  const toFilm = useFilmFallback();
   const [state, dispatch] = useReducer(liveInboxReducer, undefined, initialLiveState);
   const [part, setPart] = useState<LivePart>("customer");
   const [seen, setSeen] = useState<Record<LivePart, string>>({ customer: "", owner: "", calendar: "" });
@@ -47,19 +49,19 @@ function LiveInboxBody({ profile, providerName, fallbackHref }: BodyProps) {
     const thread = state.threads[channel];
     if (!acceptsReplies(thread.status) || thread.sending) return false;
     const at = localNow();
-    dispatch({ type: "send", channel, text, at, subject });
+    dispatch({ type: "send", channel, text, at, subject: channel === "email" ? subject?.trim() || subjectFrom(text) : undefined });
     const outcome = await requestReply({
       channel,
       profile,
       messages: [...thread.messages.filter((message) => !message.failed), { role: "customer" as const, text }]
         .slice(-20)
-        .map(({ role, text: body }) => ({ role, text: body })),
+        .map(({ role, text: body }) => ({ role, text: role === "assistant" ? clipAssistantText(body) : body })),
       bookings: state.bookings.map((booking) => booking.slot),
       offeredSlots: thread.offeredSlots,
       now: at,
     });
     if (outcome.kind === "fallback") {
-      window.location.assign(fallbackHref);
+      toFilm();
       return true;
     }
     if (outcome.kind === "error") {
@@ -81,7 +83,7 @@ function LiveInboxBody({ profile, providerName, fallbackHref }: BodyProps) {
   const hiddenOnPhone = (id: LivePart) => part !== id && "max-md:hidden";
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 pb-24 sm:px-6 md:pb-6 lg:px-8">
+    <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 pb-24 md:px-8 md:pb-6">
       <div className="grid gap-4 md:h-[calc(100dvh-10rem)] md:min-h-[40rem] md:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] md:grid-rows-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-5">
         <section ref={customerPart} aria-label="Customer" className={cx("flex min-h-0 min-w-0 flex-col gap-3 md:row-span-2", hiddenOnPhone("customer"))}>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
@@ -110,6 +112,7 @@ function LiveInboxBody({ profile, providerName, fallbackHref }: BodyProps) {
               // The mockups grey these out and stop picks once the thread is handed over.
               onPickSlot: (iso) => void send(active, `${formatSlot(iso)} works for me.`),
               sending: thread.sending,
+              maxLength: maxCustomerMessageChars,
               notice: thread.notice,
               handover: handedOver
                 ? { note: `Handed to ${profile.people.owner.name}. You get a personal reply here.`, onStartOver: () => dispatch({ type: "startOver", channel: active }) }

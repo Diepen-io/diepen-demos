@@ -1,3 +1,4 @@
+import { isGuardTrip } from "@diepen/ai/text-stream-client";
 import { callOutputsSchema } from "@diepen/voice/tasks/call-outputs";
 import type { CompanyProfile } from "@diepen/voice/profile";
 import { z } from "zod";
@@ -9,11 +10,12 @@ const outputsSchema = callOutputsSchema.extend({
 });
 
 const successSchema = z.object({ outputs: outputsSchema, provider: z.enum(["claude", "mock"]) });
-const fallbackSchema = z.object({ fallback: z.literal("film") });
 
 export type OutputsResult =
   | { kind: "outputs"; outputs: MeetingOutputs; provider: "claude" | "mock" }
+  /** A cost guard tripped: the page sends the visitor to the film. */
   | { kind: "fallback" }
+  /** Anything else, a failed model call included: the visitor stays and tries again. */
   | { kind: "failed" };
 
 /** The visitor's wall clock as "2026-11-10T14:32:10", so the next meeting lands in their week. */
@@ -34,12 +36,9 @@ export async function requestOutputs(
       body: JSON.stringify({ ...input, localNow: localNow() }),
       signal,
     });
-    const body: unknown = await response.json().catch(() => null);
-    if (response.ok) {
-      const parsed = successSchema.safeParse(body);
-      return parsed.success ? { kind: "outputs", ...parsed.data } : { kind: "failed" };
-    }
-    return fallbackSchema.safeParse(body).success ? { kind: "fallback" } : { kind: "failed" };
+    if (!response.ok) return (await isGuardTrip(response)) ? { kind: "fallback" } : { kind: "failed" };
+    const parsed = successSchema.safeParse(await response.json().catch(() => null));
+    return parsed.success ? { kind: "outputs", ...parsed.data } : { kind: "failed" };
   } catch (error) {
     if (signal?.aborted) throw error;
     return { kind: "failed" };

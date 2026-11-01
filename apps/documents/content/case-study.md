@@ -25,16 +25,14 @@ Then you write again, and again three days later.
 
 ## What the system does
 
-The film follows one client, Daniel Okafor, and his 2025 tax return.
-
-1. The firm sends one request: one email, one link, six documents.
-2. On the upload page he signs the engagement letter and adds four files from his phone.
+1. You send one request: one email, one link and the list of documents you need.
+2. On one upload page your client signs the engagement letter and adds files from a phone or a computer.
 3. Each file is read as it arrives: document type, person, year, pages, signature and the key figures.
-4. Problems show up on arrival: the bank statement covers 2024, and the home office form is missing his employer's signature.
-5. Every file lands in Daniel's Drive folder, named and sorted. Problem files go to "Needs attention".
-6. The firm reads one summary: "3 of 6 checked. 2 problems, 1 missing."
-7. Daniel gets a follow-up naming the three open documents and why. Three days later a second reminder goes out by itself.
-8. That evening he sends the last three. All pass, and the checklist reads 6 of 6.
+4. A problem shows up the moment the file lands, for example a bank statement for the wrong year or a form without its signature.
+5. Every file is named and sorted into the client's Drive folder, and problem files go to "Needs attention".
+6. You read one summary per client, for example "3 of 6 checked. 2 problems, 1 missing."
+7. The client gets a follow-up that names each open document and why it is still open.
+8. Reminders go out on schedule until the checklist is complete.
 
 ## What it hands to you
 

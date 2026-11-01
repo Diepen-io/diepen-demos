@@ -5,7 +5,8 @@ import { fillTemplate } from "@/domain/message-template";
 export function starterPrompts(profile: CompanyProfile): string[] {
   const hasService = profile.knowledge.services.length > 0;
   return [
-    hasService ? fillTemplate("How much is {aServiceA}?", profile) : "What are your prices?",
+    // "your" reads right for any service name, where "a" would give "a full rental management".
+    hasService ? fillTemplate("What does your {serviceA} cost?", profile) : "What are your prices?",
     "Can I book a time this week?",
     "I'm not happy with how it went and I'd like a refund.",
   ];

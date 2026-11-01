@@ -32,7 +32,7 @@ export function WebsitePage({ company, tagline, links = ["Services", "Prices", "
           <h3 className="text-[28px] leading-[1.1] font-semibold tracking-[-0.025em] text-foreground @xl:text-[36px]">{company.name}</h3>
           {tagline && <p className="text-[17px] text-muted">{tagline}</p>}
           <span className="inline-flex h-10 w-fit items-center rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground">
-            Book an appointment
+            Get in touch
           </span>
           {highlights.length > 0 && (
             <ul className="mt-4 flex flex-col gap-2">

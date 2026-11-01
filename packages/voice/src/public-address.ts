@@ -3,8 +3,9 @@ import { BlockList, isIP } from "node:net";
 /**
  * Addresses a server-side fetch must never reach: private, loopback, link-local, unique-local,
  * multicast and other special ranges, for IPv4 and IPv6. Node's BlockList matches an IPv4-mapped
- * IPv6 address against the IPv4 ranges, so `::ffff:127.0.0.1` is refused like `127.0.0.1`. Other
- * IPv6 forms that embed an IPv4 address (NAT64, 6to4, Teredo) are refused whole.
+ * IPv6 address (`::ffff:0:0/96`) against the IPv4 ranges, so `::ffff:127.0.0.1` is refused like
+ * `127.0.0.1`. Other IPv6 forms that embed an IPv4 address (IPv4-compatible, IPv4-translated,
+ * NAT64, 6to4, Teredo) are refused whole, since BlockList does not look inside them.
  */
 const blocked = new BlockList();
 
@@ -27,8 +28,8 @@ const ipv4Ranges: [string, number][] = [
 ];
 
 const ipv6Ranges: [string, number][] = [
-  ["::", 128], // unspecified
-  ["::1", 128], // loopback
+  ["::", 96], // unspecified, loopback and IPv4-compatible such as ::127.0.0.1
+  ["::ffff:0:0:0", 96], // IPv4-translated such as ::ffff:0:10.0.0.1
   ["64:ff9b::", 96], // NAT64
   ["100::", 64], // discard
   ["2001::", 32], // Teredo

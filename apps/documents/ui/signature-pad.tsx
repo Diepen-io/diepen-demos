@@ -95,6 +95,7 @@ export function SignaturePad({ onSign, onDraft, onCancel }: SignaturePadProps) {
         <label className="flex flex-col gap-1.5 text-meta font-medium text-muted">
           Your full name
           <input
+            name="signature-name"
             value={name}
             onChange={(event) => typeName(event.target.value)}
             autoComplete="name"

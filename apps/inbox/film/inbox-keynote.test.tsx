@@ -1,7 +1,7 @@
 import { KEYNOTE_MAX_CAPTION_WORDS } from "@diepen/ui/film/keynote-script";
 import { presetList } from "@diepen/voice/presets";
 import { describe, expect, it } from "vitest";
-import { buildInboxKeynote } from "./inbox-keynote";
+import { buildInboxKeynote, priyaReplySeconds } from "./inbox-keynote";
 
 describe("inbox keynote film", () => {
   it.each(presetList.map((profile) => [profile.name, profile] as const))(
@@ -16,4 +16,15 @@ describe("inbox keynote film", () => {
       expect(film.finale).toMatchObject({ before: "9 h", after: "38 s" });
     },
   );
+
+  it("U6: reads Priya's reply time from the recorded messages and shows it once", () => {
+    expect(priyaReplySeconds()).toBe(38);
+    const answered = buildInboxKeynote(presetList[0] ?? never()).beats[1];
+    expect(answered?.caption).toBe("Answered in 38 seconds.");
+    expect(answered?.chip).toBeUndefined();
+  });
 });
+
+function never(): never {
+  throw new Error("No presets");
+}

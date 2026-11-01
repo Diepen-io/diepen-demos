@@ -1,6 +1,9 @@
-import { getContainer } from "@/infrastructure/container";
+import { createBrandHandler } from "@diepen/voice/brand-route";
+import { container } from "@/infrastructure/container";
 
-/** "Make it yours": reads a website and drafts a company profile. Request and response are the package's. */
-export function POST(request: Request): Promise<Response> {
-  return getContainer().handleBrandRequest(request);
-}
+/** "Make it yours": drafts a profile from a website, through the container's page fetcher. */
+export const POST = createBrandHandler({
+  fetchPage: container.fetchPage,
+  provider: container.provider,
+  guards: container.guards,
+});

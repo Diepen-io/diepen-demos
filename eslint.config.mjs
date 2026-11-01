@@ -129,12 +129,37 @@ export default defineConfig([
     }),
   },
   {
-    files: ["apps/*/ui/**/*.{ts,tsx}", "apps/*/film/**/*.{ts,tsx}"],
+    files: ["apps/*/ui/**/*.{ts,tsx}"],
     rules: restrict(appScope, noRelativePackages, anthropicOnlyInAi, {
       // No bare "@diepen/ai" here: a pattern that matches the package itself blocks the re-include below.
       group: ["@/infrastructure/**", "@/application/**", "@/app/**", "@diepen/ai/*", "!@diepen/ai/text-stream-client"],
       message: "UI talks to the server over HTTP through route handlers. It never runs a use case or an adapter.",
     }),
+  },
+  {
+    // A film test may load presets and test fixtures; the film itself may not.
+    files: ["apps/*/film/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}"],
+    rules: restrict(appScope, noRelativePackages, anthropicOnlyInAi, {
+      group: [
+        "@/infrastructure/**", "@/application/**", "@/app/**", "@/ui/**",
+        "@diepen/ai", "@diepen/ai/*", "@diepen/voice/*", "!@diepen/voice/profile",
+      ],
+      message: "A film is a script from recorded fixtures. It imports only domain, @diepen/ui and @diepen/voice/profile.",
+    }),
+  },
+  {
+    // Routes read bodies under a byte cap. These methods buffer a body of any size before a check can run.
+    files: ["apps/*/app/**/route.ts", "apps/*/app/api/**/*.ts", "packages/voice/src/brand-route.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "CallExpression[callee.object.name=/^req(uest)?$/][callee.property.name=/^(json|text|formData)$/]",
+          message: "Read a route body with readBodyText or readBodyBytes from @diepen/ai/request-body, under a byte cap.",
+        },
+      ],
+    },
   },
   {
     files: ["packages/ui/**/*.{ts,tsx}"],

@@ -1,9 +1,8 @@
 import { guards as sharedGuards, type Guards } from "@diepen/ai/guards";
 import type { AiProvider } from "@diepen/ai/provider";
 import { getProvider } from "@diepen/ai/provider-factory";
-import { fetchPage as webPageFetcher, type PageFetcher } from "@diepen/voice/page-fetcher";
+import { pageFetcherFor } from "@diepen/voice/fixture-page-fetcher";
 import { answerInquiry, type Inquiry } from "@/application/answer-inquiry";
-import { fixturePageFetcher } from "./fixture-page-fetcher";
 import { withTypingPace } from "./typing-pace";
 
 /**
@@ -13,14 +12,12 @@ import { withTypingPace } from "./typing-pace";
 export type ContainerOptions = { provider?: AiProvider; guards?: Guards };
 
 export function createContainer({ provider = getProvider(), guards = sharedGuards }: ContainerOptions = {}) {
-  // Without a key nothing may leave the server, so "Make it yours" reads a fixture page.
-  const fetchPage: PageFetcher = provider.name === "mock" ? fixturePageFetcher : webPageFetcher;
   const paced = withTypingPace(provider);
   return {
     provider,
     providerName: provider.name,
     guards,
-    fetchPage,
+    fetchPage: pageFetcherFor(provider.name),
     answerInquiry: (inquiry: Inquiry) => answerInquiry({ ai: paced }, inquiry),
   };
 }

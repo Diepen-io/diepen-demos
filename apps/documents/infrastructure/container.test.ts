@@ -2,9 +2,10 @@ import { liveSessionSchema } from "@/domain/live-session";
 import { completeSession, dayMs, filmSession, storyMs } from "@/test-support/live-sessions";
 import { presets } from "@diepen/voice/presets";
 import { describe, expect, it } from "vitest";
-import { runChase } from "./container";
+import { createContainer } from "./container";
 
 const profile = presets["ledgerwick-accounting"];
+const { runChase } = createContainer();
 const filmOutstanding = ["bank-interest", "home-office", "health-insurance"];
 
 type Sent = Awaited<ReturnType<typeof runChase>>["sent"][number];

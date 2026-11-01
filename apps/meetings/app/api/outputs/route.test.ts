@@ -37,7 +37,7 @@ vi.mock("@/infrastructure/container", () => {
       return current().processCall;
     },
   };
-  return { getContainer: () => container };
+  return { container };
 });
 
 function useContainer({ provider = createMockProvider(), guards = createGuards() }: { provider?: AiProvider; guards?: Guards } = {}) {
@@ -131,7 +131,7 @@ describe("POST /api/outputs @meetings.live-paste", () => {
     expect(await response.json()).toMatchObject({ fallback: "film" });
   });
 
-  it("answers 502 when the provider throws", async () => {
+  it("answers 503 unavailable when the provider throws, so the visitor can try again", async () => {
     const failing: AiProvider = {
       name: "claude",
       streamText: () => {
@@ -143,8 +143,8 @@ describe("POST /api/outputs @meetings.live-paste", () => {
     useContainer({ provider: failing });
     vi.spyOn(console, "error").mockImplementation(() => {});
     const response = await post({ transcript: sample(), localNow });
-    expect(response.status).toBe(502);
-    expect(await response.json()).toEqual({ error: "generation_failed" });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ reason: "unavailable" });
   });
 
   it("answers 200 with the outputs and the mock provider for the sample call", async () => {

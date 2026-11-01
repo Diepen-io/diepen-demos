@@ -12,6 +12,7 @@ import { frameForChannel, isQuestion, keyWords, overlap, sentence } from "./mock
  */
 
 const refundWords = ["refund", "money back", "reimburse"];
+const urgentWords = ["pain", "hurts", "swelling", "swollen", "bleeding", "accident", "emergency", "urgent"];
 const complaintWords = [
   "complain", "complaint", "not acceptable", "unacceptable", "nobody told", "no one told", "not happy", "unhappy",
   "disappointed", "rude", "terrible", "awful", "ridiculous", "waited", "lawyer", "legal",
@@ -38,6 +39,7 @@ function answer(inquiry: Inquiry, free: readonly string[]): Answer {
   const original = inquiry.messages.findLast((message) => message.role === "customer")?.text ?? "";
   const text = original.toLowerCase();
 
+  if (mentions(text, urgentWords)) return urgentHandover(profile);
   if (mentions(text, refundWords)) return handover(profile, "Refund request", "Asked for a refund");
   if (mentions(text, complaintWords)) return handover(profile, "Complaint", "Raised a complaint");
 
@@ -85,6 +87,13 @@ function answer(inquiry: Inquiry, free: readonly string[]): Answer {
 
 function handover(profile: CompanyProfile, intent: string, handoverReason: string): Answer {
   return { body: profile.policies.handoverMessage, intent, status: "needs_human", handoverReason };
+}
+
+/** Pain or an accident: the handover adds the phone number, since the customer may need help today. */
+function urgentHandover(profile: CompanyProfile): Answer {
+  const { phone } = profile.knowledge;
+  const call = phone ? ` If it is urgent, please call us on ${phone}.` : "";
+  return { ...handover(profile, "Urgent help", "Described pain or an accident"), body: `${profile.policies.handoverMessage}${call}` };
 }
 
 /** The profile's own rule for questions it cannot answer, when it has one. */

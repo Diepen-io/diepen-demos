@@ -1,7 +1,8 @@
+import { isAiError } from "@diepen/ai/errors";
 import { BodyTooLargeError, readBodyText } from "@diepen/ai/request-body";
-import { fallbackResponse } from "@diepen/ai/route-responses";
+import { fallbackResponse, unavailableResponse } from "@diepen/ai/route-responses";
 import { defaultPresetFor } from "@diepen/voice/presets";
-import { getContainer } from "@/infrastructure/container";
+import { container } from "@/infrastructure/container";
 import { maxBodyBytes, outputsRequestSchema } from "./request-schema";
 
 const noStore = { "cache-control": "no-store" };
@@ -35,7 +36,6 @@ export async function POST(request: Request): Promise<Response> {
     return invalid(parsed.error.issues.map((issue) => ({ path: issue.path.join("."), message: issue.message })));
   }
 
-  const container = getContainer();
   const guard = container.guards.check(request);
   if (!guard.ok) return fallbackResponse(guard);
 
@@ -44,7 +44,7 @@ export async function POST(request: Request): Promise<Response> {
     const outputs = await container.processCall({ transcript, profile: profile ?? defaultPresetFor("meetings"), localNow });
     return json({ outputs, provider: container.providerName });
   } catch (error) {
-    console.error("Call outputs failed", error);
-    return json({ error: "generation_failed" }, 502);
+    if (isAiError(error)) return unavailableResponse(error);
+    throw error;
   }
 }

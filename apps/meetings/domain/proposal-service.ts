@@ -17,3 +17,8 @@ export function proposalService(profile: CompanyProfile): ProposalService {
     price: priceOnRequest,
   };
 }
+
+/** The currency a price is quoted in, for example "EUR" in "EUR 34 per unit per month", or `null`. */
+export function currencyOf(price: string): string | null {
+  return /\b(EUR|USD|GBP|CHF|AUD|CAD)\b|[€$£]/.exec(price)?.[0] ?? null;
+}

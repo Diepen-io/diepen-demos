@@ -1,6 +1,7 @@
 import { KeynoteFileStack, KeynoteNotification, KeynoteRow } from "@diepen/ui/film/keynote-parts";
 import { defineKeynoteFilm, type KeynoteFilm } from "@diepen/ui/film/keynote-script";
 import type { CompanyProfile } from "@diepen/voice/profile";
+import { chasingHoursAfter, chasingHoursBefore, exampleMonth, formatHours } from "@/domain/chase-hours";
 import { client, itemIds, type ItemId } from "@/domain/document-request";
 
 /** The six requested documents as a client would name them, short enough for one file chip each. */
@@ -50,9 +51,9 @@ export function buildDocumentsKeynote(profile: CompanyProfile): KeynoteFilm {
     ],
     finale: {
       label: "Hours a month chasing documents",
-      before: "12 h",
-      after: "1 h",
-      note: `A simulation with ${profile.name}, a fictional firm. Example month: 40 tax returns with 3 chases of 6 minutes each, against 1.5 minutes per return to read the summary.`,
+      before: formatHours(chasingHoursBefore()),
+      after: formatHours(chasingHoursAfter()),
+      note: `A simulation with ${profile.name}, a fictional firm. Example month: ${exampleMonth.returns}\u00a0tax returns with ${exampleMonth.chasesPerReturn} chases of ${exampleMonth.minutesPerChase} minutes each, against ${exampleMonth.minutesPerSummary} minutes per return to read the summary.`,
     },
   });
 }

@@ -55,6 +55,6 @@ export function ConversationFooter({
   subject?: string;
 }) {
   if (controls.handover) return <HandoverNote note={controls.handover.note} onStartOver={controls.handover.onStartOver} />;
-  if (controls.onSend) return <Composer channel={channel} onSend={controls.onSend} disabled={controls.sending} subject={subject} />;
+  if (controls.onSend) return <Composer channel={channel} onSend={controls.onSend} disabled={controls.sending} subject={subject} maxLength={controls.maxLength} />;
   return staticBar;
 }

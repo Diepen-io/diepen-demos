@@ -17,7 +17,6 @@ vi.mock("@diepen/ai/guards", async (importOriginal) => {
   const delegate: Guards = {
     check: (request) => active().check(request),
     clampMaxTokens: (requested) => active().clampMaxTokens(requested),
-    checkInputSize: (chars, limit) => active().checkInputSize(chars, limit),
   };
   return { ...actual, guards: delegate, createGuards: (_options?: GuardOptions) => delegate };
 });

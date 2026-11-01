@@ -113,7 +113,7 @@ The page keeps the live session in browser memory only; a reload or "Start over"
    A Problem found item on the upload page shows the client reason line and "Upload again". A Checked item has no upload button.
 6. "Review and sign" opens the engagement letter with a signature pad ("Sign here") and one row of buttons: "Back", "Clear", "Type your name" (then "Draw instead") and "Sign"; on a narrow phone they form two even rows with "Sign" at the bottom right. A typed name shows on the signature line as it is typed. "Sign" stays disabled until there is a stroke or a typed name. Signing turns the item Checked and puts the signed copy in `01 Engagement`. Signing makes no server call.
 7. "Done for now" posts the session to `/api/chase` with `event: "submitted"`. When items are outstanding, the follow-up email arrives in the inbox at once, its card in the system lane says "Sent when Daniel pressed Done for now", and the system lane shows "Reminder 2" with its date. When nothing is outstanding, the firm lane shows "Complete. Ready to prepare the return." and no email goes out.
-8. "Skip 3 days" posts the session to `/api/chase` with `event: "skip-days"`. The clock jumps three days and whatever the schedule says is due goes out: the follow-up if "Done for now" was never pressed, else the second reminder, else the escalation, which appears in the firm lane as a task "Call Daniel Okafor: 3 documents still open after 2 reminders". A chase that went out this way says "Went out on its own"; the escalation's card says "Task" and "Added to {firm}'s tasks". A follow-up sent before Daniel uploaded any file opens with "{firm} is ready to start on your 2025 tax return and needs these documents from you:" instead of thanking him. After the escalation, or once the request is complete, "Skip 3 days" is disabled.
+8. "Skip 3 days" posts the session to `/api/chase` with `event: "skip-days"`. The clock jumps three days, on to Monday when that lands on a weekend, and whatever the schedule says is due goes out (a chase that falls on a Saturday or Sunday waits for Monday, so the escalation call is never booked on a weekend): the follow-up if "Done for now" was never pressed, else the second reminder, else the escalation, which appears in the firm lane as a task "Call Daniel Okafor: 3 documents still open after 2 reminders". A chase that went out this way says "Went out on its own"; the escalation's card says "Task" and "Added to {firm}'s tasks". A follow-up sent before Daniel uploaded any file opens with "{firm} is ready to start on your 2025 tax return and needs these documents from you:" instead of thanking him. After the escalation, or once the request is complete, "Skip 3 days" is disabled.
 9. "Start over" clears the session and returns to step 1.
 
 The live session keeps facts only: which email went out when, which items it listed, and whether any file had come in.
@@ -129,7 +129,7 @@ A check card whose item later passed shrinks to its file name with the badge "Re
 | Request | One file per request, whole multipart body at most 4,400,000 bytes (Vercel's limit is 4.5 MB) | `/api/check` reads `content-length` first |
 
 Messages: "Use a PDF, PNG or JPEG." and "Files up to 4 MB." Neither sends a request.
-Under the upload items: "PDF, PNG or JPEG, up to 4 MB. Your file goes to Claude for this one check. This demo keeps no copy."
+Under the upload items: "PDF, PNG or JPEG, up to 4 MB. Your file goes to Claude for this one check. This demo keeps no copy." Under the mock provider no file goes to Claude, so the middle sentence is left out.
 The route reads the file into memory, passes it to the OCR port and the AI provider, and drops it. Nothing writes the bytes to disk, a log or a store, and the browser keeps only the file names.
 
 ### Keyless and cost guards
@@ -137,10 +137,12 @@ The route reads the file into memory, passes it to the OCR port and the AI provi
 - With no `ANTHROPIC_API_KEY`, `/api/check` answers with the mock provider and the page shows the shell's `ProviderNote` ("Demo answers. No API key is set.").
 - The mock answer is keyed on the uploaded file name: each of the 9 sample names returns its recorded result from `domain/sample-documents.ts`, then runs through `domain/check-rules.ts` like a real answer.
   Any other name returns `status: "problem"`, `documentType: "Unknown document"`, person and year `null`, one issue `{ kind: "other", detail: "Demo answers only cover the sample files. Pick a sample to see a full check." }`, and the item turns Problem found.
-- `/api/check` runs `guards.check` after validation and caps output tokens with `guards.clampMaxTokens(1200)`. A trip answers with `fallbackResponse` (429 `{ fallback: "film" }`), and the live page swaps to the film with the shell's `FallbackNote`.
+- `/api/check` runs `guards.check` after validation and caps output tokens with `guards.clampMaxTokens(1200)`. A trip answers with `fallbackResponse` (429 `{ fallback: "film" }`), and the live page sends the visitor to the film with the shell's `FallbackNote` (`useFilmFallback`). A 503 leaves the visitor on the live page to try again.
 - `/api/chase` makes no AI call and runs no cost guard. It only validates and limits its body.
 
 ## 5. Make it yours
+
+The panel's example companies list only Ledgerwick, since the story is a tax return (decision F3). "Read my site" and the form work for any business.
 
 The visitor's profile (from the shell's "Make it yours", in `?brand=` and local storage) changes:
 
@@ -242,9 +244,8 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | `infrastructure/google-document-ai-ocr.ts` | `OcrService` named `google-document-ai`: calls `processDocument({ name: "projects/{project}/locations/{location}/processors/{processorId}", rawDocument: { content: base64, mimeType } })` on a client created with `apiEndpoint: "{location}-documentai.googleapis.com"`, returns `{ ocrText: document.text }`. Takes the client as a constructor parameter typed `Pick<DocumentProcessorServiceClient, "processDocument">`, so tests pass a fake. Wraps client errors in `OcrError` |
 | `infrastructure/ocr-settings.ts` | Reads `OCR_PROVIDER` (`claude` default, or `google-document-ai`) and, for Google, `GOOGLE_CLOUD_PROJECT`, `GOOGLE_DOCUMENT_AI_LOCATION`, `GOOGLE_DOCUMENT_AI_PROCESSOR_ID` with zod. Missing settings or an unknown value throw an error that names each missing variable |
 | `infrastructure/in-process-scheduler.ts` | `JobScheduler` on a virtual clock: jobs in a map by id, `advanceTo(time, handler)` runs due jobs in `runAt` order. Seeded from and written back to `session.jobs`, because the demo keeps no server state |
-| `infrastructure/fixture-page-fetcher.ts` | The page "Make it yours" reads under the mock provider |
 | `infrastructure/simulated-drive-store.ts` | `FileStore` that keeps no bytes and returns the Drive path. The browser draws the folder |
-| `infrastructure/container.ts` | The one place that picks adapters: `getProvider()` from `@diepen/ai`, the OCR service from `ocr-settings.ts` (the Google client is loaded with a dynamic `import("@google-cloud/documentai")` only when selected), the simulated Drive store, and `runChase(session, profile, event)`, which seeds the in-process scheduler, calls `chaseMissingDocuments`, then advances the scheduler to now (submitted) or now + 3 days (skip-days) with `sendDueChase` as the handler |
+| `infrastructure/container.ts` | `createContainer({ provider?, guards? })` and the app's `container`, the one place that picks adapters: `getProvider()` from `@diepen/ai`, the shared `guards`, the page fetcher for "Make it yours" from `pageFetcherFor` in `@diepen/voice/fixture-page-fetcher`, the OCR service from `ocr-settings.ts` (the Google client is loaded with a dynamic `import("@google-cloud/documentai")` only when selected), the simulated Drive store, and `runChase(session, profile, event)`, which seeds the in-process scheduler, calls `chaseMissingDocuments`, then advances the scheduler to now (submitted) or now + 3 days, moved past a weekend (skip-days), with `sendDueChase` as the handler |
 
 `@google-cloud/documentai` is a dependency of `apps/documents`. Google credentials come from Application Default Credentials. The deployed demo leaves `OCR_PROVIDER` unset.
 
@@ -280,17 +281,16 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | File | Holds |
 | --- | --- |
 | `film/documents-keynote.tsx` | `buildDocumentsKeynote(profile)`: the four beats and the finale of section 2, checked by `defineKeynoteFilm` |
-| `ui/documents-film.tsx` | The film inside the demo shell: `KeynoteStage` with the profile and the `/live` link of the active brand |
 
 ### app/
 
 | Route | Kind | Does |
 | --- | --- | --- |
-| `/` | page | The film in the demo shell. Reads `?t=`, `?record=` and `?brand=` |
+| `/` | page | The film in the demo shell: `KeynoteFilmView` with the documents keynote built from the Ledgerwick preset. Reads `?t=`, `?record=` and `?brand=` |
 | `/live` | page | Live mode. The upload page is a view inside it, not its own route |
 | `/api/check` | POST | Checks one uploaded file |
 | `/api/chase` | POST | Submits or skips days, returns the chases sent |
-| `/api/brand` | POST | `createBrandHandler` from `@diepen/voice/brand-route`, wired in the container. Under the mock provider it reads a fixture page, so tests and keyless runs never fetch the internet |
+| `/api/brand` | POST | `createBrandHandler` from `@diepen/voice/brand-route` with the container's page fetcher, provider and guards. Under the mock provider it reads a fixture page, so tests and keyless runs never fetch the internet |
 | `/api/health` | GET | `{ ok: true, app: "documents", provider: "claude" \| "mock", ocr: "claude" \| "google-document-ai" }`; 500 with the missing variable names when the OCR settings are invalid |
 | `/icon.svg` | file | `app/icon.svg`, the tab icon. With it the browser asks for no `/favicon.ico` |
 
@@ -311,7 +311,7 @@ Order in the route: read the body with `readBodyBytes` from `@diepen/ai/request-
 | 413 | `{ error: "file_too_large", maxBytes: 4000000 }` |
 | 415 | `{ error: "unsupported_file_type", accepted: ["application/pdf", "image/png", "image/jpeg"] }` |
 | 429 | `{ fallback: "film", reason, message }` from `fallbackResponse` |
-| 503 | `{ fallback: "film", reason: "unavailable", message }` from `unavailableResponse` when the provider or OCR throws |
+| 503 | `{ fallback: "film", reason: "unavailable", message }` from `unavailableResponse` when the provider or OCR throws. The visitor stays and can upload again |
 
 `POST /api/chase` takes JSON, at most 64 KB, read with `readBodyText` under that cap.
 
@@ -338,7 +338,7 @@ Live mode uses four lanes.
 | --- | --- |
 | 1920x1080 | Four lanes side by side in one row: Firm 30%, Client 21% (phone frame), System 22%, Drive 27%. The clock bar carries "Skip 3 days" and "Start over" |
 | 1440x900, and 1280x720 | Same four lanes. Firm and Drive zoom their content out a step as the lane gets shorter (to 0.9, 0.8, 0.74 and 0.68 of full size), so all 6 checklist rows and the summary read whole and Drive names wrap on two or three lines. The phone content zooms out a step on a phone narrower than 260 px. The upload page scrolls inside the phone frame |
-| 375 px wide | One lane at a time with the shared `LaneTabs` (Firm, Client, System, Drive). The client lane is full width without the phone frame. Each lane is as long as its content and the page scrolls; the clock, "Skip 3 days" and the tabs stick to the top. Tabs show a dot when another lane changed |
+| 375 px wide | One lane at a time with `ui/lane-tabs.tsx` (Firm, Client, System, Drive). The client lane is full width without the phone frame. Each lane is as long as its content and the page scrolls; the clock, "Skip 3 days" and the tabs stick to the top. Tabs show a dot when another lane changed |
 
 The phone frame keeps a 9:19 shape at a size set by the lane alone: as tall as the lane allows, never wider than the lane, at most 820 px tall. Its status bar, island and corners scale with its width, so the clock never meets the island.
 

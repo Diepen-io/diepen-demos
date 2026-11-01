@@ -19,10 +19,16 @@ describe("keynote films", () => {
     expect(keynoteStepAt(film, 99_000)).toBe(4);
   });
 
-  it("rejects captions over six words, dashes and more than four beats", () => {
-    expect(() => defineKeynoteFilm({ ...film, beats: [{ id: "a", caption: "one two three four five six seven", element: null }] })).toThrow(/6/);
-    expect(() => defineKeynoteFilm({ ...film, beats: [{ id: "a", caption: "Sent — now", element: null }] })).toThrow(/dash/);
-    expect(() => defineKeynoteFilm({ ...film, beats: [...film.beats, { id: "five", caption: "Five.", element: null }] })).toThrow(/1 to 4/);
+  it("rejects captions over six words and dashes", () => {
+    const [first, ...rest] = film.beats;
+    const withCaption = (caption: string) => ({ ...film, beats: [{ id: first?.id ?? "one", caption, element: null }, ...rest] });
+    expect(() => defineKeynoteFilm(withCaption("one two three four five six seven"))).toThrow(/6/);
+    expect(() => defineKeynoteFilm(withCaption("Sent — now"))).toThrow(/dash/);
     expect(defineKeynoteFilm(film)).toBe(film);
+  });
+
+  it("requires exactly four beats before the finale", () => {
+    expect(() => defineKeynoteFilm({ ...film, beats: film.beats.slice(0, 3) })).toThrow(/4 beats/);
+    expect(() => defineKeynoteFilm({ ...film, beats: [...film.beats, { id: "five", caption: "Five.", element: null }] })).toThrow(/4 beats/);
   });
 });
