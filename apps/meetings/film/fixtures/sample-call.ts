@@ -4,7 +4,7 @@
  * tab in live mode both use it.
  */
 export const sampleCall = [
-  "[00:00] {sellerOwner}: Hi Tom, it's {sellerOwnerFirst} from {sellerCompany}. Thanks for making the time. Can you hear me okay?",
+  "[00:00] {sellerOwner}: Hi Tom, it's {sellerIntro}. Thanks for making the time. Can you hear me okay?",
   "[00:05] Tom Becker: Yes, loud and clear. Sorry, I'm parked outside one of the buildings, so if a door slams, that's why.",
   "[00:12] {sellerOwner}: No problem. I read your message. Tell me what you've got today.",
   "[00:17] Tom Becker: So, 14 apartments across three buildings. Two on Elm Street and one by the station. My wife Anna and I bought the first one in 2015 and it just kept growing.",
@@ -32,7 +32,7 @@ export const sampleCall = [
   "[17:31] Tom Becker: And Anna and I would still pick the tenants?",
   "[17:34] {sellerOwner}: You'd meet the final two candidates and choose. We handle everything before and after that.",
   "[18:10] Tom Becker: What does that cost?",
-  "[18:13] {sellerOwner}: {serviceName} is {servicePrice}. I'll put the details in writing.",
+  "[18:13] {sellerOwner}: {servicePriceLine} I'll put the details in writing.",
   "[24:30] Tom Becker: Can you put all of that in writing today? Anna will want to see it with our numbers.",
   "[24:38] {sellerOwner}: You'll have it this afternoon. When would you want to start?",
   "[24:42] Tom Becker: January would be ideal. The first of January, clean start.",

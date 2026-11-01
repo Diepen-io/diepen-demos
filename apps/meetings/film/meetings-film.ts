@@ -1,13 +1,16 @@
 import type { IconName } from "@diepen/ui/primitives/icon";
 import { defineFilmScript, type FilmBeat, type FilmScript } from "@diepen/ui/film/film-script";
 import type { CompanyProfile } from "@diepen/voice/profile";
+import { weekLabel } from "@/domain/calendar-week";
 import { stageAfterSend } from "@/domain/deal-stage";
 import { laneIds, lanes, type LaneId } from "@/domain/lanes";
 import { fillTokens, profileTokens } from "@/domain/profile-tokens";
+import { nextStepAfterSend } from "@/domain/proposal-sent";
 import { elapsedMs, formatDuration } from "@/domain/timing-metric";
 import { formatCallTime, parseTranscript } from "@/domain/transcript";
 import { filmCallLines } from "./film-call-lines";
 import { fillDeep } from "./fill-deep";
+import { filmWeekStart } from "./fixtures/existing-tools";
 import { recordedOutputs } from "./fixtures/recorded-outputs";
 import { sampleCall, sampleCallEndsAt, sampleCallStartsAt } from "./fixtures/sample-call";
 import type { MeetingsFilmData } from "./meetings-film-data";
@@ -128,7 +131,7 @@ export function buildMeetingsFilm(profile: CompanyProfile): FilmScript<MeetingsF
       at: 63_400,
       lane: "crm",
       travel: { from: "proposal", kind: "event", label: "Proposal sent", durationMs: travelMs },
-      data: { kind: "stage", stage: stageAfterSend },
+      data: { kind: "stage", stage: stageAfterSend, nextStep: nextStepAfterSend(outputs.nextMeeting) },
     },
   ];
 
@@ -138,7 +141,9 @@ export function buildMeetingsFilm(profile: CompanyProfile): FilmScript<MeetingsF
     durationMs: filmDurationMs,
     lanes: laneIds.map((id) => {
       const lane = lanes.find((entry) => entry.id === id);
-      return { id, label: lane?.label ?? id, role: lane?.role ?? "", tabLabel: lane?.tab, icon: laneIcons[id], brand: brandLanes.has(id) };
+      // The calendar's header names the week, so the lane body is the week alone.
+      const role = id === "calendar" ? weekLabel(filmWeekStart) : (lane?.role ?? "");
+      return { id, label: lane?.label ?? id, role, tabLabel: lane?.tab, icon: laneIcons[id], brand: brandLanes.has(id) };
     }),
     clock: clockFrames.map(([at, time]) => ({ at, time: `2026-11-10T${time}` })),
     beats,

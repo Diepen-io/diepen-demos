@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SpeechRecognizer } from "@/ui/speech/speech-recognizer";
 import { RecordPanel } from "./record-panel";
+import { useRecording } from "./use-recording";
 
 type Handlers = Parameters<SpeechRecognizer["start"]>[0];
 
@@ -31,6 +32,12 @@ function control(container: HTMLElement, name: string): HTMLElement {
   return match;
 }
 
+/** The page holds the recording and hands it to the panel; this does the same for one recognizer. */
+function RecordHarness({ recognizer, onLine }: { recognizer: SpeechRecognizer; onLine: (line: string) => void }) {
+  const recording = useRecording(recognizer, "Jonas", onLine);
+  return createElement(RecordPanel, { supported: recognizer.supported, recording, sellerName: "Jonas" });
+}
+
 let container: HTMLElement;
 let root: Root;
 
@@ -53,7 +60,7 @@ describe("RecordPanel @meetings.live-record", () => {
   it("writes each final result as a timed line for the speaker of the toggle, and stops at 10 minutes", async () => {
     const recognizer = fakeRecognizer();
     const onLine = vi.fn();
-    act(() => root.render(createElement(RecordPanel, { recognizer, sellerName: "Jonas", onLine })));
+    act(() => root.render(createElement(RecordHarness, { recognizer, onLine })));
 
     act(() => control(container, "Start").click());
     expect(recognizer.start).toHaveBeenCalledTimes(1);
@@ -82,7 +89,7 @@ describe("RecordPanel @meetings.live-record", () => {
   it("shows interim text without writing a line", async () => {
     const recognizer = fakeRecognizer();
     const onLine = vi.fn();
-    act(() => root.render(createElement(RecordPanel, { recognizer, sellerName: "Jonas", onLine })));
+    act(() => root.render(createElement(RecordHarness, { recognizer, onLine })));
     act(() => control(container, "Start").click());
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1_000);

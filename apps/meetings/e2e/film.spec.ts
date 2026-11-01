@@ -31,6 +31,15 @@ test("plays to the end card with every API request blocked @meetings.film", asyn
   await expectEndCard(page, 20_000);
 });
 
+// F4b. Decision F1: the film always tells Brickfern's story, and at 63000 the sent email and the folded proposal both show.
+test("shows the sent email under the proposal at 14:36 @meetings.film", async ({ page }) => {
+  await page.goto("/?t=63000");
+  await expect(lane(page, "proposal")).toContainText("Full rental management for Becker Residential");
+  await expect(lane(page, "proposal")).toContainText("Your proposal from Brickfern Property Management");
+  await expect(lane(page, "proposal").getByText("Sent 14:36")).toBeInViewport();
+  await expect(lane(page, "crm")).toContainText("EUR 34 per unit per month");
+});
+
 // F16
 test("never scrolls sideways at 375 px, in the film or in live mode @meetings.film", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "phone", "Runs at phone width only");

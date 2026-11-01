@@ -1,3 +1,4 @@
+import { BodyTooLargeError, readBodyText } from "@diepen/ai/request-body";
 import { fallbackResponse } from "@diepen/ai/route-responses";
 import { defaultPresetFor } from "@diepen/voice/presets";
 import { getContainer } from "@/infrastructure/container";
@@ -15,10 +16,13 @@ function invalid(issues: { path: string; message: string }[]): Response {
 
 /** Turns a call transcript into the six outputs with one structured model call. */
 export async function POST(request: Request): Promise<Response> {
-  const declared = Number(request.headers.get("content-length"));
-  if (declared > maxBodyBytes) return json({ error: "too_large" }, 413);
-  const raw = await request.text();
-  if (new TextEncoder().encode(raw).byteLength > maxBodyBytes) return json({ error: "too_large" }, 413);
+  let raw: string;
+  try {
+    raw = await readBodyText(request, maxBodyBytes);
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) return json({ error: "too_large" }, 413);
+    throw error;
+  }
 
   let body: unknown;
   try {

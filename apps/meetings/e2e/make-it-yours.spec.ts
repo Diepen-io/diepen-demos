@@ -1,6 +1,5 @@
 import { encodeProfile } from "@diepen/voice/profile-codec";
 import { testProfile } from "@/test-support/test-profile";
-import { lane } from "./support/film";
 import { expectAllOutputs, inputTab, output, transcriptBox, turnIntoProposal } from "./support/live";
 import { expect, test } from "./support/test";
 
@@ -17,13 +16,6 @@ test("runs live mode in the visitor's brand, owner and price @meetings.make-it-y
   await turnIntoProposal(page).click();
   await expectAllOutputs(page);
   await expect(output(page, "proposal")).toContainText(price);
-});
-
-test("plays the film in the visitor's name and price @meetings.make-it-yours", async ({ page }) => {
-  await page.goto(`/?brand=${brand}&t=63000`);
-  await expect(lane(page, "proposal")).toContainText(`${testProfile.name} takes over on 1 January 2027`);
-  await expect(lane(page, "proposal")).toContainText(`Your proposal from ${testProfile.name}`);
-  await expect(lane(page, "crm")).toContainText(price);
 });
 
 // F15

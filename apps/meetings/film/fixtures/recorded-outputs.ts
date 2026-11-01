@@ -50,7 +50,7 @@ export const recordedOutputs: MeetingOutputs = {
       "Thanks for the call today. What I heard: 14 apartments in three buildings, about nine hours a week of your time, and 38 empty days on average between tenants.\n\n" +
       "The proposal is attached. We take the tenant calls and repairs, nights included, run viewings within five days of a notice, and send you one statement a month. You and Anna still choose every tenant. {serviceName} is {servicePrice}, starting 1 January.\n\n" +
       "Friday at 10:00 is in the calendar to walk the three buildings. Bring Anna if she can make it.\n\n" +
-      "{signOffGreeting}\n{sellerOwner}",
+      "{signOffGreeting}\n{sellerSignature}",
   },
   nextMeeting: {
     title: "Walkthrough with Tom Becker",

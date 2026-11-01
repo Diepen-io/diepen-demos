@@ -5,8 +5,17 @@ import { laneById, type LaneId } from "@/domain/lanes";
 
 const icons: Record<LaneId, IconName> = { call: "mic", ai: "sparkle", crm: "briefcase", proposal: "file", calendar: "calendar" };
 
+export type LanePanelProps = {
+  id: LaneId;
+  brand?: boolean;
+  /** Replaces the lane's role under its label, for example the calendar's week. */
+  role?: string;
+  className?: string;
+  children: ReactNode;
+};
+
 /** One tool lane in live mode: the same header as in the film, content at its natural height. */
-export function LanePanel({ id, brand, className, children }: { id: LaneId; brand?: boolean; className?: string; children: ReactNode }) {
+export function LanePanel({ id, brand, role, className, children }: LanePanelProps) {
   const lane = laneById(id);
   return (
     <section aria-label={lane.label} className={cx("panel flex min-w-0 flex-col", className)}>
@@ -21,7 +30,7 @@ export function LanePanel({ id, brand, className, children }: { id: LaneId; bran
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] leading-tight font-semibold">{lane.label}</span>
-          <span className="block truncate text-[13px] text-muted">{lane.role}</span>
+          <span className="block truncate text-[13px] text-muted">{role ?? lane.role}</span>
         </span>
       </header>
       <div className="p-3.5">{children}</div>

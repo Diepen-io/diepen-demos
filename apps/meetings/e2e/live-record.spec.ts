@@ -46,4 +46,19 @@ test("records two speakers into the transcript and turns them into six outputs @
 
   await turnIntoProposal(page).click();
   await expectAllOutputs(page);
+  await expect(output(page, "crm")).toContainText("Rosa");
+});
+
+// F10b
+test("stops the recording when the visitor turns the call into a proposal @meetings.live-record", async ({ page }) => {
+  await installFakeSpeech(page, "manual");
+  await page.goto("/live");
+  await inputTab(page, "Record").click();
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await fakeSpeechSays(page, "Hi Rosa, thanks for taking the call. Tell me how you run your flats today and what takes the most time.");
+  await turnIntoProposal(page).click();
+
+  await expect(page.getByRole("button", { name: "Start", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Stop", exact: true })).toHaveCount(0);
+  await expect(page.getByText(/^Recording \d/)).toHaveCount(0);
 });

@@ -1,13 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { unnamedProspect } from "@/domain/call-sides";
 import { transcriptLimits, formatCallTime } from "@/domain/transcript";
 import type { SpeechErrorKind, SpeechRecognizer } from "@/ui/speech/speech-recognizer";
 
 export type RecordingStatus = "idle" | "recording" | "denied" | "failed" | "time-up";
 
+/** Who speaks next, so one person can play both sides of a call. */
+export type RecordingSide = "seller" | "prospect";
+
 export type Recording = {
   status: RecordingStatus;
+  side: RecordingSide;
+  setSide: (side: RecordingSide) => void;
+  /** The label of the next line: the seller's short name or "Prospect". */
+  speakerName: string;
   /** Seconds since Start. */
   elapsed: number;
   interim: string;
@@ -18,10 +26,13 @@ export type Recording = {
 
 /**
  * Drives one recognizer: each final result becomes a timed line for the speaker of the moment.
- * Chrome ends a session after a pause, so the recording restarts until the visitor stops it.
+ * Chrome ends a session after a pause, so the recording restarts until the visitor stops it. The
+ * page holds it, so pressing "Turn this call into a proposal" can stop it.
  */
-export function useRecording(recognizer: SpeechRecognizer, speakerName: string, onLine: (line: string) => void): Recording {
+export function useRecording(recognizer: SpeechRecognizer, sellerName: string, onLine: (line: string) => void): Recording {
   const [status, setStatus] = useState<RecordingStatus>("idle");
+  const [side, setSide] = useState<RecordingSide>("seller");
+  const speakerName = side === "seller" ? sellerName : unnamedProspect;
   const [elapsed, setElapsed] = useState(0);
   const [interim, setInterim] = useState("");
   const [noSpeech, setNoSpeech] = useState(false);
@@ -86,6 +97,9 @@ export function useRecording(recognizer: SpeechRecognizer, speakerName: string, 
 
   return {
     status,
+    side,
+    setSide,
+    speakerName,
     elapsed,
     interim,
     noSpeech,
@@ -98,6 +112,7 @@ export function useRecording(recognizer: SpeechRecognizer, speakerName: string, 
       listen();
     },
     stop() {
+      if (!wanted.current) return;
       wanted.current = false;
       recognizer.stop();
     },

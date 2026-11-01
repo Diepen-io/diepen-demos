@@ -24,7 +24,13 @@ describe("processCall with the mock provider @meetings.live-sample", () => {
   it("finds Tom Becker, his numbers and his pain points", async () => {
     const outputs = await run();
     expect(outputs.crm.contactName).toBe("Tom Becker");
-    expect(outputs.numbers.map((figure) => figure.value)).toEqual(["14", "2015", "38", "1,150"]);
+    expect(outputs.crm.company).toBe("Becker Residential");
+    expect(outputs.crm.email).toBe("tom@becker-residential.example");
+    expect(outputs.numbers).toEqual([
+      { label: "Apartments across three buildings", value: "14" },
+      { label: "Days on average", value: "38" },
+      { label: "Average rent a month", value: "1,150" },
+    ]);
     expect(outputs.painPoints).toEqual([
       "A normal week, about nine hours.",
       "Calls, texts, chasing the plumber, chasing rent.",

@@ -23,23 +23,28 @@ It runs from recorded fixtures with no key and no network.
 | `ai` | AI | "Waiting for the call to end", then the summary, the numbers and the pain points | The one new thing in the business. Everything else lands in tools the owner already has |
 | `crm` | CRM | Two existing deals, then the new record on top with its stage | Each output lands in the tool where the owner would look for it |
 | `proposal` | Proposal and email | The proposal document, then the follow-up email below it with the proposal attached | The email carries the proposal, so the two read as one step: send |
-| `calendar` | Calendar | The week of 9 to 13 November 2026 with three existing events, then the new meeting | The next meeting is the commitment that keeps the deal moving |
+| `calendar` | Calendar | The week of 9 to 13 November 2026 with three existing events, then the new meeting. The lane header names the week | The next meeting is the commitment that keeps the deal moving |
 
 ### Tokens
 
-Fixtures and captions hold tokens that `domain/profile-tokens.ts` fills from the active `CompanyProfile` at render time.
-That keeps the film true for the default preset and for a visitor's own profile (section 5).
+Fixtures and captions hold tokens that `domain/profile-tokens.ts` fills from a `CompanyProfile`.
+The film always tells Brickfern's story (decision F1), so it fills them from the meetings preset.
+Live mode fills the sample call from the visitor's profile, so every token reads well when the owner is a person with a title ("Dr. Lena Okafor"), a group ("the team", which brand extraction writes when a site names nobody), or when no service has a price.
+`domain/seller.ts` decides how the seller is named; `domain/person-name.ts` holds `firstName`, which skips titles, until `@diepen/voice/person-name` ships the same rule.
 
 | Token | Value |
 | --- | --- |
 | `{sellerCompany}` | `profile.name` |
-| `{sellerOwner}` | `profile.people.owner.name` |
-| `{sellerOwnerFirst}` | First word of `profile.people.owner.name` |
+| `{sellerOwner}` | The seller's speaker label: `profile.people.owner.name`, or the company name when the owner is not a person. At most 40 characters, cut at a word break, no colon |
+| `{sellerOwnerFirst}` | The owner's first name without a title ("Dr. Lena Okafor" gives "Lena"), or "You" when the owner is not a person |
+| `{sellerIntro}` | How the seller opens the call: "Jonas from Brickfern Property Management", or "the team at Brickfern Property Management" |
+| `{sellerSignature}` | The name under the follow-up email: the owner's full name, or "The Brickfern Property Management team" |
 | `{sellerEmail}` | `profile.knowledge.contactEmail` |
 | `{serviceName}` | Name of the first service in `profile.knowledge.services` that has a `price` |
 | `{servicePrice}` | That service's `price`, verbatim. "Price on request" when no service has a price |
+| `{servicePriceLine}` | "{serviceName} is {servicePrice}." With no priced service: "I'll work out the price for {serviceName} from your numbers." |
 | `{signOff}` | `profile.voice.signOff` |
-| `{signOffGreeting}` | The first line of `profile.voice.signOff`, for example "Best regards,". The owner signs the follow-up email with it and their own name, because the full sign-off can name the AI assistant |
+| `{signOffGreeting}` | The first line of `profile.voice.signOff`, for example "Best regards,". The owner signs the follow-up email with it and `{sellerSignature}`, because the full sign-off can name the AI assistant |
 | `{bookingMinutes}` | `profile.knowledge.bookingMinutes`, a number |
 
 ### Beats
@@ -50,14 +55,14 @@ A travel cell reads `from → to, kind, label`.
 
 | Film ms | Lane | What appears | Travel | Story clock | Caption |
 | --- | --- | --- | --- | --- | --- |
-| 0 | call | Call header "{sellerOwner}, {sellerCompany} with Tom Becker, landlord" and line [00:00]. AI lane shows "Waiting for the call to end". CRM, proposal and calendar lanes show their existing state | none | 2026-11-10T14:00:00 | A discovery call with a landlord. |
+| 0 | call | Call header "{sellerOwner} with Tom Becker, landlord" over "{sellerCompany}", and line [00:00] with "Live" and the call timer on it. AI lane shows "Waiting for the call to end". CRM, proposal and calendar lanes show their existing state | none | 2026-11-10T14:00:00 | A discovery call with a landlord. |
 | 3000 | call | Line [00:17], Tom: 14 apartments across three buildings | none | 2026-11-10T14:00:17 | Tom owns 14 apartments and runs them himself. |
 | 5800 | call | Line [00:44], Tom: about nine hours a week | none | 2026-11-10T14:00:44 | Nine hours a week on tenants. |
 | 8600 | call | Line [01:00], Tom: boiler on a Sunday night, night calls are the worst | none | 2026-11-10T14:01:00 | Night calls are the worst part. |
 | 11400 | call | Line [01:17], Tom: 38 days empty on average, six move-outs | none | 2026-11-10T14:01:17 | Apartments stand empty for 38 days. |
 | 14200 | call | Line [01:34], {sellerOwnerFirst}: roughly 8,700 in rent not collected | none | 2026-11-10T14:01:34 | About 8,700 in rent lost last year. |
 | 17000 | call | Line [01:49], Tom: two late payers, WhatsApp, one spreadsheet | none | 2026-11-10T14:01:49 | Late rent, chased on WhatsApp. |
-| 19800 | call | Line [18:13], {sellerOwnerFirst}: "{serviceName} is {servicePrice}." | none | 2026-11-10T14:18:13 | {sellerOwnerFirst} names the price. |
+| 19800 | call | Line [18:13], {sellerOwnerFirst}: "{servicePriceLine}" | none | 2026-11-10T14:18:13 | {sellerOwnerFirst} names the price. |
 | 22600 | call | Line [24:30], Tom: put it in writing, Anna will want to see it | none | 2026-11-10T14:24:30 | He wants it in writing today. |
 | 25400 | call | Line [27:15], {sellerOwnerFirst}: walk the buildings, Friday at ten | none | 2026-11-10T14:27:15 | Next step: Friday at 10:00. |
 | 28200 | call | Line [31:46], Tom: the empty days added up | none | 2026-11-10T14:31:46 | 32 minutes in, they wrap up. |
@@ -67,14 +72,15 @@ A travel cell reads `from → to, kind, label`.
 | 40000 | ai | Six number chips and three pain points below the summary | none | 2026-11-10T14:33:00 | His numbers and his three pain points. |
 | 44500 | crm | New record "Becker Residential" on top, stage "Proposal drafted" | ai → crm, event, "New deal" | 2026-11-10T14:33:20 | The CRM record fills itself in. |
 | 49000 | proposal | Proposal document: title, four scope lines, price, timeline, terms. Status "Draft" | ai → proposal, document, "Proposal draft" | 2026-11-10T14:33:50 | A proposal with his numbers and your price. |
-| 54000 | proposal | Follow-up email below the proposal, with a "Proposal.pdf" attachment chip. Status "Draft" | none | 2026-11-10T14:34:20 | The follow-up email, proposal attached. |
+| 54000 | proposal | The proposal folds to its title, price and status, and the follow-up email lands below it with its status "Draft" next to the sender and a "Proposal.pdf" attachment chip | none | 2026-11-10T14:34:20 | The follow-up email, proposal attached. |
 | 58500 | calendar | Friday 13 November 10:00, "Walkthrough with Tom Becker", {bookingMinutes} minutes, highlighted | ai → calendar, event, "Fri 10:00" | 2026-11-10T14:34:40 | Friday's walkthrough is in the calendar. |
-| 63000 | proposal | Email status "Sent 14:36". Then the CRM stage changes to "Proposal sent" | proposal → crm, event, "Proposal sent" | 2026-11-10T14:36:10 | {sellerOwnerFirst} checks it and sends. 14:36. |
+| 63000 | proposal | Email status "Sent 14:36", the folded proposal "Sent". Then the CRM stage changes to "Proposal sent" and its next step to "Proposal sent. Next: Walkthrough with Tom Becker on Friday 13 November at 10:00." | proposal → crm, event, "Proposal sent" | 2026-11-10T14:36:10 | {sellerOwnerFirst} checks it and sends. 14:36. |
 | 67000 | all | End card fades in over the stage and holds until 80000 | none | 2026-11-10T14:36:10 | No caption. The end card carries the text |
 
 The 36 turns in the 33000 beat is the turn count of the sample call; the film reads it from the parsed fixture, never from a literal.
 A beat with a travel starts 900 ms before its row, so the item lands at the row's film ms and its clock keyframe. `/?t=49000` therefore opens with the proposal already in its lane.
-The 63000 row is two beats, because an item lands in its own beat's lane: "Sent 14:36" in the proposal lane at 63000, then the "Proposal sent" travel from proposal to crm, which lands at 64300 and changes the CRM stage.
+The 63000 row is two beats, because an item lands in its own beat's lane: "Sent 14:36" in the proposal lane at 63000, then the "Proposal sent" travel from proposal to crm, which lands at 64300 and changes the CRM stage and next step.
+The live marker rides on the newest transcript line, so a landing line never pushes it out of the lane.
 
 ### End card
 
@@ -103,7 +109,7 @@ The film and the "Sample call" tab in live mode both use it.
 It has 36 lines and runs from 00:00 to 32:10.
 
 ```text
-[00:00] {sellerOwner}: Hi Tom, it's {sellerOwnerFirst} from {sellerCompany}. Thanks for making the time. Can you hear me okay?
+[00:00] {sellerOwner}: Hi Tom, it's {sellerIntro}. Thanks for making the time. Can you hear me okay?
 [00:05] Tom Becker: Yes, loud and clear. Sorry, I'm parked outside one of the buildings, so if a door slams, that's why.
 [00:12] {sellerOwner}: No problem. I read your message. Tell me what you've got today.
 [00:17] Tom Becker: So, 14 apartments across three buildings. Two on Elm Street and one by the station. My wife Anna and I bought the first one in 2015 and it just kept growing.
@@ -131,7 +137,7 @@ It has 36 lines and runs from 00:00 to 32:10.
 [17:31] Tom Becker: And Anna and I would still pick the tenants?
 [17:34] {sellerOwner}: You'd meet the final two candidates and choose. We handle everything before and after that.
 [18:10] Tom Becker: What does that cost?
-[18:13] {sellerOwner}: {serviceName} is {servicePrice}. I'll put the details in writing.
+[18:13] {sellerOwner}: {servicePriceLine} I'll put the details in writing.
 [24:30] Tom Becker: Can you put all of that in writing today? Anna will want to see it with our numbers.
 [24:38] {sellerOwner}: You'll have it this afternoon. When would you want to start?
 [24:42] Tom Becker: January would be ideal. The first of January, clean start.
@@ -195,7 +201,7 @@ export const recordedOutputs = {
       "Thanks for the call today. What I heard: 14 apartments in three buildings, about nine hours a week of your time, and 38 empty days on average between tenants.\n\n" +
       "The proposal is attached. We take the tenant calls and repairs, nights included, run viewings within five days of a notice, and send you one statement a month. You and Anna still choose every tenant. {serviceName} is {servicePrice}, starting 1 January.\n\n" +
       "Friday at 10:00 is in the calendar to walk the three buildings. Bring Anna if she can make it.\n\n" +
-      "{signOffGreeting}\n{sellerOwner}",
+      "{signOffGreeting}\n{sellerSignature}",
   },
   nextMeeting: {
     title: "Walkthrough with Tom Becker",
@@ -214,11 +220,11 @@ Shown greyed from beat 0 so the tools look lived in.
 | --- | --- |
 | crm | "Hartley Lofts", contact Priya Nair, stage "Proposal sent" |
 | crm | "Ines Ortega", private owner, stage "Discovery" |
-
-Every lane keeps its newest item at the bottom and lets older items scroll up under its header, so the new CRM record lands below the two existing deals.
 | calendar | Mon 9 Nov 09:00, "Team check-in", 30 minutes |
 | calendar | Wed 11 Nov 15:00, "Viewing, Mill Lane 7", 30 minutes |
 | calendar | Thu 12 Nov 11:00, "Owner statements", 60 minutes |
+
+Every lane keeps its newest item at the bottom and lets older items scroll up under its header, so the new CRM record lands below the two existing deals.
 
 ## 4. Live mode (`/live`)
 
@@ -228,20 +234,23 @@ The visitor plays both sides of a call, or brings a real transcript, and gets al
 
 1. `/live` opens with the shell's Film or Live switch, the active brand, the fictional note when `profile.fictional` is true, and "Demo answers. No API key is set." when the container's provider is `mock`.
 2. The input column has three tabs: "Record", "Paste" and "Sample call". "Record" is selected when the browser supports speech recognition, otherwise "Paste".
-3. Every tab ends in the same editable transcript box with a counter, for example "1,240 / 30,000".
-4. The visitor presses "Turn this call into a proposal".
-5. The AI lane shows "Reading 12 turns" with the turn count and a seconds counter.
-6. When the response arrives, the six outputs appear one after the other, 700 ms apart, in this order: summary, numbers and pain points, CRM record, proposal, follow-up email, next meeting.
-7. The email card has "Send to {prospect first name}" and the line "Simulated email."
-8. On send, the email shows "Sent HH:MM", the CRM stage changes to "Proposal sent", and a result bar shows "Transcript to proposal sent: 1 min 12 s", measured from the press in step 4 to the send.
-9. "Start over" clears the outputs and keeps the transcript.
+3. Every tab ends in the same editable transcript box with a counter, for example "1,240 / 30,000". The box text is 16 px on phones so iOS does not zoom.
+4. While the box holds a valid transcript, the AI lane says "Ready to read 12 turns"; otherwise "Waiting for a transcript".
+5. The visitor presses "Turn this call into a proposal". A running recording stops first.
+6. The AI lane shows "Reading 12 turns" with the turn count of the submitted transcript and a seconds counter.
+7. When the response arrives, the six outputs appear one after the other, 700 ms apart, in this order: summary, numbers and pain points, CRM record, proposal, follow-up email, next meeting.
+8. The email card has "Send to {prospect first name}", or "Send the email" when the call never names the prospect, and the line "Simulated email."
+9. On send, the email shows "Sent HH:MM", the CRM stage changes to "Proposal sent", the CRM next step becomes "Proposal sent. Next: {meeting title} on {weekday day month} at {HH:MM}.", and a result bar shows "Transcript to proposal sent: 1 min 12 s", measured from the press in step 5 to the send. On desktop the bar spans the top of the output side; on a phone it shows right under the email, so the page does not jump.
+10. "Start over" clears the outputs and keeps the transcript.
+11. When the transcript changes after the outputs exist (an edit, a paste, more recording, a loaded sample), a note says "The transcript changed. These drafts are from the earlier version." with "Draft again". The outputs dim and cannot be sent until they are drafted again.
 
 With `prefers-reduced-motion: reduce`, all six outputs appear at once without motion.
 
 ### Record
 
 - The recorder uses the browser's Web Speech API (`SpeechRecognition` or `webkitSpeechRecognition`) with `continuous` and `interimResults` on and `lang` from `navigator.language`.
-- A two-option toggle "Speaking now: {sellerOwnerFirst} | Prospect" sets the speaker of the next final result, so one person can role-play both sides.
+- A two-option toggle "Speaking now: {sellerOwnerFirst} | Prospect" sets the speaker of the next final result, so one person can role-play both sides. With a team profile the seller side reads "You".
+- The page holds the recording, so "Turn this call into a proposal" and switching to another tab stop it.
 - Interim text shows greyed at the end; each final result becomes one line `[mm:ss] Speaker: text`, with mm:ss measured from "Start".
 - Recording stops at 10 minutes, then shows "Recording stops at 10 minutes. Edit the transcript or turn it into a proposal."
 - Under the button: "Your browser's speech service turns your voice into text."
@@ -264,7 +273,7 @@ No test ever touches the real recognizer.
 - A line without a speaker label continues the previous turn. Text before the first label becomes speaker "Speaker".
 - Every labelled line is its own turn, even when the same speaker had the line before, so the sample call's 36 lines are 36 turns.
 - A speaker label is at most 40 characters and holds no colon; blank lines are ignored.
-- "Sample call" fills the box with the sample call from section 3, tokens filled from the active profile.
+- "Sample call" fills the box with the sample call from section 3, tokens filled from the active profile, when the box is empty or already holds the sample. When it holds the visitor's own transcript, the tab says "Loading the sample replaces the transcript in the box." and fills it only on "Replace with the sample call".
 
 ### Input limits
 
@@ -274,7 +283,7 @@ No test ever touches the real recognizer.
 | Maximum | 30,000 characters, about 35 minutes of speech | "That is over 30,000 characters. Trim it to the part of the call that matters." |
 | Turns | 400 after parsing | "That is over 400 turns. Trim it to the part of the call that matters." |
 | Recording | 10 minutes | See Record |
-| Request body | 100 KB | Route answers 413 |
+| Request body | 100 KB | Route answers 413. `readBodyText` from `@diepen/ai/request-body` counts bytes while the body streams in and stops reading at the cap |
 
 The button stays disabled while the client-side check fails; the route checks again with the same domain rules.
 
@@ -305,34 +314,35 @@ It is pure and deterministic for a given transcript, profile and `localNow`, so 
 
 | Field | Rule |
 | --- | --- |
-| Seller, prospect | Seller is the first speaker whose name contains the profile owner's first name, case-insensitive, else the first speaker. Prospect is the first other speaker, else "Prospect" |
-| `summary` | `Call between {seller} of {sellerCompany} and {prospect}, {n} turns. {prospect first name} said: "{first pain point}"` |
-| `numbers` | Each number token (`\d{1,3}(,\d{3})*(\.\d+)?`) in the prospect's turns, in order, skipping tokens next to a colon, at most 6. `value` is the token, `label` is the next four words without punctuation, else the previous four |
+| Seller, prospect | Seller is the first speaker named with the owner's first name (case-insensitive) or labelled as the seller ("You", the company), else the first speaker. Prospect is the first other speaker, else "Prospect" |
+| Contact | The prospect's label when it is a person. A recorded "Prospect" takes the name from the seller's greeting ("Hi Rosa,"), else "New contact". Company: a name after "company" ("that's the company, Becker Residential") or a name ending in Residential, Homes, Lettings, GmbH, Ltd and the like, else the contact's own name, as for a private owner. Email: the first address the prospect says |
+| `summary` | `{Contact} of {company} spoke with {seller} over {n} turns. {First name} said: "{first pain point}" Next: send the proposal and meet on {weekday}.` The seller is "{owner} of {company}", or the company for a team profile |
+| `numbers` | Each figure in the prospect's turns, at most 6. Years (1900 to 2099) and clock times are skipped. The label is the phrase that follows the figure up to four words ("Apartments across three buildings", "Hours a month"); a bare rate such as "1,150 a month" takes its subject from the question just before ("What's the average rent?" gives "Average rent a month"). A figure nothing explains is left out |
 | `painPoints` | Prospect sentences matching `worst\|problem\|late\|drags\|empty\|hours\|chasing\|stress\|too much\|cost`, case-insensitive, first 3. Else `["The call names no pain point yet."]` |
-| `crm` | company `{prospect}'s business`, contactName prospect, contactRole "Prospect", stage "Proposal drafted", dealValue `{servicePrice}`, nextStep "Send the proposal and confirm the next meeting." No email or phone |
-| `proposal` | title `{serviceName} for {prospect}`, scope `["{serviceName}: {service description}"]`, price `{servicePrice}`, timeline "Start within two weeks of signing", terms "Valid for 30 days." |
-| `followUpEmail` | subject `Your proposal from {sellerCompany}`, body greets the prospect's first name, names the service and price, names the meeting day, ends with `{signOff}` and `{sellerOwner}` |
-| `nextMeeting` | title `Next step with {prospect}`, durationMinutes `{bookingMinutes}`, start 10:00 on the first weekday at least two days after `localNow`, agenda `["Questions on the proposal", "Agree the start date", "Next steps"]` |
+| `crm` | company and contact as above, contactRole "Prospect", the email when said, stage "Proposal drafted", dealValue `{servicePrice}` or "Not priced yet", nextStep "Send the proposal today. {meeting title} on {weekday day month} at 10:00." |
+| `proposal` | title `{serviceName} for {company}`, or `{serviceName} proposal` for an unnamed contact; scope `["{serviceName}: {service description}"]`, price `{servicePrice}`, timeline "Start within two weeks of signing", terms "Valid for 30 days." |
+| `followUpEmail` | subject `Your proposal from {sellerCompany}`, greets "Hi {first name}," or "Hello,", names the service and price (or "we'll agree the price when we meet"), names the meeting day, ends with `{signOffGreeting}` and `{sellerSignature}` |
+| `nextMeeting` | title `Proposal review with {contact}`, or "Proposal review"; durationMinutes `{bookingMinutes}`, start 10:00 on the first weekday at least two days after `localNow`, agenda `["Questions on the proposal", "Agree the start date", "Next steps"]` |
 
-For the sample call with the default preset, the mock gives prospect "Tom Becker", numbers `["14", "2015", "38", "1,150"]` and pain points `["A normal week, about nine hours.", "Calls, texts, chasing the plumber, chasing rent.", "The night calls are the worst part."]`.
+For the sample call with the default preset, the mock gives contact "Tom Becker" of "Becker Residential" at tom@becker-residential.example, numbers 14 "Apartments across three buildings", 38 "Days on average" and 1,150 "Average rent a month", and pain points `["A normal week, about nine hours.", "Calls, texts, chasing the plumber, chasing rent.", "The night calls are the worst part."]`.
 
 ## 5. Make it yours
 
 The visitor enters a website in the shell's "Make it yours" panel; `/api/brand` drafts a profile, the visitor edits it, and it travels in `?brand=` and local storage (decision S3).
-The seller is always the active profile's company.
+The film always tells Brickfern's story (decision F1); "Make it yours" puts the visitor's company fully into live mode.
 
-| What | Film (`/`) | Live (`/live`) |
-| --- | --- | --- |
-| Logo, colours, company name in the header | Yes | Yes |
-| Seller name and company in the transcript, CRM, proposal and email | Yes, through the tokens in section 2 | Yes, from the model's answer and the sample call's tokens |
-| Proposal service and price | First priced service of the profile, verbatim | Same, enforced after the model answers |
-| Email sign-off | `voice.signOff` | `voice.signOff`, plus tone and words to use and avoid through `buildSystemPrompt` |
-| Meeting length | `bookingMinutes` | `bookingMinutes`, enforced after the model answers |
-| Policies (what the AI may promise) | Fixed fixtures | Through `buildSystemPrompt`, so the proposal and email never promise what `neverPromise` lists |
-| The prospect and the story | Stays Tom Becker, the landlord | Whatever the call says |
-| Fictional note | Only when `profile.fictional` is true; the end card note always shows | Only when `profile.fictional` is true |
+| What | Live (`/live`) |
+| --- | --- |
+| Logo, colours, company name in the header | Yes |
+| Seller name and company in the transcript, CRM, proposal and email | From the model's answer and the sample call's tokens, worded for a person, a titled person or a team |
+| Proposal service and price | First priced service of the profile, verbatim, enforced after the model answers |
+| Email sign-off | `voice.signOff` greeting and `{sellerSignature}`, plus tone and words to use and avoid through `buildSystemPrompt` |
+| Meeting length | `bookingMinutes`, enforced after the model answers |
+| Policies (what the AI may promise) | Through `buildSystemPrompt`, so the proposal and email never promise what `neverPromise` lists |
+| The prospect and the story | Whatever the call says |
+| Fictional note | Only when `profile.fictional` is true |
 
-A profile with no priced service gets "Price on request" in the proposal and the transcript line at 18:13.
+A profile with no priced service gets "Price on request" in the proposal's price field, "Not priced yet" as the CRM deal value, and its own sentence at 18:13 of the sample call; no sentence reads "is Price on request".
 
 ## 6. Architecture
 
@@ -344,6 +354,10 @@ Inside `apps/meetings`. Dependencies point inwards; `eslint.config.mjs` enforces
 | --- | --- |
 | `domain/transcript.ts` | `SpeakerTurn { atSeconds?: number; speaker: string; text: string }`, `parseTranscript(text)`, `formatTranscript(turns)`, `transcriptLimits`, `checkTranscript(text)` returning the issues of section 4 |
 | `domain/call-sides.ts` | `identifySides(turns, profile)` returning `{ seller, prospect }` |
+| `domain/person-name.ts` | `firstName` (skips titles), `isPersonName` (false for "the team", "Prospect", "New contact"), `speakerLabel` (40 characters, no colon) |
+| `domain/seller.ts` | `sellerOf(profile)`: how every sentence names the seller, for a person or a team |
+| `domain/proposal-sent.ts` | `markProposalSent(outputs)`: stage "Proposal sent" and the meeting as the next step; `meetingMoment(start)` |
+| `domain/calendar-week.ts` | `mondayOf`, `workingDays`, `weekLabel` ("9 to 13 November") for the calendar lane header |
 | `domain/deal-stage.ts` | `dealStages` ("Discovery", "Proposal drafted", "Proposal sent", "Won", "Lost"), `normaliseStage(text)`, `stageAfterSend` |
 | `domain/output-sequence.ts` | `OutputKind` (summary, numbers, crm, proposal, email, meeting), `outputSequence`, `laneOf(kind)`, `revealPlan(stepMs, reducedMotion)` |
 | `domain/lanes.ts` | The five lane ids, labels, roles and phone tab names, shared by the film and live mode |
@@ -358,7 +372,8 @@ Inside `apps/meetings`. Dependencies point inwards; `eslint.config.mjs` enforces
 | --- | --- |
 | `application/process-call.ts` | `processCall({ transcript, profile, localNow }, { ai })`. Parses and checks the transcript, builds the request with `@diepen/voice/tasks/call-outputs` (system prompt through `buildSystemPrompt`), passes `draftMockOutputs` as `mock`, calls `ai.generateObject`, then enforces price, meeting length and stage |
 | `application/draft-mock-outputs.ts` | The deterministic mock of section 4 |
-| `application/read-prospect.ts` | The mock's text rules: the prospect's figures and pain point sentences |
+| `application/read-prospect.ts` | The mock's text rules: the prospect's figures with their labels, and pain point sentences |
+| `application/read-contact.ts` | The mock's text rules: the prospect's name, company and email address |
 
 The `AiProvider` is a parameter, so tests pass the mock provider or a fake.
 
@@ -401,11 +416,12 @@ export function createSpeechRecognizer(scope: Window): SpeechRecognizer;
 | `ui/lanes/render-lane.tsx` | `renderFilmLane`: the film's landed beats become the lane components |
 | `ui/film-view/meetings-film-stage.tsx`, `film-header.tsx`, `fallback-toast.tsx` | The film page. It uses the film stage's own header with the shell's pieces (brand, Film or Live switch, "Make it yours"), so the film fits one screen with no page scroll |
 | `ui/live/live-demo.tsx` | The live page: input column and output lanes |
-| `ui/live/use-live-call.ts` | The live state: ready, processing, revealing, revealed, sent, failed |
+| `ui/live/use-live-call.ts` | The live state: ready, processing, revealing, revealed, sent, failed, and the submitted transcript the stale check compares with |
 | `ui/live/transcript-input.tsx`, `input-tabs.tsx` | Tabs, transcript box, counter, inline issues |
-| `ui/live/record-panel.tsx`, `use-recording.ts` | Speaker toggle, Start and Stop, interim text, fallback notes, the 10-minute stop |
+| `ui/live/record-panel.tsx`, `use-recording.ts` | Speaker toggle, Start and Stop, interim text, fallback notes, the 10-minute stop. `LiveDemo` holds the recording so the main button can stop it |
 | `ui/live/live-lanes.tsx`, `lane-panel.tsx` | The output lanes in live mode |
 | `ui/live/send-result.tsx` | "Transcript to proposal sent" bar |
+| `ui/live/stale-note.tsx` | "The transcript changed" note with "Draft again" |
 | `ui/live/outputs-client.ts` | `fetch` to `/api/outputs`, zod parse of each response shape |
 | `ui/speech/speech-recognizer.ts`, `browser-recognizer.ts` | The interface and browser adapter above, and the hook that creates it once in the browser |
 
@@ -444,7 +460,7 @@ export const outputsRequestSchema = z.object({
 | --- | --- |
 | 200 | `{ outputs: CallOutputs, provider: "claude" \| "mock" }` |
 | 400 | `{ error: "invalid_request", issues: { path: string, message: string }[] }`, messages from section 4 |
-| 413 | `{ error: "too_large" }` when the raw body is over 100 KB, checked before JSON parsing |
+| 413 | `{ error: "too_large" }` when the raw body is over 100 KB: the declared length is checked first, then the bytes as they stream in, before JSON parsing |
 | 429 | `{ fallback: "film" }` when a guard trips |
 | 502 | `{ error: "generation_failed" }` when the provider throws or the answer fails the schema |
 
@@ -458,14 +474,24 @@ The route validates, runs the guards, calls `processCall` through the container,
 | --- | --- |
 | 1920x1080 | Four columns: Call 26%, AI 22%, a column with CRM on top and Calendar below 22%, Proposal and email 30%. Caption bar under the stage at 32 px, transcript text 20 px, controls in one row at the bottom. No page scroll |
 | 1440x900 | The same grid. Transcript shows the last six lines; caption 26 px; transcript 16 px. No page scroll |
+| 1280x720 | The same grid; Leander records at 150% zoom on 1920x1080, which lays out at this size. No lane slides its newest item under its header |
 | 375 wide | One lane at a time: the lane of the latest beat fills the width, a row of five lane chips above it marks the active lane and lanes with new items. Travel animates between chips. Caption below the lane, at most two lines at 18 px. Controls at the bottom with 44 px targets. The end card stacks before over after |
+
+Every film lane fits its content without sliding the newest item under the lane header, at 1920x1080, 1440x900 and 1280x720:
+
+| Lane | What keeps it in view |
+| --- | --- |
+| Proposal and email | Once the email lands, the proposal folds to its title, price and status. Below 1000 px of screen height the email body fades out at the height that keeps the sender, the status and the attachment chip in view. Below 760 px the proposal page tightens and drops its timeline and terms |
+| CRM | Below 960 px of screen height the two older deals step aside once the new record lands. Below 760 px the record keeps its name, stage, contact and value, and drops the email address and next step |
+| Calendar | The week sits in the lane header. Below 960 px free days drop out once the meeting is booked; below 760 px rows tighten and the meeting card reads "10:00 Walkthrough with Tom Becker" |
+| Header | From 1400 px the company name shows over "Fictional company"; between 768 and 1400 px a "Fictional" badge stands in; on phones the name shows next to the logo |
 
 ### Live
 
 | Viewport | Layout |
 | --- | --- |
 | 1920x1080 and 1440x900 | Input column at 32% on the left (tabs, transcript box, button). Right side is the lane grid without the call lane: AI, then CRM over Calendar, then Proposal and email. The result bar spans the right side once sent |
-| 375 wide | One column: tabs, transcript box, button, then the six outputs as cards in sequence order. Each new card scrolls into view. Long emails and scope lines wrap; no fixed widths |
+| 375 wide | One column: tabs, transcript box, button, then the six outputs as cards in sequence order. Each new card scrolls into view. Long emails and scope lines wrap; no fixed widths. Input tabs, the "Speaking now" toggle, Start, Stop, Send and Start over are at least 44 px tall |
 
 Nothing may overflow horizontally at 375 px in either mode: `document.documentElement.scrollWidth` stays at or below 375.
 
@@ -497,11 +523,14 @@ Every check names the feature id it proves. Flow tests carry `@<id>` in their ti
 | U8 | `meetings.make-it-yours` | `fillTokens` fills every token of section 2 and throws on an unknown one. After `buildMeetingsFilm` with each preset, no caption, transcript line or output contains `{` |
 | U9 | `meetings.live-sample` | `processCall` with the mock provider on the sample call and the default preset returns a value that passes the `call-outputs` schema, contactName "Tom Becker", the numbers and pain points of section 4, `proposal.price` equal to the preset's price, `durationMinutes` equal to its `bookingMinutes`; two runs with the same `localNow` are deep-equal |
 | U10 | `meetings.live-paste` | `processCall` with a fake provider that returns another price and a 15-minute meeting returns the profile's price and `bookingMinutes`; the request it sent has role `analysis` and a system prompt that contains the profile's name |
-| U11 | `meetings.live-paste` | The route answers 400 with `path: "transcript"` for a missing, too short or too long transcript, 400 for an invalid profile or `localNow`, 413 for a 101 KB body, 429 `{ fallback: "film" }` when the guard trips, 502 when the provider throws, and 200 `{ outputs, provider: "mock" }` for the sample call |
+| U11 | `meetings.live-paste` | The route answers 400 with `path: "transcript"` for a missing, too short or too long transcript, 400 for an invalid profile or `localNow`, 413 for a 101 KB body and for an endless streamed body without a declared length, 429 `{ fallback: "film" }` when the guard trips, 502 when the provider throws, and 200 `{ outputs, provider: "mock" }` for the sample call |
 | U12 | `meetings.film` | `buildMeetingsFilm`: beats sorted by ms, every lane and travel end is one of the five lanes, clock keyframes strictly increase, the last beat is at 67,000 and the film ends at 80,000, the end card "after" is "4 minutes", every caption has at most 60 characters and no "—" or "–" |
 | U13 | `meetings.film` | The recorded outputs pass the `call-outputs` schema after filling tokens; the sample call has 25 to 40 lines |
 | U14 | `meetings.live-record` | `createSpeechRecognizer` on a window without either constructor has `supported: false`; with a fake constructor, final results reach `onFinal`, interim results reach `onInterim`, and `not-allowed` maps to `denied` |
 | U15 | `meetings.live-record` | The record panel with a fake recognizer appends `[00:03] {owner first name}: …` then, after the toggle, `[00:09] Prospect: …`, and stops at 10 minutes with fake timers |
+| U16 | `meetings.make-it-yours` | `firstName` skips titles; `isPersonName` is false for "the team" and "Prospect"; `sellerOf` names a team profile by its company; the sample call filled from a titled, a team and an unpriced profile has 36 turns, finds Tom Becker and never reads "it's the from" or "is Price on request" |
+| U17 | `meetings.live-sample` | The mock labels each figure, skips the year 2015, reads "Becker Residential" and Tom's email from the call, names a recorded prospect from the greeting, and writes to "New contact" with "Hello," when no name is said |
+| U18 | `meetings.live-send` | `markProposalSent` sets "Proposal sent" and the next step "Proposal sent. Next: {meeting} on Friday 13 November at 10:00." |
 
 ### Flow checks (Playwright, mock provider, desktop and phone projects)
 
@@ -519,13 +548,18 @@ Every flow test fails on any `console` error or `pageerror` through one shared f
 | F8 | `meetings.live-record` | With both constructors removed by an init script, the Record tab shows the "Recording needs Chrome, Edge or Safari" note, no Start button, and the Paste path still works |
 | F9 | `meetings.live-record` | With a fake constructor that fires `error` `not-allowed` on start, the page shows the blocked microphone note and "Try again" |
 | F10 | `meetings.live-record` | With a fake constructor that emits two final results, toggling the speaker in between, the transcript box holds two lines with the two speakers, and the button produces six outputs |
-| F11 | `meetings.live-send` | After the outputs, "Send to Tom" shows "Sent", the CRM stage "Proposal sent" and "Transcript to proposal sent:" with a duration |
+| F11 | `meetings.live-send` | After the outputs, "Send to Tom" shows "Sent", the CRM stage "Proposal sent", the next step "Proposal sent. Next: …" and "Transcript to proposal sent:" with a duration |
 | F12 | `meetings.limit-fallback` | With `/api/outputs` routed to 429 `{ fallback: "film" }`, pressing the button lands on the film with the shell's fallback note |
 | F13 | `meetings.live-paste` | With `/api/outputs` routed to 502, the page shows "The draft did not come through. Try again." and "Try again" succeeds once the route is released |
-| F14 | `meetings.make-it-yours` | `/live?brand=<test profile>` (fictional, its own name, owner and price) shows its name in the header; the sample call uses its owner; the proposal shows its price. `/?brand=<same>&t=63000` shows its name in the CRM, proposal and email |
+| F14 | `meetings.make-it-yours` | `/live?brand=<test profile>` (fictional, its own name, owner and price) shows its name in the header; the sample call uses its owner; the proposal shows its price |
 | F15 | `meetings.make-it-yours` | With `/api/brand` routed to return the test profile, the "Make it yours" panel applies it and the `--brand` CSS variable equals its brand colour |
 | F16 | `meetings.film` | At 375x812, `/`, `/?t=40000`, `/?t=70000`, `/live` and `/live` after the six outputs have `scrollWidth` at most 375 |
 | F17 | `meetings.film` | At 1920x1080 and 1440x900, `/?t=63000` shows all five lanes inside the viewport with no vertical page scroll |
+| F4b | `meetings.film` | `/?t=63000` shows the folded proposal, the email from Brickfern with "Sent 14:36" in view, and the price in the CRM |
+| F10b | `meetings.live-record` | Pressing "Turn this call into a proposal" while recording stops the recording: Start shows again |
+| F18 | `meetings.live-sample` | With a pasted transcript in the box, "Sample call" keeps it until "Replace with the sample call" |
+| F19 | `meetings.live-paste` | A changed transcript after the outputs shows "The transcript changed.", disables send, and "Draft again" drafts from the new transcript |
+| F20 | `meetings.live-sample` | After "Start over" the AI lane says "Ready to read 36 turns" |
 
 ## 9. Feature rows
 
@@ -538,7 +572,7 @@ Every flow test fails on any `console` error or `pageerror` through one shared f
 | `meetings.live-record` | Record a role-played call with the microphone, or see why recording is not available | `/live`, "Record", "Start" | anon | shipped |
 | `meetings.live-send` | Send the follow-up email (simulated) and see the time from transcript to proposal sent | `/live`, after the outputs, "Send to …" | anon | shipped |
 | `meetings.limit-fallback` | See the film with a short note when the live demo hits its limit | `/live`, "Turn this call into a proposal" while a guard trips | anon | shipped |
-| `meetings.make-it-yours` | See the film and live mode in their own company's brand, voice and prices | `/`, "Make it yours", or `/live?brand=…` | anon | shipped |
+| `meetings.make-it-yours` | See live mode in their own company's brand, voice and prices | `/live`, "Make it yours", or `/live?brand=…` | anon | shipped |
 
 ## 10. Open questions
 
@@ -547,7 +581,6 @@ None is in `docs/decisions.md` yet, because this plan's scope is this file only.
 
 | Question | Default |
 | --- | --- |
-| With a visitor's profile, should the film keep the landlord story? | Yes. The film swaps the seller's name, logo, colours, price, sign-off and meeting length; the call stays the landlord story. Live mode is where their own call runs |
 | Is "2 days" the right "before" for call end to proposal sent? | Yes, as this fictional scenario's manual routine, stated in the end card note |
 | Chrome and Edge send recorded audio to their own speech service. Should the page say so? | Yes, one line under the Record button: "Your browser's speech service turns your voice into text." |
 | How does a single person record both sides of a call? | A "Speaking now" toggle sets the speaker of each final result |
