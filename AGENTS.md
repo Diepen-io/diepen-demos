@@ -23,7 +23,7 @@ Each demo is a case study page, a 60 to 90 second LinkedIn screen video and a li
 | `pnpm check` | Lint, types, unit tests, feature maps, suppressions, then e2e with the mock provider. Before commits |
 | `pnpm verify` | Prove a change in the running app. `VERIFY_APP=documents pnpm verify up` |
 
-e2e starts its own dev server per app on ports 3201 to 3203, builds into `.next-e2e/` and forces `AI_PROVIDER=mock`.
+e2e starts its own dev server per app on a port derived from the checkout path (4100 to 4899), so parallel worktrees never collide. It builds into `.next-e2e/` and forces `AI_PROVIDER=mock`.
 
 ## Where code goes
 
