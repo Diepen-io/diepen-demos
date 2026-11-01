@@ -1,62 +1,18 @@
 import { expect, test } from "./support/documents-test";
-import { clockReading, openFilm, positionMs, pressControl, setSpeed, storyClock } from "./support/film-page";
-import { firmRow } from "./support/live-page";
-import { showLane } from "./support/lanes";
+import { keynoteStep, openFilm, stepMoments } from "./support/film-page";
 
-test("pause holds the clock for a second @documents.controls", async ({ page }) => {
-  // 4,500 ms is where three and a half story hours pass in two and a half seconds.
-  await openFilm(page, "?t=4500");
-  await pressControl(page, "Play");
-  await page.waitForTimeout(500);
-  await pressControl(page, "Pause");
-  const paused = await clockReading(page);
-  const position = await positionMs(page);
-  await page.waitForTimeout(1000);
-  expect(await clockReading(page)).toBe(paused);
-  expect(await positionMs(page)).toBe(position);
+test("play moves on to the next beat and pause holds it @documents.controls", async ({ page }) => {
+  await openFilm(page, `?t=${stepMoments[0]}`);
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(keynoteStep(page)).toHaveAttribute("data-keynote-step", "1", { timeout: 5000 });
+  await page.getByRole("button", { name: "Pause" }).click();
+  await page.waitForTimeout(3500);
+  await expect(keynoteStep(page)).toHaveAttribute("data-keynote-step", "1");
 });
 
-test("play moves the clock @documents.controls", async ({ page }) => {
-  await openFilm(page, "?t=4500");
-  const before = await clockReading(page);
-  await pressControl(page, "Play");
-  await expect.poll(() => clockReading(page), { timeout: 3000 }).not.toBe(before);
-});
-
-test("restart shows Mon 9 Mar, 09:00 and the first caption @documents.controls", async ({ page }) => {
-  await openFilm(page, "?t=30000");
-  await pressControl(page, "Restart");
-  await expect(storyClock(page)).toHaveAccessibleName("Story time Mon 09:00");
-  await expect(storyClock(page)).toContainText("9 Mar");
-  await expect(page.getByText(/needs 6 documents/)).toBeVisible();
-});
-
-test("each speed setting changes the pace @documents.controls", async ({ page }) => {
-  test.setTimeout(60_000);
-  await openFilm(page, "?t=1000");
-  await pressControl(page, "Play");
-
-  const pace: Record<number, number> = {};
-  for (const speed of [0.5, 1, 1.5, 2]) {
-    await setSpeed(page, speed);
-    const startMs = await positionMs(page);
-    const startedAt = Date.now();
-    await page.waitForTimeout(1200);
-    pace[speed] = ((await positionMs(page)) - startMs) / (Date.now() - startedAt);
-  }
-
-  const [half = 0, one = 0, oneAndHalf = 0, two = 0] = [pace[0.5], pace[1], pace[1.5], pace[2]];
-  expect(half).toBeGreaterThan(0);
-  expect(one).toBeGreaterThan(half);
-  expect(oneAndHalf).toBeGreaterThan(one);
-  expect(two).toBeGreaterThan(oneAndHalf);
-  expect(two / half).toBeGreaterThan(2.5);
-});
-
-test("opens at a moment after the wrong-year statement reached the firm @documents.controls", async ({ page }) => {
-  await openFilm(page, "?t=27000");
-  await expect(page.getByText(/Wrong year caught/)).toBeVisible();
-  await expect(storyClock(page)).toHaveAccessibleName("Story time Mon 12:47");
-  await showLane(page, "firm");
-  await expect(firmRow(page, "bank-interest").getByText("Problem found", { exact: true })).toBeVisible();
+test("a progress dot jumps to its beat @documents.controls", async ({ page }) => {
+  await openFilm(page, `?t=${stepMoments[0]}`);
+  await page.getByRole("button", { name: "Step 3 of 5" }).click();
+  await expect(keynoteStep(page)).toHaveAttribute("data-keynote-step", "2");
+  await expect(page.getByRole("button", { name: "Step 3 of 5" })).toHaveAttribute("aria-current", "step");
 });

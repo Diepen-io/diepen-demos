@@ -55,21 +55,6 @@
 }
 
 /*
- * On a phone the plan puts the caption above the lane and the controls below it. The stage's own
- * order puts the caption under the lanes, so the documents film moves it up.
- */
-@media (max-width: 767px) {
-  .documents-film > header {
-    order: -2;
-  }
-
-  .documents-film > [aria-live] {
-    order: -1;
-    min-height: 2.6em;
-  }
-}
-
-/*
  * Firm and Drive lanes are size containers. On a short desktop screen their content zooms out a
  * step, so the checklist and its summary still read whole instead of being cut. A phone shows one
  * lane at a time at full size.
@@ -145,22 +130,9 @@
   }
 }
 
-/* The "Signed" stamp lands on the letter. */
-.stamp {
-  animation: stamp 260ms var(--ease-out) both;
-}
-
-@keyframes stamp {
-  from {
-    opacity: 0;
-    scale: 1.25;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .screen-in,
-  .upload-bar,
-  .stamp {
+  .upload-bar {
     animation: none;
   }
 

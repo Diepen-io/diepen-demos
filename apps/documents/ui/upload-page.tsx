@@ -11,7 +11,7 @@ import { UploadItem, type UploadRow, type UploadRowActions } from "./upload-item
 export type UploadPageProps = {
   profile: CompanyProfile;
   rows: UploadRow[];
-  /** Live mode only. The film shows the same page without handlers. */
+  /** Without it the rows show their state but offer no actions. */
   actionsFor?: (row: UploadRow) => UploadRowActions;
   onDone?: () => void;
   doneDisabled?: boolean;

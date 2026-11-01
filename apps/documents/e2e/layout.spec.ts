@@ -1,5 +1,5 @@
 import { expect, test } from "./support/documents-test";
-import { openFilm } from "./support/film-page";
+import { openFilm, stepMoments } from "./support/film-page";
 import { expectNoHorizontalOverflow, insideViewport, lane, laneTabs, type LaneId } from "./support/lanes";
 import { action, openLetter, openLive, openRequestEmail, uploadRow } from "./support/live-page";
 
@@ -10,7 +10,7 @@ test("nothing overflows 375 px in the film or in live mode @documents.film @docu
   test.setTimeout(90_000);
   await page.setViewportSize({ width: 375, height: 812 });
 
-  for (const t of [0, 20_000, 37_500, 57_500, 61_000]) {
+  for (const t of stepMoments) {
     await openFilm(page, `?t=${t}`);
     await expectNoHorizontalOverflow(page, 375);
   }
@@ -37,16 +37,15 @@ for (const viewport of [
   { width: 1920, height: 1080 },
   { width: 1440, height: 900 },
 ]) {
-  test(`all four lanes fit ${viewport.width}x${viewport.height} @documents.film @documents.upload`, async ({ page }, testInfo) => {
+  test(`the film finale and all four live lanes fit ${viewport.width}x${viewport.height} @documents.film @documents.upload`, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "Runs once, at the desktop sizes of the plan");
     await page.setViewportSize(viewport);
 
-    // At 34,500 ms the summary card shows and the caption is one of the longest.
-    await openFilm(page, "?t=34500");
-    for (const id of lanes) expect(await insideViewport(page, lane(page, id)), `film lane ${id}`).toBe(true);
-    const caption = page.getByText(/reads one summary instead of opening 4 files/);
-    await expect(caption).toBeVisible();
-    expect(await insideViewport(page, caption), "caption").toBe(true);
+    // The finale is the tallest step: the numbers, "Try it live" and the note.
+    await openFilm(page, `?t=${stepMoments[4]}`);
+    const finale = page.locator("[data-keynote-finale]");
+    await expect(finale).toBeVisible();
+    expect(await insideViewport(page, finale), "film finale").toBe(true);
 
     await openLive(page);
     for (const id of lanes) {

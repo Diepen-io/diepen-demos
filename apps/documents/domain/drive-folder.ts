@@ -3,7 +3,7 @@ import type { ItemId } from "./document-request";
 /**
  * The client's Drive folder. A passing file goes to its item's folder, a problem file to
  * "00 Needs attention", and when an item passes, its earlier problem files move to "99 Replaced".
- * Every function returns a new tree, so a film frame and a live render fold the same way.
+ * Every function returns a new tree.
  */
 
 export const folderNames = [
