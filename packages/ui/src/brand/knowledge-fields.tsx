@@ -16,7 +16,7 @@ function RemoveButton({ label, onClick }: { label: string; onClick: () => void }
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="press inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] text-faint hover:bg-subtle hover:text-fail"
+      className="press inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] text-faint hover:bg-subtle hover:text-fail max-sm:size-11"
     >
       <Icon name="close" size={16} />
     </button>
@@ -33,18 +33,21 @@ export function KnowledgeFields({ value, onChange }: { value: Knowledge; onChang
       <FormSection title="Services and prices">
         {services.map((service, index) => (
           <div key={index} className="flex flex-col gap-2 rounded-xl bg-subtle p-3">
-            <div className="flex gap-2">
+            {/* Grid tracks, not flex widths: every Input carries w-full, which beat a fixed price width. */}
+            <div className="grid grid-cols-[minmax(0,1fr)_6rem_auto] gap-2 sm:grid-cols-[minmax(0,1fr)_7rem_auto]">
               <Input
+                name={`services.${index}.name`}
                 aria-label={`Service ${index + 1} name`}
                 placeholder="Service"
                 value={service.name}
                 onChange={(event) => onChange({ ...value, services: replaceAt(services, index, { ...service, name: event.target.value }) })}
               />
               <Input
+                name={`services.${index}.price`}
                 aria-label={`Service ${index + 1} price`}
                 placeholder="Price"
                 value={service.price ?? ""}
-                className="tabular w-28 shrink-0"
+                className="tabular"
                 onChange={(event) =>
                   onChange({ ...value, services: replaceAt(services, index, { ...service, price: event.target.value || undefined }) })
                 }
@@ -52,6 +55,7 @@ export function KnowledgeFields({ value, onChange }: { value: Knowledge; onChang
               <RemoveButton label={`Remove ${service.name || "service"}`} onClick={() => onChange({ ...value, services: removeAt(services, index) })} />
             </div>
             <Input
+              name={`services.${index}.description`}
               aria-label={`Service ${index + 1} description`}
               placeholder="What it includes"
               value={service.description}
@@ -80,8 +84,9 @@ export function KnowledgeFields({ value, onChange }: { value: Knowledge; onChang
       <FormSection title="FAQ">
         {faq.map((item, index) => (
           <div key={index} className="flex flex-col gap-2 rounded-xl bg-subtle p-3">
-            <div className="flex gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
               <Input
+                name={`faq.${index}.question`}
                 aria-label={`Question ${index + 1}`}
                 placeholder="Question"
                 value={item.question}
@@ -90,6 +95,7 @@ export function KnowledgeFields({ value, onChange }: { value: Knowledge; onChang
               <RemoveButton label={`Remove question ${index + 1}`} onClick={() => onChange({ ...value, faq: removeAt(faq, index) })} />
             </div>
             <Textarea
+              name={`faq.${index}.answer`}
               aria-label={`Answer ${index + 1}`}
               placeholder="Answer"
               rows={2}

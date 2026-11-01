@@ -10,6 +10,7 @@ import { cx } from "../primitives/class-names";
 import { Icon } from "../primitives/icon";
 import { Segmented } from "../primitives/segmented";
 import { FallbackNote } from "./fallback-note";
+import { PageTitleContext } from "./page-title";
 import { useRecordMode } from "./record-mode";
 import { setUrlParam, useUrlParam } from "./url-param";
 
@@ -39,10 +40,13 @@ export function DemoShell({ title, mode, fit, children }: DemoShellProps) {
 
   if (recording) return <main className="flex h-dvh flex-col overflow-hidden">{children}</main>;
 
+  // A film runs edge to edge, so the bars use the film stage's gutters; live pages keep a reading width.
+  const frame = mode === "film" ? "w-full px-4 md:px-8 2xl:px-12" : "mx-auto w-full max-w-[1440px] px-4 sm:px-6";
+
   return (
     <div className={cx("flex min-h-dvh flex-col", fit && "md:h-dvh md:overflow-hidden")}>
       <header className="border-b border-border bg-surface">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
+        <div className={cx(frame, "flex flex-wrap items-center gap-x-4 gap-y-3 py-3")}>
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <BrandMark profile={profile} size={34} />
             <div className="min-w-0">
@@ -64,7 +68,7 @@ export function DemoShell({ title, mode, fit, children }: DemoShellProps) {
             />
             <a
               href={studioUrl}
-              className="px-2 text-[13px] font-medium text-faint transition-colors hover:text-foreground sm:order-last"
+              className="inline-flex h-11 items-center px-2 text-[13px] font-medium text-faint transition-colors hover:text-foreground sm:order-last sm:h-auto"
             >
               diepen.ai
             </a>
@@ -78,17 +82,17 @@ export function DemoShell({ title, mode, fit, children }: DemoShellProps) {
 
       <main className="flex min-h-0 flex-1 flex-col">
         {fallback && (
-          <div className="mx-auto w-full max-w-[1440px] px-4 pt-4 sm:px-6">
+          <div className={cx(frame, "pt-4")}>
             <FallbackNote
               filmHref={mode === "live" ? hrefWithBrand("/") : undefined}
               onDismiss={() => setUrlParam("fallback", null)}
             />
           </div>
         )}
-        {children}
+        <PageTitleContext value={true}>{children}</PageTitleContext>
       </main>
 
-      <footer className="mx-auto w-full max-w-[1440px] px-4 py-5 text-[13px] text-faint sm:px-6">
+      <footer className={cx(frame, "py-5 text-[13px] text-faint")}>
         {profile.fictional
           ? `A diepen.ai demo with ${profile.name}, a fictional company.`
           : `A diepen.ai demo in ${profile.name}'s brand.`}{" "}

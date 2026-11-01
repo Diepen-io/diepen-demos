@@ -2,6 +2,7 @@ import type { AiProvider } from "@diepen/ai/provider";
 import { readableForeground } from "./color-contrast.ts";
 import { extractHtmlSignals, type HtmlSignals } from "./html-signals.ts";
 import type { PageFetcher } from "./page-fetcher.ts";
+import { teamOwner } from "./person-name.ts";
 import type { CompanyProfile } from "./profile.ts";
 import { buildSystemPrompt } from "./prompt.ts";
 import { brandExtractionSchema, brandExtractionTask, type BrandExtraction } from "./tasks/brand-extraction.ts";
@@ -43,7 +44,7 @@ export function domainProfile(pageUrl: string, signals: HtmlSignals): BrandExtra
     website: new URL(pageUrl).origin,
     logo: { kind: "monogram", text: monogram },
     colors: { brand, brandForeground: readableForeground(brand) },
-    people: { owner: { name: "The owner", role: "Owner" }, assistantName: `${name} assistant` },
+    people: { owner: { ...teamOwner }, assistantName: `${name} assistant` },
     voice: {
       tone: "Friendly, clear and helpful. Short sentences and plain words.",
       wordsToUse: ["happy to help", "appointment", "thank you"],
@@ -64,6 +65,13 @@ export function domainProfile(pageUrl: string, signals: HtmlSignals): BrandExtra
       bookingMinutes: 30,
     },
   };
+}
+
+// Models sometimes fall back to a generic owner despite the instructions; a draft never greets "The owner".
+const placeholderOwner = /^(the )?(owner|business owner|founder|team)$/i;
+
+function ownerOf(draft: BrandExtraction): CompanyProfile["people"]["owner"] {
+  return placeholderOwner.test(draft.people.owner.name.trim()) ? { ...teamOwner } : draft.people.owner;
 }
 
 function signalsMessage(signals: HtmlSignals): string {
@@ -88,6 +96,7 @@ export async function extractBrandProfile({ url, fetchPage, provider }: BrandExt
     ...draft,
     id: slug(draft.id || draft.name),
     website: new URL(page.url).origin,
+    people: { ...draft.people, owner: ownerOf(draft) },
     colors: { brand: draft.colors.brand, brandForeground: readableForeground(draft.colors.brand) },
   };
 }

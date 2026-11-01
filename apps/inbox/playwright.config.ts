@@ -1,7 +1,8 @@
+import { createHash } from "node:crypto";
 import { defineConfig, devices } from "@playwright/test";
 
-// e2e owns its port and build folder, and always runs the mock provider, so it never calls Claude.
-const port = 3201;
+// Each checkout and app gets its own e2e port, so parallel worktrees never share a server.
+const port = 4100 + (createHash("sha1").update(import.meta.dirname).digest().readUInt16BE(0) % 800);
 const external = process.env.VERIFY_URL;
 
 export default defineConfig({

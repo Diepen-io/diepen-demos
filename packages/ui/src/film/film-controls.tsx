@@ -17,8 +17,9 @@ export type FilmControlsProps = {
   className?: string;
 };
 
+// 44 px on phones, the smallest comfortable touch target.
 const iconButton =
-  "press grid size-10 shrink-0 cursor-pointer place-items-center rounded-full transition-[background-color,color,transform] duration-150";
+  "press grid size-10 max-sm:size-11 shrink-0 cursor-pointer place-items-center rounded-full transition-[background-color,color,transform] duration-150";
 
 /** Play or pause, restart, speed and a scrubber with beat marks. */
 export function FilmControls({ film, ticks, idle, className }: FilmControlsProps) {
@@ -57,7 +58,7 @@ export function FilmControls({ film, ticks, idle, className }: FilmControlsProps
         type="button"
         onClick={() => film.setSpeed(nextSpeed(film.speed))}
         aria-label={`Speed ${film.speed} times. Change speed`}
-        className="press h-9 w-14 shrink-0 cursor-pointer rounded-[10px] text-[14px] font-semibold tabular-nums transition-colors duration-150 hover:bg-subtle"
+        className="press h-9 w-14 shrink-0 cursor-pointer max-sm:h-11 rounded-[10px] text-[14px] font-semibold tabular-nums transition-colors duration-150 hover:bg-subtle"
       >
         {film.speed}×
       </button>
@@ -76,8 +77,9 @@ function Scrubber({ film, ticks }: { film: FilmController; ticks: FilmTick[] }) 
     film.seek(film.t + (event.key === "ArrowRight" ? 5000 : -5000));
   }
 
+  // The side margins keep the thumb, which overhangs the track ends, clear of the time labels.
   return (
-    <div className="relative h-10 min-w-0 flex-1">
+    <div className="relative mx-2 h-10 min-w-0 flex-1 max-sm:h-11">
       <input
         type="range"
         min={0}

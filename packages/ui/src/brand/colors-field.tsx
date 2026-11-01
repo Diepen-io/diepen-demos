@@ -11,7 +11,9 @@ type Colors = { brand: string; brandForeground: string };
 
 const hex = /^#[0-9a-f]{6}$/i;
 
-function ColorInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+type ColorInputProps = { label: string; name: string; value: string; onChange: (value: string) => void };
+
+function ColorInput({ label, name, value, onChange }: ColorInputProps) {
   const [text, setText] = useState(value);
   const shown = hex.test(text) ? value : text;
   return (
@@ -20,16 +22,18 @@ function ColorInput({ label, value, onChange }: { label: string; value: string; 
         <div className="flex items-center gap-2">
           <input
             type="color"
+            name={`${name}-picker`}
             aria-label={`${label} picker`}
             value={value}
             onChange={(event) => {
               setText(event.target.value);
               onChange(event.target.value);
             }}
-            className="size-10 shrink-0 cursor-pointer rounded-[10px] border-0 bg-transparent p-0 [&::-webkit-color-swatch]:rounded-[9px] [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-0"
+            className="size-10 shrink-0 cursor-pointer rounded-[10px] max-sm:size-11 border-0 bg-transparent p-0 [&::-webkit-color-swatch]:rounded-[9px] [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-0"
           />
           <Input
             {...control}
+            name={name}
             value={shown}
             spellCheck={false}
             className="tabular font-mono uppercase"
@@ -55,10 +59,11 @@ export function ColorsField({ value, onChange }: { value: Colors; onChange: (val
   return (
     <div className="flex flex-col gap-3">
       <div className="grid gap-3 sm:grid-cols-2">
-        <ColorInput label="Brand colour" value={value.brand} onChange={(brand) => onChange({ ...value, brand })} />
+        <ColorInput label="Brand colour" name="colors.brand" value={value.brand} onChange={(brand) => onChange({ ...value, brand })} />
         <ColorInput
           key={fixes}
           label="Text on brand"
+          name="colors.brandForeground"
           value={value.brandForeground}
           onChange={(brandForeground) => onChange({ ...value, brandForeground })}
         />

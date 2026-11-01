@@ -63,4 +63,25 @@ describe("extractBrandProfile with a model", () => {
     expect(profile.id).toBe("northwind-bakery-gmbh");
     expect(profile.colors.brandForeground).toBe("#ffffff");
   });
+
+  it("replaces a generic owner such as 'The owner' with the team", async () => {
+    const provider: AiProvider = {
+      name: "claude",
+      streamText: () => (async function* () {})(),
+      generateText: () => Promise.resolve(""),
+      generateObject: <T>() => {
+        const base = domainProfile(page.url, { icons: [], text: "", colors: [] });
+        return Promise.resolve({ ...base, people: { ...base.people, owner: { name: "The owner", role: "Owner" } } } as T);
+      },
+    };
+    const profile = await extractBrandProfile({ url: page.url, fetchPage: () => Promise.resolve(page), provider });
+    expect(profile.people.owner).toEqual({ name: "the team", role: "Team" });
+  });
+});
+
+describe("domainProfile", () => {
+  it("names the team as owner when the page names no person", () => {
+    const draft = domainProfile("https://acme.example/", { icons: [], text: "", colors: [] });
+    expect(draft.people.owner).toEqual({ name: "the team", role: "Team" });
+  });
 });

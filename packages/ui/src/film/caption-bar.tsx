@@ -6,14 +6,17 @@ import { EASE_OUT_POINTS } from "./film-easing";
 
 export type CaptionBarProps = {
   caption: { beatId: string; text: string } | null;
+  /** Changes on a seek or restart. The new caption then replaces the old one at once, without a crossfade. */
+  jumpKey?: number;
   className?: string;
 };
 
 /**
  * One line that says what happens, so the film works without sound. Captions share one grid
- * cell and crossfade, so the bar never changes height.
+ * cell and crossfade. The bar always reserves room for two lines (three on phones), so a caption
+ * that wraps never moves the lanes above it.
  */
-export function CaptionBar({ caption, className }: CaptionBarProps) {
+export function CaptionBar({ caption, jumpKey = 0, className }: CaptionBarProps) {
   const reduceMotion = useReducedMotion();
   const offset = reduceMotion ? 0 : 10;
 
@@ -21,15 +24,15 @@ export function CaptionBar({ caption, className }: CaptionBarProps) {
     <div
       aria-live="polite"
       className={cx(
-        "grid min-h-[3.2em] place-items-center px-2 text-center text-[clamp(1.125rem,1.45vw,1.875rem)] leading-[1.25] font-medium tracking-[-0.015em] md:min-h-[1.6em]",
+        "grid h-[3.75em] shrink-0 place-items-center overflow-hidden px-2 text-center text-[clamp(1.125rem,1.45vw,1.875rem)] leading-[1.25] font-medium tracking-[-0.015em] md:h-[2.5em]",
         className,
       )}
     >
-      <AnimatePresence initial={false}>
+      <AnimatePresence key={jumpKey} initial={false}>
         {caption ? (
           <motion.p
             key={caption.beatId}
-            className="col-start-1 row-start-1 max-w-[52ch] text-balance"
+            className="col-start-1 row-start-1 line-clamp-3 max-w-[52ch] text-balance md:line-clamp-2"
             initial={{ opacity: 0, transform: `translateY(${offset}px)` }}
             animate={{
               opacity: 1,

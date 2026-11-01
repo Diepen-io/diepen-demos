@@ -8,7 +8,7 @@ type PageProps = { searchParams: Promise<Record<string, string | string[] | unde
 export default async function FilmPage({ searchParams }: PageProps) {
   const { brand } = await searchParams;
   return (
-    <BrandProvider defaultProfile={defaultPresetFor("documents")} brandParamValue={typeof brand === "string" ? brand : null}>
+    <BrandProvider fixed defaultProfile={defaultPresetFor("documents")} brandParamValue={typeof brand === "string" ? brand : null}>
       <DemoShell title="Document chaser" mode="film">
         <DocumentsFilmStage />
       </DemoShell>

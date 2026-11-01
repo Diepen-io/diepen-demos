@@ -109,7 +109,7 @@ export function Sheet({ open, onClose, title, description, children, footer }: S
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="press -mr-1.5 inline-flex size-9 cursor-pointer items-center justify-center rounded-lg text-muted hover:bg-subtle hover:text-foreground"
+            className="press -mr-1.5 inline-flex size-11 shrink-0 cursor-pointer sm:size-9 items-center justify-center rounded-lg text-muted hover:bg-subtle hover:text-foreground"
           >
             <Icon name="close" size={18} />
           </button>

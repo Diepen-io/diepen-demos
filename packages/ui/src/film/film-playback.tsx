@@ -9,6 +9,8 @@ export type PlaybackState = {
   playing: boolean;
   speed: FilmSpeed;
   durationMs: number;
+  /** Counts seeks and restarts, so views can skip transitions when time jumps instead of flowing. */
+  jumps: number;
 };
 
 export type PlaybackAction =
@@ -22,23 +24,23 @@ export type PlaybackAction =
   | { type: "tick"; elapsedMs: number };
 
 export function initialPlayback(durationMs: number): PlaybackState {
-  return { t: 0, playing: false, speed: 1, durationMs };
+  return { t: 0, playing: false, speed: 1, durationMs, jumps: 0 };
 }
 
 export function playbackReducer(state: PlaybackState, action: PlaybackAction): PlaybackState {
   switch (action.type) {
     case "play":
       // Play at the end starts over, the way a video player does.
-      return state.t >= state.durationMs ? { ...state, t: 0, playing: true } : { ...state, playing: true };
+      return state.t >= state.durationMs ? { ...state, t: 0, playing: true, jumps: state.jumps + 1 } : { ...state, playing: true };
     case "pause":
       return state.playing ? { ...state, playing: false } : state;
     case "toggle":
       return playbackReducer(state, { type: state.playing ? "pause" : "play" });
     case "restart":
-      return { ...state, t: 0, playing: true };
+      return { ...state, t: 0, playing: true, jumps: state.jumps + 1 };
     case "seek": {
       const t = clamp(action.t, 0, state.durationMs);
-      return { ...state, t, playing: state.playing && t < state.durationMs };
+      return { ...state, t, playing: state.playing && t < state.durationMs, jumps: state.jumps + 1 };
     }
     case "speed":
       return { ...state, speed: action.speed };

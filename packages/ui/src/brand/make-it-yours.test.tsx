@@ -1,10 +1,12 @@
 import type { CompanyProfile } from "@diepen/voice/profile";
 import { presetList } from "@diepen/voice/presets";
+import { encodeProfile } from "@diepen/voice/profile-codec";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BrandProvider, useBrand } from "./brand-provider";
 import { MakeItYours } from "./make-it-yours";
+import { brandStorageKey } from "./profile-store";
 
 const [defaultProfile, other] = presetList as [CompanyProfile, CompanyProfile];
 const extracted = { ...other, id: "harbour-bakery", name: "Harbour Bakery", fictional: false };
@@ -94,5 +96,34 @@ describe("MakeItYours", () => {
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/name/i));
     expect(screen.getByTestId("active").textContent).toBe(defaultProfile.name);
+  });
+
+  it("copies a link that carries the profile loaded from storage, without film time", async () => {
+    window.localStorage.setItem(brandStorageKey, encodeProfile(extracted));
+    window.history.replaceState(null, "", "/live?t=4000&record=1");
+    const writeText = vi.fn(() => Promise.resolve());
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText } });
+    render(<Harness />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
+      await Promise.resolve();
+    });
+    expect(writeText).toHaveBeenCalledWith(`http://localhost:3000/live?brand=${encodeProfile(extracted)}`);
+  });
+
+  it("edits the owner's name and role and the sign-off", () => {
+    render(<Harness />);
+    expect(screen.getByLabelText<HTMLInputElement>("Owner's name").value).toBe(defaultProfile.people.owner.name);
+    expect(screen.getByLabelText<HTMLInputElement>("Owner's role").value).toBe(defaultProfile.people.owner.role);
+    fireEvent.change(screen.getByLabelText("Sign-off"), { target: { value: "Cheers,\nAda" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+    expect(new URLSearchParams(window.location.search).get("brand")).not.toBe(defaultProfile.id);
+  });
+
+  it("gives every field an id or a name", () => {
+    render(<Harness />);
+    const fields = [...document.querySelectorAll("input, textarea, select")];
+    expect(fields.length).toBeGreaterThan(10);
+    expect(fields.filter((field) => !field.id && !field.getAttribute("name"))).toEqual([]);
   });
 });

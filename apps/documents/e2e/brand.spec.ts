@@ -35,7 +35,8 @@ test("live mode speaks in the applied profile's name, colours and Drive @documen
   expect(sentBody).toContain(brickfern.name);
 });
 
-test("the film's first caption uses the applied profile @documents.brand", async ({ page }) => {
+test("the film keeps its own fictional firm with a ?brand= link (decision F1) @documents.brand", async ({ page }) => {
+  const film = presets["ledgerwick-accounting"];
   await openFilm(page, `${brandQuery}&t=0`);
-  await expect(page.getByText(new RegExp(`^${brickfern.name} needs 6 documents`))).toBeVisible();
+  await expect(page.getByText(new RegExp(`^${film.name} needs 6 documents`))).toBeVisible();
 });

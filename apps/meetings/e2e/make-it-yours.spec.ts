@@ -1,3 +1,4 @@
+import { presets } from "@diepen/voice/presets";
 import { encodeProfile } from "@diepen/voice/profile-codec";
 import { testProfile } from "@/test-support/test-profile";
 import { lane } from "./support/film";
@@ -19,11 +20,12 @@ test("runs live mode in the visitor's brand, owner and price @meetings.make-it-y
   await expect(output(page, "proposal")).toContainText(price);
 });
 
-test("plays the film in the visitor's name and price @meetings.make-it-yours", async ({ page }) => {
+test("plays the film in its own fictional company, even with a ?brand= link (decision F1) @meetings.make-it-yours", async ({ page }) => {
+  const film = presets["brickfern-property"];
   await page.goto(`/?brand=${brand}&t=63000`);
-  await expect(lane(page, "proposal")).toContainText(`${testProfile.name} takes over on 1 January 2027`);
-  await expect(lane(page, "proposal")).toContainText(`Your proposal from ${testProfile.name}`);
-  await expect(lane(page, "crm")).toContainText(price);
+  await expect(lane(page, "proposal")).toContainText(`${film.name} takes over on 1 January 2027`);
+  await expect(lane(page, "proposal")).not.toContainText(testProfile.name);
+  await expect(lane(page, "crm")).not.toContainText(price);
 });
 
 // F15

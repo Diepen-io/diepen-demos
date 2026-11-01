@@ -24,7 +24,7 @@ export const brandExtractionTask: TaskSpec<BrandExtractionContext, BrandExtracti
       "- tone: describe how the business writes, based on its real sentences, in two or three sentences. wordsToUse are words the page itself uses; wordsToAvoid are words that would not fit that tone.",
       "- services and faq: only what the page offers or answers.",
       "- policies: mayPromise only what the page commits to. neverPromise and handoverWhen always cover complaints, refunds, legal questions, professional advice for the industry, and anything the knowledge does not answer.",
-      "- people: use names from the page. When there is none, use 'The owner' as the owner's name and '<business name> assistant' as the assistant name.",
+      "- people: use names from the page. When the page names no person, use 'the team' (lowercase) as the owner's name and 'Team' as the role; never invent a name or write 'The owner'. The assistant name is '<business name> assistant' unless the page names one.",
       "- colors.brand: the theme colour, else the most frequent colour that is not white, black or grey.",
       "- logo: a monogram of one to three letters from the business name.",
       "- bookingMinutes: 30 unless the page states a length.",
