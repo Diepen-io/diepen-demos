@@ -297,3 +297,19 @@ input[type="range"] {
   box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--brand) 55%, transparent);
   transition-delay: 380ms;
 }
+
+/* Keynote films: each beat rises a few pixels into place while it fades in. One move per beat. */
+.keynote-rise {
+  animation: keynote-rise 320ms var(--ease-out) both;
+}
+
+.keynote-fade {
+  animation: fade-in 320ms var(--ease-out) both;
+}
+
+@keyframes keynote-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
