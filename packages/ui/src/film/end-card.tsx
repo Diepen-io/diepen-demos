@@ -40,7 +40,7 @@ export function EndCard({ end, visible, onReplay, liveHref, recording = false, r
           key="end"
           style={sizeContainer}
           // Phones get an opaque cover at once: a fading, see-through layer let the page show through.
-          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-background p-4 max-md:opacity-100! md:absolute md:z-30 md:bg-background/85 md:p-[clamp(0.5rem,3cqh,2rem)]"
+          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-background p-4 max-md:opacity-100! md:absolute md:z-30 md:bg-background/95 md:p-[clamp(0.5rem,3cqh,2rem)]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { duration: 0.5, ease: EASE_OUT_POINTS } }}
           exit={{ opacity: 0, transition: { duration: 0.2, ease: EASE_OUT_POINTS } }}
@@ -52,19 +52,19 @@ export function EndCard({ end, visible, onReplay, liveHref, recording = false, r
           >
             <h2
               id="film-end-metric"
-              className="text-[clamp(1rem,min(1.4vw,3.4cqh),1.625rem)] font-medium tracking-[-0.015em] text-muted"
+              className="text-[clamp(1.125rem,min(1.6vw,3.6cqh),1.75rem)] font-medium tracking-[-0.015em] text-muted"
             >
               {end.metric}
             </h2>
             <div className="mt-5 grid gap-6 md:mt-[clamp(0.75rem,3cqh,2rem)] md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-0">
               <motion.div className="md:border-r md:border-border md:pr-10" {...rise(0.25)}>
-                <p className="text-[14px] font-medium text-faint">Before</p>
+                <p className="text-[16px] font-medium text-faint">Before</p>
                 <p className="mt-2 text-[clamp(1.5rem,min(2.8vw,6.5cqh),3.25rem)] leading-none font-semibold tracking-[-0.03em] text-balance text-muted tabular-nums">
                   {end.before}
                 </p>
               </motion.div>
               <motion.div className="md:pl-10" {...rise(0.6, 18)}>
-                <p className="text-[14px] font-medium text-faint">Now</p>
+                <p className="text-[16px] font-medium text-faint">Now</p>
                 <p className="mt-2 text-[clamp(2.25rem,min(5.2vw,12cqh),6.25rem)] leading-[0.95] font-semibold tracking-[-0.035em] text-balance tabular-nums">
                   {end.after}
                 </p>
@@ -72,7 +72,7 @@ export function EndCard({ end, visible, onReplay, liveHref, recording = false, r
             </div>
             {end.lines?.length ? (
               <motion.ul
-                className="mt-6 grid gap-2 text-[clamp(0.9375rem,min(1.1vw,2.8cqh),1.25rem)] leading-snug md:mt-[clamp(0.75rem,3.5cqh,2.5rem)] md:gap-[clamp(0.25rem,1cqh,0.5rem)]"
+                className="mt-6 grid gap-2 text-[clamp(1rem,min(1.3vw,3cqh),1.375rem)] leading-snug md:mt-[clamp(0.75rem,3.5cqh,2.5rem)] md:gap-[clamp(0.25rem,1cqh,0.5rem)]"
                 {...rise(0.95)}
               >
                 {end.lines.map((line) => (
@@ -88,7 +88,7 @@ export function EndCard({ end, visible, onReplay, liveHref, recording = false, r
               {...rise(1.15, 8)}
             >
               {recording ? (
-                <p className="text-[15px] font-medium text-muted">{makerLine}</p>
+                <p className="text-[16px] font-medium text-muted">{makerLine}</p>
               ) : (
                 <div className="flex flex-wrap items-center gap-3">
                   <Button variant="secondary" size="lg" onClick={onReplay}>
@@ -107,7 +107,7 @@ export function EndCard({ end, visible, onReplay, liveHref, recording = false, r
                   </a>
                 </div>
               )}
-              {end.note ? <p className="text-[14px] text-faint">{end.note}</p> : null}
+              {end.note ? <p className="text-[16px] text-muted">{end.note}</p> : null}
             </motion.div>
           </motion.section>
         </motion.div>

@@ -1,33 +1,28 @@
 "use client";
 
+import { BrandMark } from "@diepen/ui/brand/brand-mark";
 import { useBrand } from "@diepen/ui/brand/brand-provider";
-import { FilmStage } from "@diepen/ui/film/film-stage";
-import type { FilmLayout } from "@diepen/ui/film/film-layout";
-import { inboxFilmFor, snapshotAt } from "@/film/film-state";
-import { FilmLane } from "./film-lanes";
+import { FictionalBadge } from "@diepen/ui/brand/fictional-badge";
+import { FocusStage } from "@diepen/ui/film/focus-stage";
+import { useRecordMode } from "@diepen/ui/shell/record-mode";
+import { inboxFilmFor } from "@/film/film-state";
+import { InboxFilmPanel } from "./film-panels";
 
-const layout: FilmLayout = {
-  columns: [
-    { lanes: ["customers"], width: "35fr" },
-    { lanes: ["ai"], width: "18fr" },
-    { lanes: ["calendar"], width: "26fr" },
-    { lanes: ["owner"], width: "21fr" },
-  ],
-};
-
-/** The film in the active company's brand. A new profile keeps the film time and redraws every lane. */
+/** The film in its own company's brand (decision F1). */
 export function InboxFilm() {
   const { profile, hrefWithBrand } = useBrand();
-  const script = inboxFilmFor(profile);
+  // A recording has no shell header, so the stage names the company and marks it fictional itself.
+  const recording = useRecordMode();
 
   return (
-    <FilmStage
-      script={script}
-      layout={layout}
+    <FocusStage
+      script={inboxFilmFor(profile)}
+      brand={recording ? <BrandMark profile={profile} size={42} /> : undefined}
+      badge={recording ? <FictionalBadge size="lg" /> : undefined}
       liveHref={hrefWithBrand("/live")}
       // On a phone the shell header sits above the stage, so the stage leaves its height free for the caption and controls.
       className="max-md:h-[calc(100dvh-7.25rem)] md:h-auto! md:min-h-0 md:flex-1"
-      renderLane={(lane, ctx) => <FilmLane laneId={lane.id} snapshot={snapshotAt(ctx.t, profile)} t={ctx.t} profile={profile} />}
+      renderPanel={(ctx) => <InboxFilmPanel ctx={ctx} profile={profile} />}
     />
   );
 }

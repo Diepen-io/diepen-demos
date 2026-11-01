@@ -30,11 +30,13 @@ export type FilmClockProps = {
   storyTime: number;
   /** Story ms per film ms, from `storyRateAt`. */
   rate: number;
+  /** "Time compressed" beside the clock. A focus film leaves it out: the racing clock says it. */
+  raceHint?: boolean;
   className?: string;
 };
 
 /** The story clock. A new day flashes its date; the hint lights up while time races. */
-export function FilmClock({ storyTime, rate, className }: FilmClockProps) {
+export function FilmClock({ storyTime, rate, raceHint = true, className }: FilmClockProps) {
   const parts = formatStoryTime(storyTime);
   const [firstDay] = useState(parts.dayKey);
   const reduceMotion = useReducedMotion();
@@ -45,7 +47,7 @@ export function FilmClock({ storyTime, rate, className }: FilmClockProps) {
     <div className={cx("flex items-center gap-3", className)} role="timer" aria-label={`Story time ${parts.weekday} ${parts.time}`}>
       <motion.span
         key={parts.dayKey}
-        className="inline-flex h-8 items-center gap-1.5 rounded-[9px] px-2.5 text-[14px] font-medium whitespace-nowrap"
+        className="inline-flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-[16px] font-medium whitespace-nowrap"
         initial={
           newDay
             ? { backgroundColor: "#171717", color: "#ffffff", opacity: 0, transform: reduceMotion ? "none" : "translateY(8px)" }
@@ -61,16 +63,18 @@ export function FilmClock({ storyTime, rate, className }: FilmClockProps) {
         <span>{parts.weekday}</span>
         <span className="opacity-60">{parts.date}</span>
       </motion.span>
-      <span className="text-[28px] leading-none font-semibold tracking-[-0.02em] tabular-nums">{parts.time}</span>
-      <span
-        className={cx(
-          "hidden items-center gap-1.5 text-[13px] font-medium whitespace-nowrap transition-colors duration-300 lg:inline-flex",
-          racing ? "text-foreground" : "text-faint",
-        )}
-      >
-        <FilmGlyph name="fastForward" size={15} className={racing && !reduceMotion ? "animate-pulse" : undefined} />
-        Time compressed
-      </span>
+      <span className="text-[30px] leading-none font-semibold tracking-[-0.02em] tabular-nums">{parts.time}</span>
+      {raceHint ? (
+        <span
+          className={cx(
+            "hidden items-center gap-1.5 text-[16px] font-medium whitespace-nowrap transition-colors duration-300 lg:inline-flex",
+            racing ? "text-foreground" : "text-faint",
+          )}
+        >
+          <FilmGlyph name="fastForward" size={17} className={racing && !reduceMotion ? "animate-pulse" : undefined} />
+          Time compressed
+        </span>
+      ) : null}
     </div>
   );
 }

@@ -166,7 +166,7 @@ export function receivingLanes(script: FilmScript<unknown>, t: number, leadMs = 
 }
 
 /** Story wall-clock time at `t`, as UTC epoch ms so it formats the same on server and client. */
-export function storyTimeAt(script: FilmScript<unknown>, t: number): number {
+export function storyTimeAt(script: { clock: FilmClockKeyframe[] }, t: number): number {
   const frames = script.clock;
   const first = frames[0];
   if (!first) return 0;
@@ -185,7 +185,7 @@ export function storyTimeAt(script: FilmScript<unknown>, t: number): number {
 }
 
 /** Story ms per film ms at `t`. Above 1 means time is compressed. */
-export function storyRateAt(script: FilmScript<unknown>, t: number, windowMs = 100): number {
+export function storyRateAt(script: { clock: FilmClockKeyframe[] }, t: number, windowMs = 100): number {
   const before = storyTimeAt(script, Math.max(0, t - windowMs / 2));
   const after = storyTimeAt(script, t + windowMs / 2);
   return (after - before) / windowMs;

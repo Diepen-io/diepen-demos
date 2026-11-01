@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { filmLane } from "./support/film-page";
+import { filmPanel } from "./support/film-page";
 import { gotoApp } from "./support/layout";
 
 test.describe.configure({ timeout: 60_000 });
@@ -7,9 +7,9 @@ test.describe.configure({ timeout: 60_000 });
 test.use({ actionTimeout: 15_000 });
 
 test("F5: at 08:00 the owner view lists needs a human first, then by last activity @inbox.owner-view", async ({ page }) => {
-  await gotoApp(page, "/?t=66000");
+  await gotoApp(page, "/?t=46000");
 
-  const rows = filmLane(page, "owner").getByTestId("owner-row");
+  const rows = filmPanel(page, "owner").getByTestId("owner-row");
   await expect(rows).toHaveCount(4);
   const expected = [
     { channel: "chat", name: "Daniel Moore", status: "Needs a human" },

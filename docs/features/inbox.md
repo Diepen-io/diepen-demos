@@ -13,90 +13,67 @@ At 08:00 you see every conversation and its status in one list.
 ## 2. Film script
 
 The film runs at `/`.
-It is 86 seconds long: 76 seconds of story and 10 seconds of end card.
-It plays one night at a fictional dental clinic, from Tuesday 10 November 2026 at 21:40 to Wednesday 11 November at 08:01.
+It is 63 seconds long: 53 seconds of story in seven beats and 10 seconds of end card.
+It plays one night at a fictional dental clinic, from Tuesday 10 November 2026 at 21:42 to Wednesday 11 November at 08:01.
 The film always tells Ottervale Dental's story (decision F1).
 Four customers write on four channels while the clinic is closed.
 
-### Lanes
+It runs on the shared focus engine (`FocusStage`, see `docs/packages.md`): one focus per beat.
+Live mode keeps every detail; the film shows only what the caption is about.
 
-| Lane id | Label on screen | What it shows |
-| --- | --- | --- |
-| `customers` | Customers, with the role "4 channels" | A channel tab strip (Email, Instagram, LinkedIn, Website chat) over the mockup of the active channel, with the thread as the customer sees it |
-| `ai` | {assistant}, with the subtitle "AI assistant" | One card per conversation: channel icon, customer name, intent, qualifying facts as tags, status chip, "Replied in 42 s", and on a handover the policy line |
-| `calendar` | Calendar, with the role "Bookings" | A three-day week view, Wed 11 to Fri 13 November, 08:00 to 18:00, with busy, offered and booked blocks. When the lane is too short for the whole day, it scrolls to the blocks that changed last |
-| `owner` | {owner}, with the role "Owner view" | The list a business owner opens in the morning: one row per conversation with channel, name, one-line summary and status |
+### Parties
 
-Why these four: the customer's channel UI and the customer are one lane, because a separate "Channels" lane would show every message twice.
-The AI lane shows the decision an owner wants to understand (what it read, what it decided, why it handed over).
-The calendar lane makes a booking visible as a result, and the owner lane is the payoff: the morning view.
+Every party is a chip in one row under the panels, in this order. A beat shows one or two of them as panels.
 
-Lane widths at 16:9: Customers 35 %, AI 18 %, Calendar 26 %, Owner 21 %. The calendar gets the room a booked block needs for its time and name on two lines.
+| Party id | Label | Role line | What its panel shows |
+| --- | --- | --- | --- |
+| `ana` | Ana Ruiz | Email | The last two messages of her conversation as large bubbles: hers on the left with her initials, the assistant's on the right in the brand colour with a sparkle avatar. Offered times show as two chips under the offer |
+| `priya` | Priya Shah | Instagram | The same thread view. In her beat, "Answered in 38 s" sits between her question and the reply |
+| `tom` | Tom Becker | LinkedIn | The same thread view |
+| `daniel` | Daniel Moore | Website chat | The same thread view, ending on the amber note "Handed to {owner}" |
+| `calendar` | Calendar | Bookings | One morning, 08:00 to 12:00, of the day the beat's booking falls on: grey "Busy" blocks, dashed "Offered" blocks, the booked block in the brand colour with its time and name |
+| `owner` | {owner} | Owner | The owner's list: channel mark, name and status chip per conversation, needs a human first. As a partner it shows only the beat's conversation; at 08:00 it shows all four |
+
+Thread panels leave out an email's greeting and sign-off (`ui/film-text.ts`), subjects, message times, typing indicators and composers.
+Summaries, filter chips and reply meta lines belong to live mode only.
 
 ### Rules for the script
 
-- Every beat row is a clock keyframe (`FilmClockKeyframe`, curve `linear`), so story times never go down. The jump at 64000 ms uses curve `ease`.
-- Travel starts at the beat's film time and lands in the beat's lane after the engine's default 800 ms. Kinds: `message` (a chat bubble), `document` (a note card), `event` (a small pill). The travel label is the message id's short text, for example "Email from Ana".
-- A caption stays on screen until the next caption replaces it. "(keeps)" means no new caption.
-- Captions are templates. Slots in braces come from the active profile (section 3, "Slots"). The engine takes plain strings, so `buildInboxFilm(profile)` fills every caption, lane label and end card line before it hands the script to `FilmStage`.
-- A filled caption is at most 60 characters with every preset. Captions use {owner} and {assistant} and leave the company name to the lanes, because "Brickfern Property Management" alone takes half the limit.
-- Status labels on screen: `answered` is "Answered", `booking_offered` is "Slot offered", `booked` is "Booked", `needs_human` is "Needs a human".
-- Status chip colours are semantic, not brand: Answered zinc, Slot offered blue, Booked green, Needs a human amber.
-- Under `prefers-reduced-motion` travel is replaced by a 150 ms fade at the target; beats and the clock run the same.
-- Thread panes show whole messages: the newest message is always fully in view, and the pane starts at the first message that fits whole (`ui/use-whole-messages.ts`).
-- While the AI card says "Writing a reply", its status chip waits for the reply.
-- A customer message lands in its thread at its row's time. A second beat 300 to 400 ms later carries it to the AI lane, so the travelling token leaves a thread that already shows the message. `film/film-beats.ts` holds every beat, these included.
+- Each beat names its `focus`, an optional `partner`, one caption and one highlight id (`film/film-beats.ts`). The focus is large and centred; the partner slides in beside it from 768 px up. Phones show the focus only, so every highlight sits in the focus panel.
+- A caption has at most 8 words with every preset (the engine refuses more than 9) and no em or en dash. Captions use {owner} and leave the company name to the header.
+- What a panel shows follows from the beat's story time alone: `frameAt(story)` in `film/film-state.ts` takes every fixture message sent by then. The picture holds still through a beat and changes once, at the next beat.
+- The story clock holds each beat's time and races to the next one in the 1.2 seconds before it (`clockForBeats`). A race of more than an hour eases.
+- Status labels on screen: `answered` is "Answered", `booking_offered` is "Slot offered", `booked` is "Booked", `needs_human` is "Needs a human". Chip colours are semantic, not brand: Answered zinc, Slot offered blue, Booked green, Needs a human amber.
+- Nothing on screen is under 16 px at the 1280x720 recording layout.
 
 ### Beats
 
-Times in the clock column are local story time on 10 November until 23:59, then on 11 November.
-Message ids (C1-1 and so on) point to section 3.
+Times in the clock column are story time on 10 November until 23:59, then on 11 November.
+Message ids (C1-1 and so on) point to section 3. Each beat's thread panel shows the last two messages sent by its story time.
 
-| Film ms | Lane | What appears | Travel | Story clock | Caption |
-| --- | --- | --- | --- | --- | --- |
-| 0 | all | Lanes fade in. Customers shows the Email tab with the inbox list: three emails read before closing. AI lane says "Waiting for messages". Calendar shows the busy blocks. Owner view header "{company}" with the badge "Closed until 08:00" and the text "No conversations yet" | none | 21:40:00 | Closed for the night. Messages keep coming. |
-| 3000 | customers | C1-1 lands at the top of the inbox and opens | none | 21:42:00 | An email from Ana. She wants a morning slot. |
-| 4500 | ai | Card "Email, Ana Ruiz" with intent "Price and a first visit" and a typing indicator | customers to ai, message | 21:42:10 | (keeps) |
-| 7000 | customers | C1-2 appears in the thread. AI card shows "Replied in 42 s", tags "New customer", "Mornings only", chip Answered | ai to customers, message | 21:42:42 | {assistant} replies in 42 seconds. |
-| 7600 | owner | Row: Email, Ana Ruiz, "Price and a first visit", Answered | ai to owner, event | 21:42:45 | (keeps) |
-| 11000 | customers | C1-3 appears | none | 21:44:10 | (keeps) |
-| 12000 | ai | Card adds tags "Routine visit", "Wed or Thu morning" | customers to ai, message | 21:44:20 | (keeps) |
-| 13500 | calendar | Dashed outlines on Thu 12 Nov 09:00 and 10:30 | ai to calendar, event | 21:44:28 | It checks the calendar for free mornings. |
-| 14500 | customers | C1-4 appears with two slot chips. AI card chip Slot offered. Owner row chip Slot offered | ai to customers, message | 21:44:31 | (keeps) |
-| 17500 | customers | C1-5 appears with the picked chip "Thu 12 Nov, 09:00"; the 09:00 chip under C1-4 shows as picked | customers to ai, message | 21:45:05 | (keeps) |
-| 19000 | calendar | Thu 09:00 fills in brand colour: "Ana Ruiz". The 10:30 outline fades | ai to calendar, event | 21:45:14 | Booked. Thursday 09:00 is in the calendar. |
-| 20000 | customers | C1-6 appears. AI card chip Booked | ai to customers, message | 21:45:16 | (keeps) |
-| 21000 | owner | Ana's row: "Booked, Thu 12 Nov 09:00", chip Booked | ai to owner, event | 21:45:18 | (keeps) |
-| 24000 | customers | Tab switches to Instagram. C2-1 from Priya Shah (@priya.shah.studio) | none | 22:14:00 | Instagram at 22:14. Priya asks for a price. |
-| 25200 | ai | Card "Instagram, Priya Shah" with intent "Asks about {serviceB}" | customers to ai, message | 22:14:08 | (keeps) |
-| 27000 | customers | C2-2 appears. AI card "Replied in 38 s", chip Answered | ai to customers, message | 22:14:38 | The price and one question, 38 seconds later. |
-| 27600 | owner | Row: Instagram, Priya Shah, "Asks about {serviceB}", Answered | ai to owner, event | 22:14:40 | (keeps) |
-| 30000 | customers | C2-3 appears | customers to ai, message | 22:16:40 | (keeps) |
-| 32500 | customers | C2-4 appears. AI card tag "Wants a date before March" | ai to customers, message | 22:16:52 | Priya has no date yet. The thread stays open. |
-| 33200 | owner | Priya's row summary: "Wants {serviceB} before March", chip Answered | ai to owner, event | 22:16:54 | (keeps) |
-| 36000 | customers | Tab switches to LinkedIn. C3-1 from Tom Becker, Office Manager at Fernhill Architects | none | 23:31:00 | LinkedIn at 23:31. A team of 14 asks. |
-| 37200 | ai | Card "LinkedIn, Tom Becker" with intent "Company offer for 14 people" | customers to ai, message | 23:31:10 | (keeps) |
-| 39500 | customers | C3-2 appears. AI card "Replied in 36 s", chip Answered | ai to customers, message | 23:31:36 | Two questions so {owner} gets a useful call. |
-| 40100 | owner | Row: LinkedIn, Tom Becker, "Company offer for 14 people", Answered | ai to owner, event | 23:31:38 | (keeps) |
-| 43000 | customers | C3-3 appears. AI card tags "10 to 12 people", "Spread over the year" | customers to ai, message | 23:33:02 | (keeps) |
-| 44200 | calendar | Dashed outlines labelled "Call" on Thu 12 Nov 10:30 and Fri 13 Nov 10:30 | ai to calendar, event | 23:33:15 | (keeps) |
-| 45200 | customers | C3-4 appears with two slot chips. Chips Slot offered in AI card and owner row | ai to customers, message | 23:33:20 | It offers two times for a call with {owner}. |
-| 47800 | customers | C3-5 appears with the picked chip "Fri 13 Nov, 10:30" | customers to ai, message | 23:34:10 | (keeps) |
-| 49000 | calendar | Fri 10:30 fills: "Tom Becker". The Thu 10:30 outline fades | ai to calendar, event | 23:34:16 | A call with {owner}, booked for Friday. |
-| 49800 | customers | C3-6 appears. AI card chip Booked | ai to customers, message | 23:34:19 | (keeps) |
-| 50600 | owner | Tom's row: "Call booked, Fri 13 Nov 10:30. 10 to 12 people, spread over the year", chip Booked | ai to owner, document | 23:34:21 | (keeps) |
-| 53000 | customers | Tab switches to Website chat: the chat widget open on a page of {website}. C4-1 from Daniel Moore | none | 00:33:00 | After midnight, website chat. Daniel wants a refund. |
-| 54200 | ai | Card "Website chat, Daniel Moore", intent "Refund request". Amber policy line "Policy: refunds go to {owner}". The chip Needs a human shows once the reply lands | customers to ai, message | 00:33:08 | The policy says refunds go to {owner}. |
-| 56000 | customers | C4-2 appears. AI card "Replied in 36 s" | ai to customers, message | 00:33:36 | (keeps) |
-| 56800 | owner | Row: Website chat, Daniel Moore, "Refund request after a visit on Monday", chip Needs a human. The row moves to the top and gets an amber edge | ai to owner, message | 00:33:38 | {owner} gets the thread, marked Needs a human. |
-| 59500 | customers | C4-3 appears | customers to ai, message | 00:34:20 | (keeps) |
-| 61000 | customers | C4-4 appears. The widget shows the note "Handed to {owner}" | ai to customers, message | 00:34:28 | (keeps) |
-| 61800 | owner | Daniel's row adds "Call back on 07700 900123" | ai to owner, event | 00:34:30 | (keeps) |
-| 64000 | owner | The clock jumps to 08:00. Badge "Open". Other lanes dim to 40 %. Owner view in order: Daniel (Needs a human), Tom (Booked), Priya (Answered), Ana (Booked). Filter chips: "Needs a human 1", "Booked 2", "Answered 1" | none | 08:00:00 | 08:00. Every conversation, in one list. |
-| 68000 | owner | A cursor clicks Daniel's row. The detail opens: handover reason, the chat thread (it scrolls inside the row and opens on the latest messages) and a "Call 07700 900123" button | none | 08:00:30 | The refund is on top, with the whole thread. |
-| 72000 | calendar | Calendar returns to full opacity and the two booked blocks pulse once. The owner closes Daniel's row and the "Booked 2" filter shows Tom and Ana | none | 08:01:00 | Two bookings made overnight, ready at 08:00. |
-| 76000 | stage | End card fades in over the stage | none | 08:01:00 | (end card, no caption) |
-| 86000 | stage | Film ends. Controls show Restart | none | 08:01:00 | (none) |
+| Film ms | Story clock | Focus | Partner | Caption | Highlight | Shows |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0 | 21:42:00 | `ana` | none | Closed for the night. Ana emails a question. | `message-C1-1`, Ana's email | C1-1 |
+| 7500 | 21:44:31 | `ana` | `calendar` | Two free mornings, straight from the calendar. | `slots-C1-4`, the chips "Thu 09:00" and "Thu 10:30" | C1-3 and C1-4; the calendar on Thu 12 Nov with 09:00 and 10:30 offered. The owner chip gets a dot |
+| 15000 | 21:45:16 | `calendar` | `ana` | Ana picks 09:00. It's in the calendar. | `booking-C1`, the block "09:00 Ana Ruiz" | Thu 12 Nov with the booking; C1-5 and C1-6 |
+| 22500 | 22:14:38 | `priya` | none | Instagram at 22:14. Answered in 38 seconds. | `reply-time-C2`, "Answered in 38 s" | C2-1, the reply time, C2-2 |
+| 30000 | 23:34:19 | `tom` | `calendar` | Tom books a call with {owner}. | `message-C3-6`, the booking confirmation | C3-5 and C3-6; Fri 13 Nov with "10:30 Call with Tom Becker" |
+| 37500 | 00:33:36 | `daniel` | `owner` | A refund request goes to {owner}. | `handover-C4`, "Handed to {owner}" | C4-1, C4-2 and the handover note; the owner list with Daniel's row, Needs a human |
+| 45000 | 08:00:00 | `owner` | none | 08:00. Every conversation, the refund on top. | `row-C4`, Daniel's row | The four rows in the order of section 3 |
+| 53000 | 08:00 to 08:01 | end card | | (no caption) | | The end card covers caption, panels and chips |
+| 63000 | 08:01:00 | | | | | Film ends. Controls show Restart |
+
+### Motion
+
+One transition per beat, through the engine:
+
+- A new focus fades through the background: the old picture out in 180 ms, the new one in over 300 ms after 150 ms.
+- A partner that joins a focus which stays slides in from the right (40 px, 350 ms, ease-out) while the focus glides aside.
+- Content that changes inside a panel that stays fades through the same way.
+- The highlight ring fades in 380 ms after the beat starts, once the panels have settled. Colour only.
+- The caption fades out in 150 ms and the new one in over 350 ms.
+- Under `prefers-reduced-motion` the slide and the glide are dropped; the fades stay.
+- A seek, `?t=` or restart shows the new picture at once, without a transition.
 
 ### End card
 
@@ -107,7 +84,6 @@ Message ids (C1-1 and so on) point to section 3.
 | After | 38 seconds |
 | Supporting line 1 | 2 bookings while {company} was closed: one appointment, one call with {owner}. |
 | Supporting line 2 | 1 refund request waiting for {owner}, with the full thread. |
-| Supporting line 3 | 4 of 4 messages answered before 08:00. |
 | Fictional note, preset profile | A simulation. {company} and everyone in it are fictional. "Before" is how long these four messages would wait for the 08:00 opening. |
 | Fictional note, own profile | A simulation in {company}'s brand. The customers and messages are fictional. "Before" is how long these four messages would wait for the 08:00 opening. |
 
@@ -153,9 +129,9 @@ Example: `[{ServiceA} costs {priceA}. ]` disappears when the first service has n
 
 | Name | Value |
 | --- | --- |
-| Story start | 2026-11-10T21:40:00 (Tuesday) |
+| Film start | 2026-11-10T21:42:00 (Tuesday), Ana's email |
 | Opening time for the "before" metric | 08:00 |
-| Calendar days shown | Wed 11, Thu 12, Fri 13 November 2026 |
+| Calendar day shown | The day of the beat's offer or booking: Thu 12 or Fri 13 November 2026, 08:00 to 12:00 |
 | Calendar hours | Monday to Thursday 08:00 to 18:00, Friday 08:00 to 14:00 (the default preset's hours) |
 | Slot length | `{minutes}` from the profile (the calendar blocks use it) |
 
@@ -176,33 +152,32 @@ Busy blocks already in the calendar, all labelled "Busy" in grey, so "Booked" ke
 | C3 | Tom Becker, Office Manager at Fernhill Architects | LinkedIn | linkedin profile "Tom Becker" | Booked call, Fri 13 Nov 10:30 |
 | C4 | Daniel Moore | Website chat | visitor on {website} | Needs a human |
 
-Before Ana writes, the inbox list holds three emails read that afternoon (`earlierEmails` in `film/fixtures.ts`), so the Email tab never opens empty.
-The business side shows `knowledge.contactEmail` as the inbox address, `{handle}` on Instagram, the company page "{company}" on LinkedIn and the widget header "{company}" with the logo.
+Tom's booking shows in the calendar as "Call with Tom Becker" (`bookingTitle` in `film/fixtures.ts`).
 
 ### Messages
 
 `<br>` is a line break inside the message.
 Every AI message also carries the structured reply the live mode returns (`InboxReply` from `@diepen/voice/tasks/inbox-reply`), so one renderer serves both modes.
 `qualifying` holds the questions the reply asks, as the task defines it.
-`notes` is film-only data: the facts the AI lane shows as tags and the owner view adds to a summary.
+The film shows a message without an email's greeting and sign-off; the table holds the full text.
 The style follows the task's channel rules: email greets and signs off, Instagram and chat have no sign-off, the first LinkedIn reply ends with the assistant's name.
 
 | Id | Story time | From | Text | Structured reply |
 | --- | --- | --- | --- | --- |
-| C1-1 | 21:42:00 | Ana | Subject: Room for someone new?<br>Hi there,<br>I just moved to the area. Do you have room for someone new? I'd like to book {aServiceA}, but I can only do mornings. How much is it?<br>Thanks,<br>Ana | |
-| C1-2 | 21:42:42 | AI | Subject: Re: Room for someone new?<br>Hi Ana,<br>Welcome to the area, and yes, we have room for you. [{ServiceA} costs {priceA}. ]Is anything urgent, or is this a routine visit? And which mornings suit you best?<br>{signOff} | intent "Price and a first visit", status answered, qualifying ["Is anything urgent, or is this a routine visit?", "Which mornings suit you best?"], notes ["New customer", "Mornings only"] |
+| C1-1 | 21:42:00 | Ana | Hi there,<br>I just moved to the area. Do you have room for someone new? I'd like to book {aServiceA}, but I can only do mornings. How much is it?<br>Thanks,<br>Ana | |
+| C1-2 | 21:42:42 | AI | Hi Ana,<br>Welcome to the area, and yes, we have room for you. [{ServiceA} costs {priceA}. ]Is anything urgent, or is this a routine visit? And which mornings suit you best?<br>{signOff} | intent "Price and a first visit", status answered, qualifying ["Is anything urgent, or is this a routine visit?", "Which mornings suit you best?"] |
 | C1-3 | 21:44:10 | Ana | Routine, nothing urgent. Wednesday or Thursday morning would be perfect. | |
-| C1-4 | 21:44:31 | AI | Wednesday morning is full, but Thursday has two times free: 09:00 or 10:30. Which one should I book for you?<br>{signOff} | intent "Booking", status booking_offered, offeredSlots ["2026-11-12T09:00", "2026-11-12T10:30"], notes ["Routine visit", "Wed or Thu morning"] |
+| C1-4 | 21:44:31 | AI | Wednesday morning is full, but Thursday has two times free: 09:00 or 10:30. Which one should I book for you?<br>{signOff} | intent "Booking", status booking_offered, offeredSlots ["2026-11-12T09:00", "2026-11-12T10:30"] |
 | C1-5 | 21:45:05 | Ana | 09:00 please! | |
 | C1-6 | 21:45:16 | AI | Your {serviceA} is booked for Thursday 12 November at 09:00[ at {location}]. It's in our calendar, so there's nothing else you need to do. See you on Thursday!<br>{signOff} | intent "Booking", status booked, bookedSlot "2026-11-12T09:00" |
 | C2-1 | 22:14:00 | Priya | hi! do you do {serviceB}? how much is it | |
 | C2-2 | 22:14:38 | AI | Hi Priya! Yes, we do.[ {ServiceB} is {priceB}.] Is it for a date you have in mind, or whenever suits you? | intent "Asks about {serviceB}", status answered, qualifying ["Is it for a date you have in mind?"] |
 | C2-3 | 22:16:40 | Priya | it's for my sister's wedding in march, so no rush. I'll check dates with her and come back to you | |
-| C2-4 | 22:16:52 | AI | Congratulations to your sister! Message me here when you have dates and I'll find you a time well before March. | intent "Asks about {serviceB}", status answered, notes ["Wants a date before March"] |
+| C2-4 | 22:16:52 | AI | Congratulations to your sister! Message me here when you have dates and I'll find you a time well before March. | intent "Asks about {serviceB}", status answered |
 | C3-1 | 23:31:00 | Tom | Hello, I run the office at Fernhill Architects. We're a team of 14 and we'd like to offer {serviceA} as a staff benefit next year. Do you work with companies? Happy to set up a call. | |
 | C3-2 | 23:31:36 | AI | Hi Tom, thanks for getting in touch. Yes, {owner} sets up company arrangements personally. Two quick questions so the call is useful: about how many of the 14 would take part, and would you like one visit day or appointments spread over the year?<br>{assistant} | intent "Company offer for 14 people", status answered, qualifying ["How many of the 14 would take part?", "One visit day or appointments spread over the year?"] |
 | C3-3 | 23:33:02 | Tom | Probably 10 to 12. Spread over the year works better for us. | |
-| C3-4 | 23:33:20 | AI | Thanks, that helps. {owner} has a {minutes}-minute call free on Thursday or Friday at 10:30. Which day suits you better? | intent "Call with the owner", status booking_offered, offeredSlots ["2026-11-12T10:30", "2026-11-13T10:30"], notes ["10 to 12 people", "Spread over the year"] |
+| C3-4 | 23:33:20 | AI | Thanks, that helps. {owner} has a {minutes}-minute call free on Thursday or Friday at 10:30. Which day suits you better? | intent "Call with the owner", status booking_offered, offeredSlots ["2026-11-12T10:30", "2026-11-13T10:30"] |
 | C3-5 | 23:34:10 | Tom | Friday at 10:30 works. | |
 | C3-6 | 23:34:19 | AI | Booked: a call with {owner} on Friday 13 November at 10:30. I've passed on your numbers, so you won't need to repeat them. | intent "Call with the owner", status booked, bookedSlot "2026-11-13T10:30" |
 | C4-1 | 00:33:00 | Daniel | Hi. I had {aServiceA} with you on Monday and I'm really not happy with how it went. I'd like a refund. | |
@@ -216,16 +191,15 @@ The LinkedIn follow-ups C3-4 and C3-6 carry no signature, as a running LinkedIn 
 
 ### Owner view rows at 08:00
 
-| Order | Channel | Name | Summary | Status |
-| --- | --- | --- | --- | --- |
-| 1 | Website chat | Daniel Moore | Refund request after a visit on Monday. Call back on 07700 900123 | Needs a human |
-| 2 | LinkedIn | Tom Becker | Call booked, Fri 13 Nov 10:30. 10 to 12 people, spread over the year | Booked |
-| 3 | Instagram | Priya Shah | Wants {serviceB} before March | Answered |
-| 4 | Email | Ana Ruiz | Booked, Thu 12 Nov 09:00 | Booked |
+| Order | Channel | Name | Status |
+| --- | --- | --- | --- |
+| 1 | Website chat | Daniel Moore | Needs a human |
+| 2 | LinkedIn | Tom Becker | Booked |
+| 3 | Instagram | Priya Shah | Answered |
+| 4 | Email | Ana Ruiz | Booked |
 
 Sort rule (`domain/inbox-snapshot.ts`): Needs a human first, then by last activity, newest first.
-The summary is `handoverReason`, else "Booked, {slot}" plus the film notes, else the film notes, else `intent`.
-Live mode has no notes, so its summary is `handoverReason`, the booked slot, or `intent`.
+Live mode adds a summary to each row: `handoverReason`, the booked slot, or `intent`.
 
 ## 4. Live mode (`/live`)
 
@@ -279,7 +253,7 @@ No streaming in this demo: one structured reply per turn, so `text-stream-client
 ### Owner view
 
 - One row per channel with at least one message: channel icon, "You on Instagram" (and so on), summary, status chip, time of the last message.
-- Same sort rule and same component as the film's owner lane.
+- Same sort rule as the film's owner list.
 - Header: "{company}", logo, and "Average first reply: 1.6 s" from the measured `replyMs` of each conversation's first reply.
 
 ### Notes on screen
@@ -323,12 +297,12 @@ What changes:
 
 | Part | Film | Live |
 | --- | --- | --- |
-| Company name, assistant name, owner name | Every slot in captions, messages, lane labels, owner view header, end card | Owner view header, business side of every channel, prompts, mock replies |
-| Logo | Owner view header, chat widget header, Instagram and LinkedIn business avatars | Same places |
-| Colours | `brand` and `brandForeground` as CSS variables: booked calendar blocks, AI lane accent, chat widget header, slot chips, buttons | Same |
+| Company name, assistant name, owner name | Every slot in captions, messages, the owner panel and chip, the recording header, end card | Owner view header, business side of every channel, prompts, mock replies |
+| Logo | The stage header in a recording (`?record=1`) | Owner view header, chat widget header, Instagram and LinkedIn business avatars |
+| Colours | `brand` and `brandForeground` as CSS variables: the assistant's bubbles, booked calendar blocks, slot chips, the highlight ring, buttons | Booked calendar blocks, chat widget header, slot chips, buttons |
 | Services and prices | `{serviceA}`, `{serviceB}`, prices, through the slots | The model answers from `knowledge`; the mock uses `services[0]` |
 | Voice (tone, words, sign-off) | `{signOff}` only. The rest of the film text is fixed | Full: the system prompt carries tone, words to use and avoid |
-| Policies | `{handoverMessage}` only. The policy line stays "Policy: refunds go to {owner}" | Full: `handoverWhen` decides handovers |
+| Policies | Fixed: the refund goes to {owner} | Full: `handoverWhen` decides handovers |
 | Location, booking length | `{location}`, `{minutes}` and the calendar block length | Slot length in the calendar |
 | Fictional note | Switches to the "own profile" wording when `fictional` is false | The shell note disappears when `fictional` is false |
 
@@ -358,7 +332,7 @@ Dependencies point inwards only, as `AGENTS.md` sets out.
 | `domain/reply-rules.ts` | `checkReply(reply, free, lastOffered)`: offered slots within free, at most three, booked slot free and offered, the fallback reply when not |
 | `domain/metrics.ts` | `averageFirstReplySeconds`, `averageWaitUntilOpening(conversations, "08:00")`, `countByStatus`, `formatDuration` ("38 seconds", "9 hours") |
 | `domain/message-template.ts` | `fillTemplate(text, profile)`: the slots, the optional parts in brackets, the a or an rule, the case rules |
-| `domain/inbox-snapshot.ts` | `InboxSnapshot`, the view both modes render: conversations, AI cards, calendar blocks, owner rows; `sortOwnerRows` and the live `ownerSummary` |
+| `domain/inbox-snapshot.ts` | The views both modes draw from: `ThreadView`, `CalendarBlock`, `OwnerRow`; `sortOwnerRows` and the live `ownerSummary` |
 | `domain/wall-clock.ts` | Reads and writes wall-clock times such as "2026-11-12T09:00" as written, so no time zone moves them |
 
 ### application/
@@ -384,30 +358,28 @@ No `application/ports/`: the only port is `AiProvider` from `@diepen/ai/provider
 
 | File | Holds |
 | --- | --- |
-| `film/fixtures.ts` | Customers, messages with their structured replies, the emails read before closing, story constants (section 3) |
-| `film/film-beats.ts` | The beat table of section 2, with slots |
-| `film/film-effects.ts` | `FilmEffect`, what one beat changes, and `InboxBeat` |
-| `film/inbox-film.ts` | `buildInboxFilm(profile)`: the filled `FilmScript<InboxBeat>` through `defineFilmScript`, with lanes, clock keyframes from the beat rows, beats, captions, travel and the end card (section 2) |
-| `film/apply-effect.ts` | Applies one effect to a snapshot |
-| `film/film-state.ts` | `snapshotAt(ms, profile)`: folds every beat up to `ms` into an `InboxSnapshot`, so `?t=` and seeking land on the same picture as playing |
+| `film/fixtures.ts` | Customers, messages with their structured replies, story constants (section 3) |
+| `film/film-beats.ts` | The beat table of section 2: time, story clock, focus, partner, caption with slots, highlight id. Also `threadParties`, which party shows which conversation |
+| `film/inbox-film.ts` | `buildInboxFilm(profile)`: the `FocusFilmScript<InboxBeat>` through `defineFocusFilm`, with the six parties, `clockForBeats`, the filled captions and the end card. `InboxBeat` is the beat's story time and conversation |
+| `film/film-state.ts` | `inboxFilmFor(profile)` (one script per profile) and `frameAt(story, minutes)`: every thread, offer, booking and owner row as they stand at one story moment, so `?t=`, seeking and playing land on the same picture |
 
 ### ui/
 
 | File | Holds |
 | --- | --- |
-| `ui/inbox-film.tsx` | `FilmStage` with the lane layout and the active brand |
-| `ui/film-lanes.tsx` | The body of each of the four lanes, from an `InboxSnapshot` |
-| `ui/lane-window.tsx` | Fills a lane with one app window and tells the engine where items land |
-| `ui/film-cursor.tsx` | The pointer that clicks Daniel's row at 08:00 |
-| `ui/channel-thread.tsx` | Renders the mockup for a channel with its messages, slot chips, handover note and composer, seen by the business (film) or by the customer (live) |
+| `ui/inbox-film.tsx` | `FocusStage` with the inbox script; in a recording also the brand mark and the "Fictional company" badge |
+| `ui/film-panels.tsx` | `InboxFilmPanel`: picks the panel body for a party from `frameAt` at the beat's story time |
+| `ui/film-thread.tsx` | Film thread panel: the last two messages as large bubbles, offered times, the reply time in Priya's beat, the handover note |
+| `ui/film-text.ts` | Drops an email's greeting and sign-off for the film |
+| `ui/film-day.tsx` | Film calendar panel: one morning, 08:00 to 12:00, with busy, offered and booked blocks |
+| `ui/film-owner-list.tsx` | Film owner panel: one large row per conversation, or only the beat's conversation as a partner |
+| `ui/channel-thread.tsx` | Live mode: the mockup for a channel as the customer sees it, with messages, slot chips, handover note and composer |
 | `ui/channel-tab-strip.tsx` | The channel tabs with the active tab scrolled into view |
-| `ui/use-whole-messages.ts` | Film only: scrolls a thread to the first message that fits whole, with the newest fully in view |
 | `ui/use-phone-fit.ts` | Live mode below 768 px: the customer part ends right above the bottom tab bar, so the page never scrolls the composer under it |
-| `ui/ai-card.tsx` | The AI lane card |
-| `ui/owner-view.tsx` | Owner view list, filter chips and row detail, used in both modes |
+| `ui/owner-view.tsx` | Live owner view: header, filter chips with counts, the list |
 | `ui/calendar-view.tsx` | The three-day calendar with busy, offered and booked blocks; one day at a time with a day switcher below 768 px in live mode. Blocks are exactly as long as their time |
 | `ui/use-hour-grid.ts` | The calendar's hour height: the whole working day when it fits, else 64 px hours and a scroll to the blocks in focus, starting on a whole hour |
-| `ui/owner-row.tsx` | One owner row and its detail: the thread and the call-back button |
+| `ui/owner-row.tsx` | One live owner row: channel, name, last activity, summary, status |
 | `ui/channel-mark.tsx` | The small coloured channel square |
 | `ui/status-chip.tsx` | Status chip with label and semantic colour |
 | `ui/starter-prompts.ts` | The three starter texts; the shared `StarterChips` draws them |
@@ -423,7 +395,7 @@ No `application/ports/`: the only port is `AiProvider` from `@diepen/ai/provider
 | Route | Does |
 | --- | --- |
 | `app/layout.tsx` | Shell, brand provider, fonts. `/favicon.ico` is rewritten to the app icon in `next.config.ts` |
-| `app/page.tsx` (`/`) | The demo shell in Film mode with `FilmStage`, `buildInboxFilm` and `renderLane`. Reads `?t=` (film ms), `?brand=`, `?note=` |
+| `app/page.tsx` (`/`) | The demo shell in Film mode with `InboxFilm`. Reads `?t=` (film ms), `?brand=`, `?record=1` |
 | `app/live/page.tsx` (`/live`) | The demo shell in Live mode with `live-inbox` |
 | `app/api/reply/route.ts` | POST. Validates, runs guards, calls `answerInquiry` through the container |
 | `app/api/reply/reply-request.ts` | The zod schema for the request, read with `readBodyText` from `@diepen/ai/request-body` so the 32 KB cap holds while the body streams in |
@@ -460,9 +432,9 @@ Responses:
 
 | Viewport | Film (`/`) | Live (`/live`) |
 | --- | --- | --- |
-| 1920x1080, for recording | Header 56 px. The stage keeps 16:9 and scales to fill the space between header and controls, centred. Four lanes in one row. Caption bar at the stage bottom, text about 28 px (the shared `CaptionBar`, 1.45vw). Clock top right of the stage, tabular figures. Smallest text in a lane 18 px | Content max 1600 px wide. Customer side left (55 %), owner view top right (two fifths of the height), calendar bottom right (three fifths) |
-| 1440x900 | Same as 1920, scaled. Caption text at least 24 px, smallest lane text at least 14 px. Controls stay visible below the stage without scrolling | Same as 1920 at full width with 32 px gutters |
-| 375 px wide | The engine's narrow mode (below 768 px): a strip of the four lane names with the clock, the body shows the lane of the current beat, travel shows as a pulse on the target lane name. The stage takes the height under the shell header, so caption and controls show without scrolling. The customers lane drops its channel tabs; the channel's title bar names it. Caption under the lane, 16 px, at most two lines. End card stacks: metric, before, after, then the lines | A bottom tab bar: "Customer", "Owner view", "Calendar", with a dot when the hidden part changes. The customer part ends right above the bar. The calendar day buttons are 44 px. The channel tab strip scrolls sideways inside itself. Calendar shows one day with a day switcher |
+| 1920x1080 at 150 % zoom, for recording (lays out at 1280x720, `?record=1`) | Stage header: brand mark, title, "Fictional company" badge, story clock on the right. The caption on top, one line, 32 px. The focus panel centred (56 % wide, at most 52 rem); a partner beside it (38 %, at most 36 rem). The party chips in one centred row under the panels. Nothing under 16 px; thread text 20 px, key numbers 34 px | Content max 1600 px wide. Customer side left (55 %), owner view top right (two fifths of the height), calendar bottom right (three fifths) |
+| 1440x900 | The shell header on top, then the same stage with the title and clock. Caption 36 px. Controls stay visible below the chips without scrolling | Same as 1920 at full width with 32 px gutters |
+| 375 px wide | The engine's narrow mode (below 768 px): the clock, the caption above the panel (22 px, at most two lines), the focus panel only, the chips as a row that scrolls sideways and keeps the focus chip in view. Thread text 17 px without avatars. The stage takes the height under the shell header, so caption and controls show without scrolling. A long exchange keeps its newest message in view and fades out at the top. End card stacks: metric, before, after, then the lines | A bottom tab bar: "Customer", "Owner view", "Calendar", with a dot when the hidden part changes. The customer part ends right above the bar. The calendar day buttons are 44 px. The channel tab strip scrolls sideways inside itself. Calendar shows one day with a day switcher |
 
 At every width:
 
@@ -477,7 +449,7 @@ Run one flow against the running app with `VERIFY_APP=inbox pnpm verify flow <fe
 Unit tests sit next to their module as `*.test.ts`. Flow tests sit in `apps/inbox/e2e/`.
 Flows fix the browser clock with `page.clock.install({ time: new Date("2026-11-10T21:42:00") })` so free slots are the same on every run.
 `?t=` is in film milliseconds, as `startFromSearch` in `@diepen/ui/film/film-playback` reads it.
-Prefer roles and visible text as selectors. Test ids where text is not stable: `data-lane="customers"` (and the other lane ids), `data-testid="owner-row"` with `data-channel`, `status-chip`, `calendar-booking`, `end-card`, `provider-note`, `slot-chip`.
+Prefer roles and visible text as selectors. Test ids where text is not stable: `data-film-panel="ana"` (and the other party ids) with `data-role="focus"` or `"partner"`, `data-highlighted` on the ringed element, `data-party-chip`, `data-testid="owner-row"` with `data-channel`, `status-chip`, `calendar-booking`, `end-card`, `provider-note`, `slot-chip`.
 
 ### Unit checks (Vitest)
 
@@ -488,9 +460,9 @@ Prefer roles and visible text as selectors. Test ids where text is not stable: `
 | U3 | `inbox.live-booking` | `checkReply` keeps a valid offer and booking; it turns a booked slot that is not free, or was not offered, into `booking_offered` with two slots from `spreadSlots`; it cuts offers to at most three. `spreadSlots` never offers two slots back to back |
 | U4 | `inbox.live-handover` | `applyReply` moves answered to booking_offered to booked; after `needs_human` every later reply keeps `needs_human`, and `acceptsReplies` is false |
 | U5 | `inbox.film` | `metrics` on the fixtures: average first reply 38 seconds, average wait until 08:00 is 540 minutes, `formatDuration(38)` is "38 seconds", `formatDuration(32400)` is "9 hours", counts booked 2, answered 1, needs_human 1 |
-| U6 | `inbox.film` | The script: beats sorted by ms, story times never go down, last beat at most 90000 ms and at least 60000 ms, every lane and travel end is one of the four lane ids, all four channels appear, at least one beat sets `needs_human`, the end card has metric, before and after |
-| U7 | `inbox.film` | Every caption, after filling with each of the three presets, is at most 60 characters and contains no em dash (U+2014) and no en dash (U+2013) |
-| U8 | `inbox.film` | `snapshotAt(66000)` has four conversations in the owner order of section 3 with the statuses there; `snapshotAt(20500)` shows Ana's booking in the calendar and Tom's conversation does not exist yet |
+| U6 | `inbox.film` | The script: six parties, 5 to 7 beats each with a highlight, 45 to 70 seconds long, story times never go down and each beat starts on its own story time, every focus, partner and touched party is one of the six, all four channels appear, one conversation ends `needs_human`, the end card reads Reply time, 9 hours, 38 seconds |
+| U7 | `inbox.film` | Every caption, after filling with each of the three presets, has at most 8 words, no unfilled slot and no em dash (U+2014) or en dash (U+2013) |
+| U8 | `inbox.film` | `frameAt` at 08:00 has the four owner rows in the order of section 3; at 21:45:16 Ana's booking is in the calendar with 09:00 picked in the offer and Tom has not written; at 21:44:31 the offer shows two offered blocks; Priya's first reply took 38 seconds. `filmText` drops an email's greeting and sign-off |
 | U9 | `inbox.make-it-yours` | `fillTemplate` replaces every slot, drops an optional part with an empty slot, writes "an" before a vowel, lowercases the first letter unless the second is uppercase; with each preset, no fixture text keeps a `{` or `[` |
 | U10 | `inbox.make-it-yours` | No fixture text contains the default preset's company name, owner name or any of its prices as literal text |
 | U11 | `inbox.live-chat` | `answerInquiry` with the mock provider: "How much is it?" gives `answered` with the first service's price in the reply; "Can I book?" gives `booking_offered` with two free slots; a message with the `HH:MM` of an offered slot gives `booked` with that slot; "I want a refund" gives `needs_human`, a `handoverReason`, and the profile's handover message |
@@ -505,32 +477,33 @@ Prefer roles and visible text as selectors. Test ids where text is not stable: `
 
 | Check | Feature | Steps and assertion |
 | --- | --- | --- |
-| F1 | `inbox.film` | Open `/?t=80000`. Within 15 s the end card shows "Reply time", "9 hours", "38 seconds" and the fictional note |
-| F2 | `inbox.film` | Open `/?t=20000`, set the speed to 2x and play until the end card shows; on the way the Instagram, LinkedIn and Website chat tabs each become active |
-| F3 | `inbox.film-controls` | On `/`: Pause stops the clock (same clock text after 1 s); Play resumes it; Restart sets the clock to 21:40; the speed control cycles 0.5x, 1x, 1.5x, 2x |
-| F4 | `inbox.film-controls` | Open `/?t=53000`. The Website chat tab is active and the clock reads 00:33 |
-| F5 | `inbox.owner-view` | Open `/?t=66000`. The owner view has four rows in this order: Daniel Moore with "Needs a human", Tom Becker with "Booked", Priya Shah with "Answered", Ana Ruiz with "Booked" |
+| F1 | `inbox.film` | Open `/?t=58000`. Within 15 s the end card shows "Reply time", "9 hours", "38 seconds" and the fictional note |
+| F2 | `inbox.film` | Open `/?t=20000`, set the speed to 2x and play until the end card shows; on the way Priya, Tom, Daniel and the owner each become the focus panel |
+| F3 | `inbox.film-controls` | On `/?t=6000`, Play: the clock races past 21:42. Pause stops the clock (same clock text after 1 s); Play resumes it; Restart sets the clock to 21:42; the speed control cycles 0.5x, 1x, 1.5x, 2x |
+| F4 | `inbox.film-controls` | Open `/?t=38000`. Daniel's website chat is the focus panel and the clock reads 00:33 |
+| F5 | `inbox.owner-view` | Open `/?t=46000`. The owner panel has four rows in this order: Daniel Moore with "Needs a human", Tom Becker with "Booked", Priya Shah with "Answered", Ana Ruiz with "Booked" |
 | F6 | `inbox.live-chat` | On `/live`, on each of the four channel tabs, send "What are your opening hours?". An assistant message appears in that tab's thread and the owner view has a row for that channel with "Answered" |
 | F7 | `inbox.live-chat` | On `/live` the provider note reads "Demo answers. No API key is set." |
 | F8 | `inbox.live-booking` | On `/live`, Website chat: send "Can I book an appointment?". Two slot chips appear, Wed 11 Nov 12:30 and Thu 12 Nov 09:00. Click the first. The reply says the booking, a calendar block with that time appears, and the owner row shows "Booked" |
 | F9 | `inbox.live-handover` | On `/live`, Instagram: send "I'm not happy with how it went and I'd like a refund." The reply contains the preset's handover message, the owner row shows "Needs a human" at the top, the composer is replaced by "Start over", and no further request to `/api/reply` is made. "Start over" clears the thread |
 | F10 | `inbox.limit-fallback` | On `/live`, route `/api/reply` to answer 429 `{ fallback: "film" }`. After sending a message the page is `/` with the note "Live answers are paused for now. Here is the film." and the film stage visible |
-| F11 | `inbox.make-it-yours` | On `/`, open "Make it yours" and pick the property manager preset. The owner view header and the lane label show that preset's company and assistant names, and the brand CSS variable changes. On `/live` after the same step, a reply mentions the new company name |
-| F12 | `inbox.make-it-yours` | Open `/?t=80000&brand=<encoded test profile>` (a fictional plumbing company in `e2e/fixtures/test-profile.ts`, `fictional: false`). The end card note uses the "own profile" wording with that name. `/live?brand=<same>` shows the name in the owner view header and in a mock reply |
+| F11 | `inbox.make-it-yours` | On `/`, open "Make it yours" and pick the property manager preset: live mode opens in that company and the brand CSS variable changes. With that preset saved, the film keeps its own owner panel, company and colour (decision F1). On `/live` after the same step, a reply mentions the new company name |
+| F12 | `inbox.make-it-yours` | Open `/?t=58000&brand=<encoded test profile>` (a fictional plumbing company in `e2e/fixtures/test-profile.ts`, `fictional: false`). The end card note uses the "own profile" wording with that name. `/live?brand=<same>` shows the name in the owner view header and in a mock reply |
 | F13 | `inbox.make-it-yours` | In the panel, enter `https://example.com`, apply. The mock profile from `/api/brand` is applied (its name shows in the owner view header); under the mock provider the container's fixture page fetcher answers, so no request leaves the server |
-| F14 | `inbox.film`, `inbox.live-chat` | At 375 px wide, on `/`, `/?t=30000`, `/?t=80000`, and `/live` on each bottom tab and each channel tab, `document.documentElement.scrollWidth` is at most 375 |
-| F15 | `inbox.film`, `inbox.live-chat` | No console errors and no failed requests on `/`, `/?t=80000` and `/live` after one sent message |
-| F16 | `inbox.film` | At 1920x1080, `/?t=7000` shows the four lanes side by side and the caption text is about 28 px (at least 27.5 px: the shared caption bar is 1.45vw) |
+| F14 | `inbox.film`, `inbox.live-chat` | At 375 px wide, on `/`, `/?t=30000` (one panel visible), `/?t=58000`, and `/live` on each bottom tab and each channel tab, `document.documentElement.scrollWidth` is at most 375 |
+| F15 | `inbox.film`, `inbox.live-chat` | No console errors and no failed requests on `/`, `/?t=58000` and `/live` after one sent message |
+| F16 | `inbox.film` | At 1920x1080, `/?t=9500` shows Ana's thread as the focus and the calendar as the partner, side by side, the focus wider, under the caption "Two free mornings, straight from the calendar." of at least 32 px |
 | F17 | `inbox.live-handover` | On `/live`, Website chat: ask to book, then complain without the word "complaint". The thread hands over and the earlier slot chips are no longer buttons and carry the shared inactive look (`data-disabled`) |
 | F18 | `inbox.live-chat` | On `/live`, with `/api/reply` failing, click a starter. The message stays in the thread marked "Not answered"; sending it again shows it once |
+| F19 | `inbox.film` | At 1280x720 with `?record=1`, at one moment in each of the seven beats: one focus panel, at most two panels, exactly one `[data-highlighted]` element, and no visible text under 16 px |
 
 ## 9. Feature rows
 
 | Id | A user can | Reach it | As | Status |
 | --- | --- | --- | --- | --- |
-| `inbox.film` | Watch an 86-second film of four after-hours messages answered, booked and handed over, ending on reply time: 9 hours before, 38 seconds now | `/` | anon | shipped |
+| `inbox.film` | Watch a 63-second film, one focus per beat, of four after-hours messages answered, booked and handed over, ending on reply time: 9 hours before, 38 seconds now | `/` | anon | shipped |
 | `inbox.film-controls` | Pause, restart and change the speed of the film, or start it at a moment with `?t=` in ms | `/`, controls under the stage | anon | shipped |
-| `inbox.owner-view` | See every conversation with its status, needs a human first | `/`, owner lane; `/live`, "Owner view" | anon | shipped |
+| `inbox.owner-view` | See every conversation with its status, needs a human first | `/`, the 08:00 beat; `/live`, "Owner view" | anon | shipped |
 | `inbox.live-chat` | Write as a customer on email, Instagram, LinkedIn or website chat and get an answer in the company's voice | `/live`, channel tabs | anon | shipped |
 | `inbox.live-booking` | Book a slot the AI offers and see it in the calendar | `/live`, "Can I book a time this week?", then a slot chip | anon | shipped |
 | `inbox.live-handover` | Ask for a refund, complain, or ask what the company knowledge cannot answer, and see the conversation handed to the owner as "Needs a human" | `/live`, "I'm not happy with how it went and I'd like a refund." | anon | shipped |
@@ -552,6 +525,6 @@ They belong in `docs/decisions.md`; this file does not edit it.
 | Live threads and bookings after a reload | Kept in page memory only; a reload starts empty |
 | Which clock is "now" in live mode? | The visitor's local clock, sent with each request |
 | Applying a profile in live mode | Clears all threads and bookings |
-| Recording without shell controls | A `?record=1` parameter hides the header and controls. The shell does not offer it yet; until it does, crop the controls out of the recording |
+| Recording without shell controls | A `?record=1` parameter hides the shell header and the film controls; the stage header then shows the brand mark and "Fictional company" |
 | The `inbox-reply` context needs a customer name, and a live visitor has none | Pass "there", so an email greets "Hi there" |
 | Service names that read badly mid-sentence (plurals, proper nouns) | Accept it; preset service names are written in sentence case so they read inside a sentence |

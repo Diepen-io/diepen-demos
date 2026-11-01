@@ -2,7 +2,7 @@ import { encodeProfile } from "@diepen/voice/profile-codec";
 import { defaultPresetFor, presets } from "@diepen/voice/presets";
 import { expect, test } from "@playwright/test";
 import { testProfile } from "./fixtures/test-profile";
-import { endCard, filmLane } from "./support/film-page";
+import { endCard, filmPanel } from "./support/film-page";
 import { escapeRegExp, gotoApp } from "./support/layout";
 import { liveOwnerView, openChannel, openLive, sendMessage, showLivePart } from "./support/live-page";
 import { brandColour, openMakeItYours, pickPreset } from "./support/make-it-yours";
@@ -15,7 +15,7 @@ const preset = defaultPresetFor("inbox");
 const propertyManager = presets["brickfern-property"];
 
 test("F11: picking the property manager preset on the film opens live mode in that company @inbox.make-it-yours", async ({ page }) => {
-  await gotoApp(page, "/?t=66000");
+  await gotoApp(page, "/?t=46000");
   expect(await brandColour(page)).toBe(preset.colors.brand);
 
   const panel = await openMakeItYours(page);
@@ -27,10 +27,10 @@ test("F11: picking the property manager preset on the film opens live mode in th
 });
 
 test("F11: the film keeps its own company when a saved profile exists (decision F1) @inbox.make-it-yours", async ({ page }) => {
-  await gotoApp(page, `/?t=66000&brand=${propertyManager.id}`);
+  await gotoApp(page, `/?t=46000&brand=${propertyManager.id}`);
 
-  await expect(filmLane(page, "owner")).toContainText(preset.name);
-  await expect(filmLane(page, "ai")).toHaveAttribute("aria-label", new RegExp(`^${escapeRegExp(preset.people.assistantName)}`));
+  await expect(filmPanel(page, "owner")).toHaveAttribute("aria-label", new RegExp(`^${escapeRegExp(preset.people.owner.name)}`));
+  await expect(page.getByRole("banner").first()).toContainText(preset.name);
   expect(await brandColour(page)).toBe(preset.colors.brand);
 });
 
@@ -46,7 +46,7 @@ test("F11: picking the property manager preset makes live replies name that comp
 });
 
 test("F12: a ?brand= link to the film keeps the fictional end card and carries the profile to live mode @inbox.make-it-yours", async ({ page }) => {
-  await gotoApp(page, `/?t=80000&brand=${encodeProfile(testProfile)}`);
+  await gotoApp(page, `/?t=58000&brand=${encodeProfile(testProfile)}`);
 
   await expect(endCard(page)).toContainText(preset.name);
   await expect(endCard(page).getByRole("link", { name: "Try it live" })).toHaveAttribute(
@@ -72,7 +72,7 @@ test("F13: reading a website applies the drafted profile without the browser lea
   page.on("request", (request) => {
     if (new URL(request.url()).hostname.endsWith("example.com")) offSite.push(request.url());
   });
-  await gotoApp(page, "/?t=66000");
+  await gotoApp(page, "/?t=46000");
 
   const panel = await openMakeItYours(page);
   await panel.getByLabel("Your website").fill("https://example.com");
