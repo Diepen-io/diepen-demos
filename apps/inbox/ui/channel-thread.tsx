@@ -13,23 +13,9 @@ import type { ThreadMessage, ThreadView } from "@/domain/inbox-snapshot";
 import { templateSlots } from "@/domain/message-template";
 import { wallParts } from "@/domain/wall-clock";
 
-/** A line of the inbox list that is not part of the conversation, for example mail read before closing. */
-export type InboxListEntry = Pick<EmailThread, "id" | "from" | "subject" | "snippet" | "time">;
-
 export type ChannelThreadProps = {
   thread: ThreadView;
   profile: CompanyProfile;
-  /**
-   * Whose app the thread opens in. The film shows the business's inbox; in live mode the visitor
-   * is the customer, so Instagram and LinkedIn show the business in the header and the visitor's
-   * messages as their own.
-   */
-  seenBy?: "business" | "customer";
-  /** Website chat: the chat window alone, or open on the company's website. Phones always get the window. */
-  chatLayout?: "window" | "page";
-  /** Email only: older mail in the inbox list. */
-  earlierEmails?: InboxListEntry[];
-  isNew?: (message: ThreadMessage) => boolean;
   /** A quiet line under a message, for example "Replied in 1.8 s". */
   metaOf?: (message: ThreadMessage) => string | undefined;
   /** Live mode: the composer, starters, slot chips and the handover note. */
@@ -46,7 +32,7 @@ function slotsOf(message: ThreadMessage) {
 type EmailParties = { customer: { name: string; email: string }; business: { name: string; email: string } };
 
 /** The open email thread, or none while nobody has written yet. */
-function emailThreads(thread: ThreadView, parties: EmailParties, isNew: ChannelThreadProps["isNew"], metaOf: ChannelThreadProps["metaOf"]): EmailThread[] {
+function emailThreads(thread: ThreadView, parties: EmailParties, metaOf: ChannelThreadProps["metaOf"]): EmailThread[] {
   const [first] = thread.messages;
   if (!first) return [];
   return [
@@ -66,7 +52,6 @@ function emailThreads(thread: ThreadView, parties: EmailParties, isNew: ChannelT
           tag: fromCustomer ? undefined : <Badge tone="brand" icon="sparkle">AI assistant</Badge>,
           slots: slotsOf(message),
           meta: metaOf?.(message),
-          isNew: isNew?.(message),
         };
       }),
     },
@@ -79,14 +64,17 @@ const asCustomer = (messages: ConversationMessage[]): ConversationMessage[] =>
 
 const otherSide = (typing: ThreadView["typing"]) => (typing === "business" ? "customer" : typing === "customer" ? "business" : undefined);
 
-/** The channel's own app with the thread in it. Film and live share it. */
+/**
+ * The channel's own app with the thread in it, as the customer sees it: the visitor writes as the
+ * customer, so Instagram and LinkedIn show the business in the header and the visitor's messages
+ * as their own.
+ */
 export function ChannelThread(props: ChannelThreadProps) {
-  const { thread, profile, seenBy = "business", chatLayout = "page", earlierEmails = [], isNew, metaOf, controls = {}, className } = props;
+  const { thread, profile, metaOf, controls = {}, className } = props;
   const slots = templateSlots(profile);
   // On a phone the website behind the chat leaves no room for the thread, so the chat shows alone.
   const narrow = useNarrowScreen();
   const businessAddress = profile.knowledge.contactEmail || `hello@${slots.website}`;
-  const customerView = seenBy === "customer";
   const handover = thread.handoverNote ? { note: thread.handoverNote, ...controls.handover } : controls.handover;
   const live = { ...controls, handover };
   const messages: ConversationMessage[] = thread.messages.map((message, index) => ({
@@ -96,10 +84,10 @@ export function ChannelThread(props: ChannelThreadProps) {
     time: index === 0 ? `${wallParts(message.at).weekday.slice(0, 3)} ${clock(message)}` : undefined,
     meta: metaOf?.(message),
     slots: slotsOf(message),
-    isNew: isNew?.(message),
   }));
   const businessAvatar = profile.logo.kind === "url" ? profile.logo.url : undefined;
   const customer: Person = { name: thread.customer.name, detail: thread.customer.detail };
+  const own = asCustomer(messages);
 
   switch (thread.channel) {
     case "email": {
@@ -109,29 +97,28 @@ export function ChannelThread(props: ChannelThreadProps) {
       };
       return (
         <EmailInbox
-          account={customerView ? thread.customer.detail : businessAddress}
+          account={thread.customer.detail}
           className={className}
           openThreadId={thread.messages.length > 0 ? thread.id : null}
           drafting={thread.typing === "business" ? profile.people.assistantName : null}
           composeSubject="Question"
-          threads={[...emailThreads(thread, parties, isNew, metaOf), ...earlierEmails]}
+          threads={emailThreads(thread, parties, metaOf)}
           {...live}
         />
       );
     }
     case "instagram": {
       const business: Person = { name: profile.name, detail: slots.handle, avatarUrl: businessAvatar };
-      const shown = customerView ? asCustomer(messages) : messages;
-      const lastIsOwn = shown.at(-1)?.from === "business";
+      const lastIsOwn = own.at(-1)?.from === "business";
       return (
         <InstagramDm
           className={className}
-          account={customerView ? thread.customer.detail : (slots.handle ?? "")}
-          customer={customerView ? business : customer}
-          messages={shown}
-          typing={customerView ? otherSide(thread.typing) : thread.typing}
+          account={thread.customer.detail}
+          customer={business}
+          messages={own}
+          typing={otherSide(thread.typing)}
           // The visitor's message reads "Seen" once the business is writing back.
-          seen={customerView ? lastIsOwn && thread.typing === "business" : lastIsOwn}
+          seen={lastIsOwn && thread.typing === "business"}
           {...live}
         />
       );
@@ -141,10 +128,10 @@ export function ChannelThread(props: ChannelThreadProps) {
       return (
         <LinkedinDm
           className={className}
-          customer={customerView ? business : customer}
-          business={customerView ? customer : business}
-          messages={customerView ? asCustomer(messages) : messages}
-          typing={customerView ? otherSide(thread.typing) : thread.typing}
+          customer={business}
+          business={customer}
+          messages={own}
+          typing={otherSide(thread.typing)}
           {...live}
         />
       );
@@ -153,7 +140,7 @@ export function ChannelThread(props: ChannelThreadProps) {
       return (
         <ChatWidget
           className={className}
-          layout={narrow ? "window" : chatLayout}
+          layout={narrow ? "window" : "page"}
           company={profile}
           assistantName={profile.people.assistantName}
           website={slots.website}

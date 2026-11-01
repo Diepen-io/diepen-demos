@@ -5,7 +5,7 @@ import { ownerSummary, sortOwnerRows, type CalendarBlock, type OwnerRow, type Th
 import { templateSlots } from "@/domain/message-template";
 import type { LiveState, LiveThread } from "./live-inbox-state";
 
-/** Turns the visitor's threads into the views the film draws, so both modes share one look. */
+/** Turns the visitor's threads into the views the live page draws. */
 
 const visitorDetail: Record<Channel, string> = {
   email: "you@example.com",
@@ -44,7 +44,6 @@ export function liveOwnerRows(state: LiveState): OwnerRow[] {
         summary: ownerSummary(thread.lastReply),
         status: thread.status,
         lastActivity: last.at,
-        thread: threadView(channel, thread).messages,
       },
     ];
   });

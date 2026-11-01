@@ -12,14 +12,8 @@ export type CalendarViewProps = {
   /** "2026-11-11" and so on. */
   days: string[];
   blocks: CalendarBlock[];
-  /** Plays the entrance for a block that just arrived. */
-  isNew?: (block: CalendarBlock) => boolean;
-  /** One pulse on every booked block. */
-  highlight?: boolean;
   /** One day at a time, with a day switcher. */
   singleDay?: boolean;
-  /** Leaves out the month row, for a film lane where the story clock already shows the date. */
-  compact?: boolean;
   /** Start times the hour grid scrolls into view, for example the slots just offered. */
   focus?: string[];
   className?: string;
@@ -35,7 +29,7 @@ const looks: Record<CalendarBlock["kind"], string> = {
  * A compact week. The working day fills the height when it fits; when it does not, every hour
  * keeps a readable height and the grid scrolls to the blocks in `focus`, like a calendar app.
  */
-export function CalendarView({ days, blocks, isNew, highlight, singleDay, compact, focus = [], className }: CalendarViewProps) {
+export function CalendarView({ days, blocks, singleDay, focus = [], className }: CalendarViewProps) {
   const latestBooking = blocks.findLast((block) => block.kind === "booked")?.start.slice(0, 10);
   const [picked, setPicked] = useState<string | null>(null);
   const shownDay = picked && days.includes(picked) ? picked : (latestBooking ?? days[0] ?? "");
@@ -46,14 +40,12 @@ export function CalendarView({ days, blocks, isNew, highlight, singleDay, compac
 
   return (
     <ChannelFrame channel="Calendar" icon="calendar" accent="var(--channel-calendar)" meta={singleDay ? "Day" : "Week"} className={className}>
-      {compact && !singleDay ? null : (
-        <div className="flex items-center gap-2 border-b border-border py-1.5 pr-1.5 pl-4">
-          <p className="min-w-0 flex-1 truncate text-[17px] font-semibold tracking-[-0.01em]">
-            {first.month} {days[0]?.slice(0, 4)}
-          </p>
-          {singleDay ? <DaySwitcher days={days} day={shownDay} onPick={setPicked} /> : null}
-        </div>
-      )}
+      <div className="flex items-center gap-2 border-b border-border py-1.5 pr-1.5 pl-4">
+        <p className="min-w-0 flex-1 truncate text-[17px] font-semibold tracking-[-0.01em]">
+          {first.month} {days[0]?.slice(0, 4)}
+        </p>
+        {singleDay ? <DaySwitcher days={days} day={shownDay} onPick={setPicked} /> : null}
+      </div>
       <div className="grid border-b border-border py-2" style={columns}>
         <span />
         {shown.map((day) => {
@@ -88,8 +80,6 @@ export function CalendarView({ days, blocks, isNew, highlight, singleDay, compac
                     block={block}
                     top={top(minutesOf(block.start))}
                     height={heightOf(minutesOf(block.end) - minutesOf(block.start))}
-                    fresh={isNew?.(block) ?? false}
-                    pulse={highlight === true && block.kind === "booked"}
                   />
                 ))}
             </div>
@@ -100,9 +90,9 @@ export function CalendarView({ days, blocks, isNew, highlight, singleDay, compac
   );
 }
 
-type BlockProps = { block: CalendarBlock; top: number; height: number; fresh: boolean; pulse: boolean };
+type BlockProps = { block: CalendarBlock; top: number; height: number };
 
-function Block({ block, top, height, fresh, pulse }: BlockProps) {
+function Block({ block, top, height }: BlockProps) {
   const time = block.start.slice(11, 16);
   const busy = block.kind === "busy";
   // Two lines need 26 px; a shorter block puts the time and the title on one line.
@@ -116,8 +106,6 @@ function Block({ block, top, height, fresh, pulse }: BlockProps) {
         stacked ? "items-start py-px" : "items-center",
         looks[block.kind],
         !busy && "z-10",
-        fresh && "enter",
-        (fresh || pulse) && !busy && "pulse-once",
       )}
       style={{ top: top + 1, height: height - 2 }}
     >

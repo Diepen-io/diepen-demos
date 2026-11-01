@@ -103,7 +103,6 @@ function LiveInboxBody({ profile, providerName, fallbackHref }: BodyProps) {
             className="min-h-0 flex-1"
             thread={threadView(active, thread)}
             profile={profile}
-            seenBy="customer"
             metaOf={(message) => messageMeta(thread.messages.find((item) => item.id === message.id))}
             controls={{
               onSend: (text, subject) => send(active, text, subject),

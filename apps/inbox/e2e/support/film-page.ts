@@ -1,10 +1,15 @@
 import type { Locator, Page } from "@playwright/test";
 
-export type FilmLaneId = "customers" | "ai" | "calendar" | "owner";
+export type FilmPartyId = "ana" | "priya" | "tom" | "daniel" | "calendar" | "owner";
 
-/** One lane of the film. The film engine marks each lane section with its id. */
-export function filmLane(page: Page, id: FilmLaneId): Locator {
-  return page.locator(`[data-film-lane="${id}"]`);
+/** One party's panel. The film engine marks each panel with its party and its role, "focus" or "partner". */
+export function filmPanel(page: Page, id: FilmPartyId): Locator {
+  return page.locator(`[data-film-panel="${id}"]`);
+}
+
+/** The panel of the party the beat is about. */
+export function focusPanel(page: Page): Locator {
+  return page.locator('[data-film-panel][data-role="focus"]');
 }
 
 /** The story clock. Its accessible name reads like "Story time Wed 00:33". */
@@ -17,14 +22,9 @@ export function endCard(page: Page): Locator {
   return page.getByRole("region", { name: "Reply time" });
 }
 
-/** The caption under the stage. The engine's caption bar is the polite live region that holds one paragraph. */
+/** The caption above the panels: the polite live region that holds one paragraph. */
 export function filmCaption(page: Page): Locator {
   return page.locator('[aria-live="polite"] > p').first();
-}
-
-/** A channel tab in the customers lane. On a phone the lane can be hidden, so hidden tabs count too. */
-export function filmChannelTab(page: Page, label: string): Locator {
-  return filmLane(page, "customers").getByRole("tab", { name: new RegExp(`^${label}`), includeHidden: true });
 }
 
 /**

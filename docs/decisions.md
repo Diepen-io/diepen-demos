@@ -38,4 +38,5 @@ Leander confirms or changes each open row.
 | S2 | `/` is the film, `/live` is live mode, in every app | One URL to record, one to demo on a call | 2026-11-01 |
 | S4 | Onion architecture in every app: domain, application, infrastructure, ui and app, enforced by lint | Leander asked for clean, layered code because the repo is open source | 2026-11-01 |
 | S5 | Deploy target is Vercel | Leander, 2026-11-01 | 2026-11-01 |
+| F2 | Films show one focus per beat: at most two panels, one caption of about 8 words, one highlighted element, 5 to 7 beats, one calm transition per beat, nothing under 16 px at 1280x720. Live mode keeps every detail. `FocusStage` in `@diepen/ui/film` is the one way a film renders | Leander: the four-lane films with about 40 beats overwhelmed a visitor on each screen | 2026-11-01 |
 | S3 | The company profile travels in the `?brand=` URL parameter (base64url JSON) and local storage | The brief forbids server storage; a URL can be sent to a prospect | 2026-11-01 |

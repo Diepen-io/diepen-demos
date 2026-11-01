@@ -13,23 +13,34 @@ const tones: Record<BadgeTone, string> = {
   fail: "bg-fail-soft text-fail shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--fail)_22%,white)]",
 };
 
+/** `lg` is for film panels, where nothing reads below 16 px at the 1280x720 recording size. */
+export type BadgeSize = "md" | "lg";
+
+const sizes: Record<BadgeSize, { className: string; icon: number }> = {
+  md: { className: "h-6 gap-1 px-2.5 text-[13px]", icon: 13 },
+  lg: { className: "h-9 gap-1.5 px-3.5 text-[17px]", icon: 17 },
+};
+
 export type BadgeProps = {
   tone?: BadgeTone;
+  size?: BadgeSize;
   icon?: IconName;
   children: ReactNode;
   className?: string;
 };
 
-export function Badge({ tone = "neutral", icon, children, className }: BadgeProps) {
+export function Badge({ tone = "neutral", size = "md", icon, children, className }: BadgeProps) {
+  const look = sizes[size];
   return (
     <span
       className={cx(
-        "inline-flex h-6 shrink-0 items-center gap-1 rounded-full px-2.5 text-[13px] font-medium whitespace-nowrap",
+        "inline-flex shrink-0 items-center rounded-full font-medium whitespace-nowrap",
+        look.className,
         tones[tone],
         className,
       )}
     >
-      {icon && <Icon name={icon} size={13} strokeWidth={2.25} />}
+      {icon && <Icon name={icon} size={look.icon} strokeWidth={2.25} />}
       {children}
     </span>
   );
@@ -54,10 +65,10 @@ export const statusLooks: Record<Status, StatusLook> = {
   missing: { label: "Missing", tone: "wait", icon: "clock" },
 };
 
-export function StatusBadge({ status, className }: { status: Status; className?: string }) {
+export function StatusBadge({ status, size, className }: { status: Status; size?: BadgeSize; className?: string }) {
   const look = statusLooks[status];
   return (
-    <Badge tone={look.tone} icon={look.icon} className={className}>
+    <Badge tone={look.tone} size={size} icon={look.icon} className={className}>
       {look.label}
     </Badge>
   );

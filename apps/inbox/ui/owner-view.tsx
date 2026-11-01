@@ -6,25 +6,14 @@ import { cx } from "@diepen/ui/primitives/class-names";
 import type { CompanyProfile } from "@diepen/voice/profile";
 import { statusLabels, type ConversationStatus } from "@/domain/conversation-status";
 import type { OwnerRow as OwnerRowData } from "@/domain/inbox-snapshot";
-import type { CursorState } from "./film-cursor";
 import { OwnerRow } from "./owner-row";
 
 export type OwnerViewProps = {
   company: Pick<CompanyProfile, "name" | "logo" | "colors">;
   rows: OwnerRowData[];
-  /** Under the company name, for example "Closed until 08:00" or the average first reply. */
+  /** Under the company name, for example the average first reply. */
   subtitle: string;
-  badge?: { tone: BadgeTone; label: string };
   showFilters: boolean;
-  /** The row whose thread is open. */
-  openRow?: string;
-  /** Shows only the rows with this status, and marks its filter chip. */
-  filter?: ConversationStatus;
-  onToggleRow?: (id: string) => void;
-  nameOf?: (row: OwnerRowData) => string;
-  isNew?: (row: OwnerRowData) => boolean;
-  /** The film's pointer, over the first row. */
-  cursor?: CursorState;
   emptyText: string;
   className?: string;
 };
@@ -38,8 +27,7 @@ const filterOrder: { status: ConversationStatus; tone: BadgeTone }[] = [
 
 /** The list an owner opens in the morning: every conversation and its status, needs a human first. */
 export function OwnerView(props: OwnerViewProps) {
-  const { company, rows, subtitle, badge, showFilters, openRow, filter, onToggleRow, nameOf, isNew, cursor, emptyText, className } = props;
-  const shown = filter ? rows.filter((row) => row.status === filter) : rows;
+  const { company, rows, subtitle, showFilters, emptyText, className } = props;
   const counts = filterOrder
     .map(({ status, tone }) => ({ status, tone, count: rows.filter((row) => row.status === status).length }))
     .filter((filter) => filter.count > 0);
@@ -51,7 +39,6 @@ export function OwnerView(props: OwnerViewProps) {
         <div className="min-w-0 flex-1">
           <p className="truncate text-[16px] font-semibold tracking-[-0.01em]">{company.name}</p>
           <p className="mt-0.5 flex min-w-0 items-center gap-2 text-[13px] text-muted">
-            {badge ? <Badge tone={badge.tone}>{badge.label}</Badge> : null}
             <span className="tabular truncate">{subtitle}</span>
           </p>
         </div>
@@ -60,27 +47,19 @@ export function OwnerView(props: OwnerViewProps) {
         <ul aria-label="Filters" className="flex flex-wrap gap-1.5 border-b border-border px-4 py-2.5">
           {counts.map(({ status, tone, count }) => (
             <li key={status} className="enter">
-              <Badge tone={tone} className={cx("transition-shadow duration-300", status === filter && "ring-2 ring-current/60")}>
+              <Badge tone={tone}>
                 {statusLabels[status]} <span className="tabular font-semibold">{count}</span>
               </Badge>
             </li>
           ))}
         </ul>
       ) : null}
-      {shown.length === 0 ? (
+      {rows.length === 0 ? (
         <p className="m-auto max-w-[24ch] px-4 text-center text-[14px] text-faint">{emptyText}</p>
       ) : (
         <ol className="scroll-area flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3">
-          {shown.map((row, index) => (
-            <OwnerRow
-              key={row.id}
-              row={row}
-              name={nameOf?.(row) ?? row.name}
-              open={row.id === openRow}
-              fresh={isNew?.(row) ?? false}
-              cursor={index === 0 ? cursor : undefined}
-              onToggle={onToggleRow ? () => onToggleRow(row.id) : undefined}
-            />
+          {rows.map((row) => (
+            <OwnerRow key={row.id} row={row} />
           ))}
         </ol>
       )}
