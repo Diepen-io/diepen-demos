@@ -25,8 +25,8 @@ export function KeynoteChip({ tone = "neutral", children }: { tone?: KeynoteChip
   );
 }
 
-function Avatar({ name, brand }: { name: string; brand?: boolean }) {
-  const initials = name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+function Avatar({ name, initials: given, brand }: { name: string; initials?: string; brand?: boolean }) {
+  const initials = given ?? name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
   return (
     <span
       aria-hidden
@@ -40,12 +40,12 @@ function Avatar({ name, brand }: { name: string; brand?: boolean }) {
   );
 }
 
-/** One message. `from: "business"` sits on the right in the brand colour. */
-export function KeynoteBubble({ name, text, from, channel }: { name: string; text: string; from: "customer" | "business"; channel?: string }) {
+/** One message. `from: "business"` sits on the right in the brand colour; `initials` overrides the avatar letters. */
+export function KeynoteBubble({ name, text, from, channel, initials }: { name: string; text: string; from: "customer" | "business"; channel?: string; initials?: string }) {
   const business = from === "business";
   return (
     <div className={cx("flex w-full max-w-[36rem] items-end gap-3 text-left", business && "flex-row-reverse")}>
-      <Avatar name={name} brand={business} />
+      <Avatar name={name} initials={initials} brand={business} />
       <div className="min-w-0">
         <p className={cx("mb-1.5 text-[16px] font-medium text-muted", business && "text-right")}>
           {name}

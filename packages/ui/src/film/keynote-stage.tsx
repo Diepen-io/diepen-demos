@@ -42,11 +42,14 @@ export function KeynoteStage({ film, liveHref = "/live", autoplay = true, classN
       className={cx("relative flex h-dvh w-full flex-col overflow-hidden", recording && "cursor-none", className)}
       style={backdrop}
     >
-      <header className="flex items-center gap-3 px-6 pt-5 md:px-10 md:pt-7">
-        <BrandMark profile={profile} size={36} />
-        <span className="truncate text-[17px] font-semibold tracking-[-0.01em]">{profile.name}</span>
-        {profile.fictional ? <FictionalBadge size="lg" /> : null}
-      </header>
+      {/* Outside a recording the demo shell already names the company above the stage. */}
+      {recording ? (
+        <header className="flex items-center gap-3 px-6 pt-5 md:px-10 md:pt-7">
+          <BrandMark profile={profile} size={36} />
+          <span className="truncate text-[17px] font-semibold tracking-[-0.01em]">{profile.name}</span>
+          {profile.fictional ? <FictionalBadge size="lg" /> : null}
+        </header>
+      ) : null}
 
       <div className="flex min-h-0 flex-1 items-center justify-center px-6 md:px-10">
         <div
