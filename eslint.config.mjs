@@ -49,7 +49,7 @@ export default defineConfig([
   globalIgnores([
     "**/node_modules/**",
     "**/.next/**",
-    "**/.next-e2e/**",
+    "**/.next-*/**",
     "**/.turbo/**",
     "**/next-env.d.ts",
     "**/playwright-report/**",
