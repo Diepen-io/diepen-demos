@@ -23,7 +23,8 @@ export type DriveFile = {
 
 export const driveColumns = "grid-cols-[minmax(0,1fr)_auto] gap-x-3 @2xl:grid-cols-[minmax(0,1fr)_8rem_9rem_4.5rem]";
 
-export function DriveFileRow({ file, compact }: { file: DriveFile; compact?: boolean }) {
+/** `wrapName` breaks a long name over lines instead of cutting it, for narrow lanes where the end of the name matters. */
+export function DriveFileRow({ file, compact, wrapName }: { file: DriveFile; compact?: boolean; wrapName?: boolean }) {
   const lit = file.isNew === true || file.highlight === true;
   const cellRole = compact ? undefined : "cell";
   return (
@@ -42,7 +43,7 @@ export function DriveFileRow({ file, compact }: { file: DriveFile; compact?: boo
       <span role={cellRole} className="flex min-w-0 items-center gap-3">
         <FileIcon kind={file.kind ?? fileKindOf(file.name)} size={compact ? 22 : 26} />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-body font-medium text-foreground">{file.name}</span>
+          <span className={cx("block text-body font-medium text-foreground", wrapName ? "break-words" : "truncate")}>{file.name}</span>
           {(file.isNew === true || file.status !== undefined) && (
             <span className="mt-1 flex flex-wrap gap-1.5">
               {file.isNew && <Badge tone="brand">New</Badge>}

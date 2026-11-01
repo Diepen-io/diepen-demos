@@ -89,6 +89,17 @@ export default defineConfig([
     },
   },
   {
+    // App scripts run under plain Node, which cannot resolve the @/ alias, so they import their own app by relative path.
+    files: ["apps/*/scripts/**/*.ts"],
+    rules: {
+      ...restrict(noRelativePackages, anthropicOnlyInAi, {
+        group: ["../../*", "**/apps/**"],
+        message: "An app script imports only its own app.",
+      }),
+      "no-console": "off",
+    },
+  },
+  {
     files: ["apps/*/domain/**/*.{ts,tsx}"],
     rules: restrict(appScope, noRelativePackages, anthropicOnlyInAi, {
       group: [
@@ -120,7 +131,8 @@ export default defineConfig([
   {
     files: ["apps/*/ui/**/*.{ts,tsx}", "apps/*/film/**/*.{ts,tsx}"],
     rules: restrict(appScope, noRelativePackages, anthropicOnlyInAi, {
-      group: ["@/infrastructure/**", "@/application/**", "@/app/**", "@diepen/ai", "@diepen/ai/*", "!@diepen/ai/text-stream-client"],
+      // No bare "@diepen/ai" here: a pattern that matches the package itself blocks the re-include below.
+      group: ["@/infrastructure/**", "@/application/**", "@/app/**", "@diepen/ai/*", "!@diepen/ai/text-stream-client"],
       message: "UI talks to the server over HTTP through route handlers. It never runs a use case or an adapter.",
     }),
   },

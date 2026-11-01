@@ -23,6 +23,8 @@ export type DriveFolderProps = {
   folders?: DriveSubfolder[];
   /** Files directly in this folder. */
   files?: DriveFile[];
+  /** Long file names wrap instead of being cut, so the end of a name stays readable in a narrow lane. */
+  wrapNames?: boolean;
   className?: string;
 };
 
@@ -34,7 +36,7 @@ function FolderGlyph() {
  * A cloud folder. Subfolders with `files` render as a tree, and a file that moves between
  * them (same id, new folder) slides there, as when an old version goes to "99 Replaced".
  */
-export function DriveFolder({ path, folders = [], files = [], className }: DriveFolderProps) {
+export function DriveFolder({ path, folders = [], files = [], wrapNames, className }: DriveFolderProps) {
   const tree = folders.some((folder) => folder.files);
   const count = files.length + folders.reduce((sum, folder) => sum + (folder.files?.length ?? 0), 0);
 
@@ -68,7 +70,7 @@ export function DriveFolder({ path, folders = [], files = [], className }: Drive
                     {folder.files && folder.files.length > 0 && (
                       <div role="group" className="ml-[1.375rem] flex flex-col border-l border-border pl-3">
                         {folder.files.map((file) => (
-                          <DriveFileRow key={file.id} file={file} compact />
+                          <DriveFileRow key={file.id} file={file} compact wrapName={wrapNames} />
                         ))}
                       </div>
                     )}
@@ -103,7 +105,7 @@ export function DriveFolder({ path, folders = [], files = [], className }: Drive
                     <span role="columnheader" className="text-right">Size</span>
                   </div>
                   {files.map((file) => (
-                    <DriveFileRow key={file.id} file={file} />
+                    <DriveFileRow key={file.id} file={file} wrapName={wrapNames} />
                   ))}
                 </div>
               </>
