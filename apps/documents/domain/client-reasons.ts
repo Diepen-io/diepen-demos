@@ -18,7 +18,7 @@ const reasons: Record<IssueKind, (facts: ReasonFacts) => string> = {
   missing_page: () => "A page is missing.",
   wrong_document: () => "The file you sent is a different document.",
   unreadable: () => "Part of it cannot be read. A sharper scan or photo helps.",
-  other: () => "We need a new copy.",
+  other: () => "Please send a clearer copy or the right document.",
 };
 
 export function clientReason(item: RequestItem, state: Pick<SessionItem, "state" | "issues"> & ReasonFacts): string {

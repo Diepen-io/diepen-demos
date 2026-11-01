@@ -1,5 +1,6 @@
 import { liveSessionSchema } from "@/domain/live-session";
 import { runChase } from "@/infrastructure/container";
+import { BodyTooLargeError, readBodyText } from "@diepen/ai/request-body";
 import { companyProfileSchema } from "@diepen/voice/profile";
 import { defaultPresetFor } from "@diepen/voice/presets";
 import { z } from "zod";
@@ -21,9 +22,13 @@ const invalid = (issues: string[]) => json({ error: "invalid_request", issues },
 
 /** "Done for now" and "Skip 3 days". No AI call, so no cost guard: it only validates and limits its body. */
 export async function POST(request: Request): Promise<Response> {
-  if (Number(request.headers.get("content-length") ?? 0) > maxBodyBytes) return tooLarge();
-  const text = await request.text();
-  if (new TextEncoder().encode(text).byteLength > maxBodyBytes) return tooLarge();
+  let text: string;
+  try {
+    text = await readBodyText(request, maxBodyBytes);
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) return tooLarge();
+    throw error;
+  }
 
   let body: unknown;
   try {

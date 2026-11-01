@@ -9,7 +9,8 @@ import { filmLaneRenderer } from "./render-film-lane";
 
 /**
  * The film inside the demo shell. The stage gives up its own full height and takes what the shell
- * leaves, so header, lanes, caption and controls fit one screen without a page scroll.
+ * leaves, so header, lanes, caption and controls fit one screen without a page scroll. On a phone
+ * that is the screen under the shell's header.
  */
 export function DocumentsFilmStage() {
   const { profile, hrefWithBrand } = useBrand();
@@ -21,7 +22,7 @@ export function DocumentsFilmStage() {
       renderLane={renderLane}
       layout={documentsLayout}
       liveHref={hrefWithBrand("/live")}
-      className="h-auto! min-h-[760px] flex-1 md:min-h-0 md:basis-0"
+      className="documents-film h-[calc(100svh-7.5rem)]! min-h-[560px] flex-1 md:h-auto! md:min-h-0 md:basis-0"
     />
   );
 }

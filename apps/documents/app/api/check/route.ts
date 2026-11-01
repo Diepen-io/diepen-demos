@@ -1,6 +1,7 @@
 import { acceptedMediaTypes, detectMediaType, maxUploadBytes, sniffLength } from "@/domain/file-type";
 import { activeProviderName, checkDocument } from "@/infrastructure/container";
 import { guards } from "@diepen/ai/guards";
+import { BodyTooLargeError, readBodyBytes } from "@diepen/ai/request-body";
 import { fallbackResponse, unavailableResponse } from "@diepen/ai/route-responses";
 import { parseCheckForm } from "./check-request";
 
@@ -12,13 +13,28 @@ const json = (body: unknown, status = 200) => Response.json(body, { status, head
 const tooLarge = () => json({ error: "file_too_large", maxBytes: maxUploadBytes }, 413);
 
 /**
+ * The multipart form, parsed from bytes read under the cap. `request.formData()` would buffer a
+ * body of any size before a check could run.
+ */
+async function readForm(request: Request): Promise<FormData | null> {
+  const bytes = await readBodyBytes(request, maxBodyBytes);
+  const contentType = request.headers.get("content-type") ?? "";
+  // The copy gives the bytes the plain ArrayBuffer a Response body is typed to take.
+  return new Response(new Uint8Array(bytes), { headers: { "content-type": contentType } }).formData().catch(() => null);
+}
+
+/**
  * Checks one uploaded file. The bytes stay in this request's memory: they go to the OCR service
  * and the model and are dropped when the answer is sent.
  */
 export async function POST(request: Request): Promise<Response> {
-  if (Number(request.headers.get("content-length") ?? 0) > maxBodyBytes) return tooLarge();
-
-  const form = await request.formData().catch(() => null);
+  let form: FormData | null;
+  try {
+    form = await readForm(request);
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) return tooLarge();
+    throw error;
+  }
   if (!form) return json({ error: "invalid_request", issues: ["The body must be multipart/form-data."] }, 400);
   const parsed = parseCheckForm(form);
   if (!parsed.ok) return json({ error: "invalid_request", issues: parsed.issues }, 400);

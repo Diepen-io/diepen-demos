@@ -1,4 +1,4 @@
-import { escalationTask, followUpEmail, reminderEmail, type OutstandingEntry } from "@/domain/chase-emails";
+import { anyFileReceived, escalationTask, followUpEmail, reminderEmail, type ComposedMessage, type OutstandingEntry } from "@/domain/chase-emails";
 import { outstanding } from "@/domain/checklist";
 import { clientReason } from "@/domain/client-reasons";
 import { requestItem } from "@/domain/document-request";
@@ -46,7 +46,10 @@ function outstandingAtSendTime(session: LiveSession): OutstandingEntry[] {
   return outstanding(session.items).map((state) => ({ itemId: state.id, reason: clientReason(requestItem(state.id), state) }));
 }
 
-const composers = { "follow-up": followUpEmail, reminder: reminderEmail, escalation: escalationTask } as const;
+function compose(kind: ChaseKind, session: LiveSession, profile: CompanyProfile, entries: OutstandingEntry[]): ComposedMessage {
+  if (kind === "follow-up") return followUpEmail(profile, entries, anyFileReceived(session.items));
+  return kind === "reminder" ? reminderEmail(profile, entries) : escalationTask(profile, entries);
+}
 
 /**
  * The job handler: composes whatever chase is due with the items outstanding right now, adds it
@@ -64,7 +67,7 @@ export async function sendDueChase(
     return { session, sent: null };
   }
   const entries = outstandingAtSendTime(session);
-  const message = composers[due.kind](profile, entries);
+  const message = compose(due.kind, session, profile, entries);
   const id = `chase-${session.chases.length + 1}`;
   const sent: SentChase = {
     id,

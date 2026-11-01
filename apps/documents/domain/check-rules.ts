@@ -1,5 +1,6 @@
 import type { CheckIssue, CheckResult, IssueKind } from "./check-result";
 import type { DocumentRequest, RequestItem } from "./document-request";
+import { inSentence, withArticle } from "./plain-words";
 
 /**
  * The checks code can do better than a model: compare the year, the name and the signature with
@@ -25,7 +26,7 @@ function missedIssues(result: CheckResult, item: RequestItem, request: DocumentR
     found.push({ kind: "missing_signature", detail: "The signature is missing." });
   }
   if (!result.matchesRequest) {
-    found.push({ kind: "wrong_document", detail: `This is a ${result.documentType}, not a ${item.label}.` });
+    found.push({ kind: "wrong_document", detail: `This is ${withArticle(inSentence(result.documentType))}, not ${withArticle(inSentence(item.label))}.` });
   }
   return found;
 }

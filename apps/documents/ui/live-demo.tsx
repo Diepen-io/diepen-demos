@@ -9,14 +9,18 @@ import { useState, type CSSProperties, type ReactNode } from "react";
 import { documentsGridColumns, documentsLanes, type DocumentsLaneId } from "./documents-lanes";
 import { LiveClientLane } from "./live-client-lane";
 import { LiveDriveLane, LiveFirmLane, LiveSystemLane } from "./live-side-lanes";
-import { LiveToolbar } from "./live-toolbar";
+import { LiveControls, LiveHeading } from "./live-toolbar";
 import { useLiveDemo } from "./use-live-demo";
 
 /** Live mode has no travelling items, so the tabs need no anchors. */
 const noAnchor = () => () => undefined;
 
-function Fill({ children }: { children: ReactNode }) {
-  return <div className="absolute inset-3 md:inset-4">{children}</div>;
+/**
+ * On a wide screen each lane fills its column and scrolls inside itself. On a phone a lane is as
+ * long as its content and the page scrolls, so nothing scrolls inside something that scrolls.
+ */
+function Fill({ narrow, children }: { narrow: boolean; children: ReactNode }) {
+  return narrow ? <div>{children}</div> : <div className="lane-fill absolute inset-3 md:inset-4">{children}</div>;
 }
 
 /** The `/live` layout: the film's four lanes, with the visitor playing Daniel on the phone. */
@@ -40,36 +44,52 @@ export function LiveDemo({ providerName }: { providerName: string }) {
   }
 
   const content: Record<DocumentsLaneId, ReactNode> = {
-    firm: <Fill><LiveFirmLane state={state} /></Fill>,
+    firm: <Fill narrow={narrow}><LiveFirmLane state={state} profile={profile} /></Fill>,
     client: (
-      <Fill>
+      <Fill narrow={narrow}>
         <LiveClientLane state={state} profile={profile} actions={actions} framed={!narrow} busy={busy} onDone={() => void run("submitted")} />
       </Fill>
     ),
-    system: <LiveSystemLane state={state} />,
-    drive: <Fill><LiveDriveLane state={state} firmName={profile.name} /></Fill>,
+    system: <LiveSystemLane state={state} firmName={profile.name} />,
+    drive: <Fill narrow={narrow}><LiveDriveLane state={state} firmName={profile.name} /></Fill>,
   };
+
+  const controls = (
+    <LiveControls
+      now={state.now}
+      canSkip={!busy && !done && !state.session.escalated}
+      onSkip={() => void run("skip-days")}
+      onStartOver={() => {
+        actions.startOver();
+        setShown("client");
+      }}
+    />
+  );
 
   return (
     <div className="flex min-h-0 flex-col gap-3 px-4 pt-4 pb-4 md:flex-1 md:basis-0 md:gap-5 md:px-8 md:pt-6 md:pb-6 2xl:px-12">
-      <LiveToolbar
-        now={state.now}
-        providerName={providerName}
-        canSkip={!busy && !done && !state.session.escalated}
-        onSkip={() => void run("skip-days")}
-        onStartOver={() => {
-          actions.startOver();
-          setShown("client");
-        }}
-      />
-      {narrow && (
-        <LaneTabs
-          lanes={lanes}
-          shownLane={shown}
-          receiving={new Set(state.changed.filter((lane) => lane !== shown))}
-          onSelect={select}
-          register={noAnchor}
-        />
+      {narrow ? (
+        <>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <LiveHeading providerName={providerName} />
+          </div>
+          {/* The clock, "Skip 3 days" and the tabs stay in reach while the page scrolls. */}
+          <div className="sticky top-0 z-20 -mx-4 flex flex-col gap-2 bg-background/95 px-4 py-2 backdrop-blur-sm">
+            <div className="flex items-center gap-3">{controls}</div>
+            <LaneTabs
+              lanes={lanes}
+              shownLane={shown}
+              receiving={new Set(state.changed.filter((lane) => lane !== shown))}
+              onSelect={select}
+              register={noAnchor}
+            />
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <LiveHeading providerName={providerName} />
+          {controls}
+        </div>
       )}
       <div
         className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-[var(--live-columns)] 2xl:gap-6"
@@ -81,7 +101,7 @@ export function LiveDemo({ providerName }: { providerName: string }) {
             id={`film-lane-${lane.id}`}
             lane={lane}
             focused={narrow ? false : lane.id === "client"}
-            className={cx("max-md:h-[calc(100dvh-120px)] max-md:min-h-[520px]", narrow && lane.id !== shown && "hidden")}
+            className={cx(narrow && lane.id !== shown && "hidden")}
           >
             {content[lane.id as DocumentsLaneId]}
           </Lane>

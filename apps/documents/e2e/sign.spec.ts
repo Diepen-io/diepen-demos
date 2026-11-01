@@ -28,7 +28,7 @@ test("a typed name enables Sign @documents.sign", async ({ page }) => {
   const client = await openLetter(page);
 
   await expect(signButton(client)).toBeDisabled();
-  await client.getByRole("button", { name: "Type your name instead" }).click();
+  await client.getByRole("button", { name: "Type your name" }).click();
   await expect(signButton(client)).toBeDisabled();
   await client.getByRole("textbox", { name: /name/i }).fill("Daniel Okafor");
   await expect(signButton(client)).toBeEnabled();

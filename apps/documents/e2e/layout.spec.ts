@@ -26,7 +26,7 @@ test("nothing overflows 375 px in the film or in live mode @documents.film @docu
   await expectNoHorizontalOverflow(page, 375);
 
   const tabs = laneTabs(page).getByRole("tab");
-  await expect(tabs).toHaveCount(4);
+  await expect(tabs).toHaveText(["Firm", "Client", "System", "Drive"]);
   for (let index = 0; index < 4; index++) {
     await tabs.nth(index).click();
     await expectNoHorizontalOverflow(page, 375);

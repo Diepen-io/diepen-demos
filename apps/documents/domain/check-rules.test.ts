@@ -66,8 +66,7 @@ describe("applyCheckRules @documents.problem", () => {
   it("adds wrong_document when the file does not match the request", () => {
     const checked = applyCheckRules(result({ matchesRequest: false, documentType: "Bank statement" }), payslip, request);
     expect(kinds(checked)).toEqual(["wrong_document"]);
-    expect(checked.issues[0]?.detail).toContain("Bank statement");
-    expect(checked.issues[0]?.detail).toContain(payslip.label);
+    expect(checked.issues[0]?.detail).toBe("This is a bank statement, not an annual payslip summary 2025.");
     expect(checked.status).toBe("problem");
   });
 

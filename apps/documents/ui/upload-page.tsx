@@ -2,8 +2,10 @@
 
 import { BrandMark } from "@diepen/ui/brand/brand-mark";
 import { Button } from "@diepen/ui/primitives/button";
+import { cx } from "@diepen/ui/primitives/class-names";
 import { Icon } from "@diepen/ui/primitives/icon";
 import type { CompanyProfile } from "@diepen/voice/profile";
+import { touchTarget } from "./touch-target";
 import { UploadItem, type UploadRow, type UploadRowActions } from "./upload-item";
 
 export type UploadPageProps = {
@@ -38,22 +40,21 @@ export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, on
             type="button"
             aria-label="Back to the inbox"
             onClick={onBack}
-            className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-lg text-muted hover:bg-surface"
+            className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-lg text-muted hover:bg-surface max-md:size-11"
           >
             <Icon name="chevronLeft" size={17} />
           </button>
         )}
-        <span className="flex h-8 min-w-0 flex-1 items-center gap-1.5 rounded-lg bg-surface px-2.5 text-[12px] text-muted shadow-[inset_0_0_0_1px_var(--border)]">
+        <span className="flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg bg-surface px-2.5 text-[13px] text-muted shadow-[inset_0_0_0_1px_var(--border)]">
+          {/* A phone browser shows the site, not the path. */}
           <Icon name="globe" size={13} className="shrink-0 text-faint" />
-          <span className="truncate">
-            <span className="text-foreground">{uploadHost(profile)}</span>/upload/okafor-2025
-          </span>
+          <span className="truncate text-foreground">{uploadHost(profile)}</span>
         </span>
       </div>
       <header className="flex flex-col gap-3 px-4 pt-4 pb-3">
         <div className="flex items-center gap-2.5">
           <BrandMark profile={profile} size={30} />
-          <span className="min-w-0 truncate text-[14px] font-semibold">{profile.name}</span>
+          <span className="min-w-0 text-[14px] leading-snug font-semibold text-balance">{profile.name}</span>
         </div>
         <div>
           <h2 className="text-[19px] leading-tight font-semibold tracking-[-0.015em]">Your 2025 tax return</h2>
@@ -71,7 +72,7 @@ export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, on
         <p className="text-[12px] leading-snug text-faint">
           PDF, PNG or JPEG, up to 4 MB. Your file goes to Claude for this one check. This demo keeps no copy.
         </p>
-        <Button variant="brand" className="w-full" onClick={onDone} disabled={doneDisabled}>
+        <Button variant="brand" className={cx("w-full", touchTarget)} onClick={onDone} disabled={doneDisabled}>
           Done for now
         </Button>
       </div>

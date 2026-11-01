@@ -1,7 +1,6 @@
 import { presets } from "@diepen/voice/presets";
 import { encodeProfile } from "@diepen/voice/profile-codec";
 import { expect, test } from "./support/documents-test";
-import { openFilm } from "./support/film-page";
 import { showLane, type Firm } from "./support/lanes";
 import { action, openLive, openRequestEmail, uploadRow, useSample } from "./support/live-page";
 import { samples } from "./support/samples";
@@ -35,7 +34,13 @@ test("live mode speaks in the applied profile's name, colours and Drive @documen
   expect(sentBody).toContain(brickfern.name);
 });
 
-test("the film's first caption uses the applied profile @documents.brand", async ({ page }) => {
-  await openFilm(page, `${brandQuery}&t=0`);
-  await expect(page.getByText(new RegExp(`^${brickfern.name} needs 6 documents`))).toBeVisible();
+test("a profile stored from an earlier visit writes the request email on a fresh load @documents.brand", async ({ page }) => {
+  const stored = encodeProfile(brickfern);
+  await page.addInitScript((value) => window.localStorage.setItem("diepen-demos:brand", value), stored);
+  await openLive(page);
+  const client = await showLane(page, "client", firm);
+  await expect(client.getByText(brickfern.people.assistantName).first()).toBeVisible();
+  await openRequestEmail(page);
+  await expect(client).toContainText(`${brickfern.name} needs these 6 documents`);
+  await expect(client).toContainText(brickfern.voice.signOff.split("\n")[1] ?? "");
 });
