@@ -20,13 +20,21 @@ const companySuffix = new RegExp(
   String.raw`\b((?:\p{Lu}[\p{L}&'-]*\s+){1,3}(?:Residential|Properties|Homes|Lettings|Estates|Group|Holdings|Partners|GmbH|Ltd|LLC|Inc))\b`,
   "u",
 );
-const emailPattern = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/;
+const emailPattern = /[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,5}/;
 /** The seller greets the prospect: "Hi Rosa," or "Thanks for joining, Rosa." */
 const greeting = /\b(?:[Hh]i|[Hh]ello|[Hh]ey|[Mm]orning|[Aa]fternoon|[Tt]hanks|[Tt]hank you)\b[^.?!]*?\b(\p{Lu}\p{Ll}+)\b/u;
 const notNames = new Set(["There", "Everyone", "All", "Team", "So", "For"]);
 
+// A transcript is visitor input. Every pattern runs on one short sentence at a time, so no
+// pattern can backtrack across a long run of text.
+const maxSentenceChars = 300;
+
+function sentencesOf(text: string): string[] {
+  return text.split(/(?<=[.?!])\s+/).map((sentence) => sentence.slice(0, maxSentenceChars));
+}
+
 function textsOf(turns: readonly SpeakerTurn[], speaker: string): string[] {
-  return turns.filter((turn) => turn.speaker === speaker).map((turn) => turn.text);
+  return turns.filter((turn) => turn.speaker === speaker).flatMap((turn) => sentencesOf(turn.text));
 }
 
 function firstMatch(texts: readonly string[], pattern: RegExp): string | null {
