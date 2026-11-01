@@ -21,6 +21,7 @@ Leander confirms or changes each open row.
 | M2 | Where does the "before" number of the meetings film come from? | "2 days", stated as this fictional scenario's manual routine | Meetings end card | 2026-11-01 |
 | M3 | Browser speech recognition sends audio to the browser vendor's service. How do we say it? | One line under Record: "Your browser's speech service turns your voice into text." | Meetings live mode | 2026-11-01 |
 | M4 | Live transcript limits | 30,000 characters, 20 words minimum, 400 turns, 10 minutes of recording. Zoom, Teams and Otter export formats wait for a later version | Meetings live mode | 2026-11-01 |
+| M5 | The presets' sign-off names the AI assistant ("Tom from Brickfern Property Management"), and the meetings film's prospect is also called Tom. Who signs the owner's follow-up email? | The first line of the sign-off and the owner's name, through the `{signOffGreeting}` token: "Best regards,\nJonas Albers" | Meetings film and keyless live email | 2026-11-01 |
 | S6 | One URL parameter for a tripped cost guard | `?fallback=limit` in every app; the shell shows the note | All apps | 2026-11-01 |
 | D7 | How many output tokens may one request use? Thinking tokens count too | 4000 (`AI_MAX_OUTPUT_TOKENS`). At the daily cap of 300 Sonnet requests that is at most about 12 USD a day | Cost, document checks, call outputs | 2026-11-01 |
 | N1 | Who writes the document chaser's follow-up and reminder emails? | A fixed template filled from the profile, not Claude. A voice task can come later | Documents live mode | 2026-11-01 |

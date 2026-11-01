@@ -93,7 +93,8 @@ export function Sheet({ open, onClose, title, description, children, footer }: S
         onKeyDown={onKeyDown}
         className="sheet-panel absolute inset-y-0 right-0 flex w-full max-w-[34rem] flex-col bg-surface shadow-[-24px_0_48px_-16px_rgb(0_0_0/0.18)] focus:outline-none sm:rounded-l-[18px]"
       >
-        <header className="flex items-start gap-4 px-5 pt-5 pb-4 sm:px-6">
+        {/* Plain divs: a header or footer here would add a second banner and contentinfo to the page. */}
+        <div className="flex items-start gap-4 px-5 pt-5 pb-4 sm:px-6">
           <div className="min-w-0 flex-1">
             <h2 id={titleId} className="text-lg font-semibold tracking-[-0.01em]">
               {title}
@@ -112,10 +113,10 @@ export function Sheet({ open, onClose, title, description, children, footer }: S
           >
             <Icon name="close" size={18} />
           </button>
-        </header>
+        </div>
         <div className="scroll-area min-h-0 flex-1 overflow-y-auto px-5 pb-6 sm:px-6">{children}</div>
         {footer && (
-          <footer className="border-t border-border bg-surface px-5 py-3 sm:px-6 sm:rounded-bl-[18px]">{footer}</footer>
+          <div className="border-t border-border bg-surface px-5 py-3 sm:px-6 sm:rounded-bl-[18px]">{footer}</div>
         )}
       </div>
     </div>

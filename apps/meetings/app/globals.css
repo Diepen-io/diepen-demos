@@ -1,3 +1,24 @@
 @import "tailwindcss";
 @import "@diepen/ui/styles.css";
 @source "../../../packages/ui/src";
+
+/* The AI lane while it reads the call: one bar sweeps along the bottom of the row. */
+.reading-sweep {
+  animation: reading-sweep 1.4s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+@keyframes reading-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reading-sweep {
+    animation: none;
+    opacity: 0.4;
+  }
+}

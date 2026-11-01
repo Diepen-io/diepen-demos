@@ -14,6 +14,8 @@ export type FilmLane = {
   label: string;
   /** What the party is in the story, for example "Customer" or "AI assistant". */
   role: string;
+  /** A short name for the narrow layout's tabs. Defaults to `role`. */
+  tabLabel?: string;
   icon?: IconName;
   /** The business acts in this lane, so its accents use the brand colour. */
   brand?: boolean;

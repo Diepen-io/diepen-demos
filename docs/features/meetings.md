@@ -39,6 +39,7 @@ That keeps the film true for the default preset and for a visitor's own profile 
 | `{serviceName}` | Name of the first service in `profile.knowledge.services` that has a `price` |
 | `{servicePrice}` | That service's `price`, verbatim. "Price on request" when no service has a price |
 | `{signOff}` | `profile.voice.signOff` |
+| `{signOffGreeting}` | The first line of `profile.voice.signOff`, for example "Best regards,". The owner signs the follow-up email with it and their own name, because the full sign-off can name the AI assistant |
 | `{bookingMinutes}` | `profile.knowledge.bookingMinutes`, a number |
 
 ### Beats
@@ -72,6 +73,8 @@ A travel cell reads `from → to, kind, label`.
 | 67000 | all | End card fades in over the stage and holds until 80000 | none | 2026-11-10T14:36:10 | No caption. The end card carries the text |
 
 The 36 turns in the 33000 beat is the turn count of the sample call; the film reads it from the parsed fixture, never from a literal.
+A beat with a travel starts 900 ms before its row, so the item lands at the row's film ms and its clock keyframe. `/?t=49000` therefore opens with the proposal already in its lane.
+The 63000 row is two beats, because an item lands in its own beat's lane: "Sent 14:36" in the proposal lane at 63000, then the "Proposal sent" travel from proposal to crm, which lands at 64300 and changes the CRM stage.
 
 ### End card
 
@@ -192,7 +195,7 @@ export const recordedOutputs = {
       "Thanks for the call today. What I heard: 14 apartments in three buildings, about nine hours a week of your time, and 38 empty days on average between tenants.\n\n" +
       "The proposal is attached. We take the tenant calls and repairs, nights included, run viewings within five days of a notice, and send you one statement a month. You and Anna still choose every tenant. {serviceName} is {servicePrice}, starting 1 January.\n\n" +
       "Friday at 10:00 is in the calendar to walk the three buildings. Bring Anna if she can make it.\n\n" +
-      "{signOff}\n{sellerOwner}",
+      "{signOffGreeting}\n{sellerOwner}",
   },
   nextMeeting: {
     title: "Walkthrough with Tom Becker",
@@ -211,6 +214,8 @@ Shown greyed from beat 0 so the tools look lived in.
 | --- | --- |
 | crm | "Hartley Lofts", contact Priya Nair, stage "Proposal sent" |
 | crm | "Ines Ortega", private owner, stage "Discovery" |
+
+Every lane keeps its newest item at the bottom and lets older items scroll up under its header, so the new CRM record lands below the two existing deals.
 | calendar | Mon 9 Nov 09:00, "Team check-in", 30 minutes |
 | calendar | Wed 11 Nov 15:00, "Viewing, Mill Lane 7", 30 minutes |
 | calendar | Thu 12 Nov 11:00, "Owner statements", 60 minutes |
@@ -341,7 +346,8 @@ Inside `apps/meetings`. Dependencies point inwards; `eslint.config.mjs` enforces
 | `domain/call-sides.ts` | `identifySides(turns, profile)` returning `{ seller, prospect }` |
 | `domain/deal-stage.ts` | `dealStages` ("Discovery", "Proposal drafted", "Proposal sent", "Won", "Lost"), `normaliseStage(text)`, `stageAfterSend` |
 | `domain/output-sequence.ts` | `OutputKind` (summary, numbers, crm, proposal, email, meeting), `outputSequence`, `laneOf(kind)`, `revealPlan(stepMs, reducedMotion)` |
-| `domain/lanes.ts` | The five lane ids and labels, shared by the film and live mode |
+| `domain/lanes.ts` | The five lane ids, labels, roles and phone tab names, shared by the film and live mode |
+| `domain/meeting-outputs.ts` | `MeetingOutputs`: the `call-outputs` shape with `crm.stage` as a deal stage. The model contract stays the package schema |
 | `domain/timing-metric.ts` | `elapsedMs(fromIso, toIso)`, `formatDuration(ms)`: "45 seconds", "1 min 12 s", "4 minutes", "2 days" |
 | `domain/proposal-service.ts` | `proposalService(profile)` returning `{ name, description, price }` with the "Price on request" rule |
 | `domain/profile-tokens.ts` | `profileTokens(profile)` and `fillTokens(text, tokens)`, which throws on an unknown token |
@@ -352,6 +358,7 @@ Inside `apps/meetings`. Dependencies point inwards; `eslint.config.mjs` enforces
 | --- | --- |
 | `application/process-call.ts` | `processCall({ transcript, profile, localNow }, { ai })`. Parses and checks the transcript, builds the request with `@diepen/voice/tasks/call-outputs` (system prompt through `buildSystemPrompt`), passes `draftMockOutputs` as `mock`, calls `ai.generateObject`, then enforces price, meeting length and stage |
 | `application/draft-mock-outputs.ts` | The deterministic mock of section 4 |
+| `application/read-prospect.ts` | The mock's text rules: the prospect's figures and pain point sentences |
 
 The `AiProvider` is a parameter, so tests pass the mock provider or a fake.
 
@@ -379,30 +386,35 @@ export function createSpeechRecognizer(scope: Window): SpeechRecognizer;
 
 | File | Holds |
 | --- | --- |
-| `infrastructure/container.ts` | `getContainer()`: the provider from the `@diepen/ai` factory (`claude` with a key, else `mock`), the cost guards, `providerName`, and `processCall` bound to the provider |
+| `infrastructure/container.ts` | `getContainer()`: the provider from the `@diepen/ai` factory (`claude` with a key, else `mock`), the cost guards, `providerName`, `processCall` bound to the provider, and the brand handler |
+| `infrastructure/fixture-page-fetcher.ts` | The page fetcher the brand handler uses with the mock provider, so tests and keyless runs never fetch the internet |
 
 ### `ui/`
 
 | File | Holds |
 | --- | --- |
-| `ui/lanes/call-lane.tsx` | Transcript mockup with speakers, live append, "Call ended" state, interim line |
+| `ui/lanes/call-lane.tsx` | Transcript with speakers, marked numbers and pain points, the live call timer and "Call ended" |
 | `ui/lanes/ai-lane.tsx` | Waiting and reading states, summary card, number chips, pain points |
-| `ui/lanes/crm-lane.tsx` | Existing deals and the new record, built on the CRM card mockup |
-| `ui/lanes/proposal-lane.tsx` | Proposal document and follow-up email with attachment chip, draft and sent status, optional send action |
-| `ui/lanes/calendar-lane.tsx` | Week view built on the calendar mockup, new event highlighted |
-| `ui/lanes/render-lane.tsx` | The `renderLane` the film stage calls, and the grid live mode renders |
-| `ui/live/live-demo.tsx` | Client component and its state: idle, recording, ready, processing, revealing, revealed, sent, failed |
-| `ui/live/transcript-input.tsx` | Tabs, transcript box, counter, inline issues |
-| `ui/live/record-panel.tsx` | Speaker toggle, Start and Stop, interim text, fallback notes |
+| `ui/lanes/crm-lane.tsx` | Existing deals and the new record with its stage. A compact pipeline, because the CRM lane shares its column with the calendar |
+| `ui/lanes/proposal-lane.tsx`, `proposal-paper.tsx`, `follow-up-email.tsx` | Proposal page and follow-up email (on the `EmailMessage` mockup) with attachment chip, draft and sent status, optional send action |
+| `ui/lanes/calendar-lane.tsx` | The working week as an agenda, one row per day, new meeting highlighted. A week grid is unreadable in a lane under 400 px wide |
+| `ui/lanes/render-lane.tsx` | `renderFilmLane`: the film's landed beats become the lane components |
+| `ui/film-view/meetings-film-stage.tsx`, `film-header.tsx`, `fallback-toast.tsx` | The film page. It uses the film stage's own header with the shell's pieces (brand, Film or Live switch, "Make it yours"), so the film fits one screen with no page scroll |
+| `ui/live/live-demo.tsx` | The live page: input column and output lanes |
+| `ui/live/use-live-call.ts` | The live state: ready, processing, revealing, revealed, sent, failed |
+| `ui/live/transcript-input.tsx`, `input-tabs.tsx` | Tabs, transcript box, counter, inline issues |
+| `ui/live/record-panel.tsx`, `use-recording.ts` | Speaker toggle, Start and Stop, interim text, fallback notes, the 10-minute stop |
+| `ui/live/live-lanes.tsx`, `lane-panel.tsx` | The output lanes in live mode |
 | `ui/live/send-result.tsx` | "Transcript to proposal sent" bar |
 | `ui/live/outputs-client.ts` | `fetch` to `/api/outputs`, zod parse of each response shape |
-| `ui/speech/speech-recognizer.ts` | The interface and browser adapter above |
+| `ui/speech/speech-recognizer.ts`, `browser-recognizer.ts` | The interface and browser adapter above, and the hook that creates it once in the browser |
 
 ### `film/`
 
 | File | Holds |
 | --- | --- |
 | `film/meetings-film.ts` | `buildMeetingsFilm(profile): FilmScript<MeetingsFilmData>`: lanes, beats of section 2, clock keyframes, captions and end card, tokens filled |
+| `film/meetings-film-data.ts`, `film-call-lines.ts`, `fill-deep.ts` | The beat data types, the ten film lines with their marked phrases, and token filling for nested fixtures |
 | `film/fixtures/sample-call.ts` | The sample call and `sampleCallEndsAt` |
 | `film/fixtures/recorded-outputs.ts` | The recorded outputs |
 | `film/fixtures/existing-tools.ts` | Existing CRM deals and calendar events |
@@ -411,11 +423,11 @@ export function createSpeechRecognizer(scope: Window): SpeechRecognizer;
 
 | Route | File | Contract |
 | --- | --- | --- |
-| `/` | `page.tsx` and `film-view.tsx` (client) | Shell in film mode; builds the film from the active profile; reads `?t=` and `?fallback=limit` |
+| `/` | `page.tsx` | The film page from `ui/film-view/`; builds the film from the active profile; reads `?t=`, `?brand=`, `?record=1` and `?fallback=limit` |
 | `/live` | `live/page.tsx` | Server component; passes `providerName` and the sample call to `LiveDemo` |
 | `POST /api/outputs` | `api/outputs/route.ts`, `api/outputs/request-schema.ts` | See below |
-| `POST /api/brand` | `api/brand/route.ts` | Re-exports the handler from `@diepen/voice/brand-route` with this app's guards; its request and response are the package's |
-| `GET /api/health` | `api/health/route.ts` | `{ ok: true, app: "meetings" }`, already there |
+| `POST /api/brand` | `api/brand/route.ts` | The handler from `@diepen/voice/brand-route`, wired in the container with this app's provider, guards and page fetcher; its request and response are the package's |
+| `GET /api/health` | `api/health/route.ts` | `{ ok: true, app: "meetings", provider: "claude" \| "mock" }` |
 
 `POST /api/outputs`:
 
@@ -519,14 +531,14 @@ Every flow test fails on any `console` error or `pageerror` through one shared f
 
 | Id | A user can | Reach it | As | Status |
 | --- | --- | --- | --- | --- |
-| `meetings.film` | Watch a sales call turn into a summary, CRM record, proposal, email and next meeting, ending on call end to proposal sent | `/` | anon | planned |
-| `meetings.film-controls` | Pause, play, restart, change speed and start the film at a given moment | `/`, the controls, or `/?t=49000` | anon | planned |
-| `meetings.live-sample` | Load the sample call and get all six outputs | `/live`, "Sample call", "Turn this call into a proposal" | anon | planned |
-| `meetings.live-paste` | Paste a call transcript and get all six outputs | `/live`, "Paste", "Turn this call into a proposal" | anon | planned |
-| `meetings.live-record` | Record a role-played call with the microphone, or see why recording is not available | `/live`, "Record", "Start" | anon | planned |
-| `meetings.live-send` | Send the follow-up email (simulated) and see the time from transcript to proposal sent | `/live`, after the outputs, "Send to …" | anon | planned |
-| `meetings.limit-fallback` | See the film with a short note when the live demo hits its limit | `/live`, "Turn this call into a proposal" while a guard trips | anon | planned |
-| `meetings.make-it-yours` | See the film and live mode in their own company's brand, voice and prices | `/`, "Make it yours", or `/live?brand=…` | anon | planned |
+| `meetings.film` | Watch a sales call turn into a summary, CRM record, proposal, email and next meeting, ending on call end to proposal sent | `/` | anon | shipped |
+| `meetings.film-controls` | Pause, play, restart, change speed and start the film at a given moment | `/`, the controls, or `/?t=49000` | anon | shipped |
+| `meetings.live-sample` | Load the sample call and get all six outputs | `/live`, "Sample call", "Turn this call into a proposal" | anon | shipped |
+| `meetings.live-paste` | Paste a call transcript and get all six outputs | `/live`, "Paste", "Turn this call into a proposal" | anon | shipped |
+| `meetings.live-record` | Record a role-played call with the microphone, or see why recording is not available | `/live`, "Record", "Start" | anon | shipped |
+| `meetings.live-send` | Send the follow-up email (simulated) and see the time from transcript to proposal sent | `/live`, after the outputs, "Send to …" | anon | shipped |
+| `meetings.limit-fallback` | See the film with a short note when the live demo hits its limit | `/live`, "Turn this call into a proposal" while a guard trips | anon | shipped |
+| `meetings.make-it-yours` | See the film and live mode in their own company's brand, voice and prices | `/`, "Make it yours", or `/live?brand=…` | anon | shipped |
 
 ## 10. Open questions
 

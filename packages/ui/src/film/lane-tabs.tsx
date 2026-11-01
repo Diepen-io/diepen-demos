@@ -54,7 +54,7 @@ export function LaneTabs({ lanes, shownLane, receiving, onSelect, register, clas
             )}
           >
             <Icon name={lane.icon ?? "user"} size={17} className={cx("shrink-0", lane.brand && selected && "text-brand")} />
-            <span className="max-w-full truncate">{lane.role}</span>
+            <span className="max-w-full truncate">{lane.tabLabel ?? lane.role}</span>
             <span
               aria-hidden="true"
               className={cx(

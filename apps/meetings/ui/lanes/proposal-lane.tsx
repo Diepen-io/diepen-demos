@@ -1,0 +1,40 @@
+import type { CompanyProfile } from "@diepen/voice/profile";
+import type { ReactNode } from "react";
+import type { MeetingOutputs } from "@/domain/meeting-outputs";
+import { FollowUpEmail } from "./follow-up-email";
+import { ProposalPaper } from "./proposal-paper";
+
+export type ProposalLaneProps = {
+  seller: CompanyProfile;
+  client: string;
+  date: string;
+  proposal?: { proposal: MeetingOutputs["proposal"]; isNew: boolean };
+  email?: { email: MeetingOutputs["followUpEmail"]; to: string; draftedAt: string; isNew: boolean; action?: ReactNode };
+  /** "14:36" once the email went out. */
+  sentAt?: string;
+  emptyText?: string;
+};
+
+/** The proposal, and below it the email that carries it: reading both and pressing send is one step. */
+export function ProposalLane({ seller, client, date, proposal, email, sentAt, emptyText }: ProposalLaneProps) {
+  return (
+    <div data-lane="proposal" className="flex flex-col gap-3">
+      {proposal ? (
+        <ProposalPaper seller={seller} proposal={proposal.proposal} client={client} date={date} sent={Boolean(sentAt)} isNew={proposal.isNew} />
+      ) : emptyText ? (
+        <p className="rounded-xl bg-subtle px-3.5 py-3 text-[14px] text-muted">{emptyText}</p>
+      ) : null}
+      {email ? (
+        <FollowUpEmail
+          email={email.email}
+          from={{ name: seller.people.owner.name, email: seller.knowledge.contactEmail }}
+          to={email.to}
+          draftedAt={email.draftedAt}
+          sentAt={sentAt}
+          action={email.action}
+          isNew={email.isNew}
+        />
+      ) : null}
+    </div>
+  );
+}

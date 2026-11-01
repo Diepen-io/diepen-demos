@@ -45,7 +45,10 @@ export function DemoShell({ title, mode, children }: DemoShellProps) {
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
                 <span className="truncate text-[15px] font-semibold tracking-[-0.01em]">{profile.name}</span>
-                <FictionalBadge className="hidden sm:inline-flex" />
+                {/* A wrapper hides it: a class on the badge loses to the badge's own inline-flex. */}
+                <span className="hidden sm:contents">
+                  <FictionalBadge />
+                </span>
               </div>
               <h1 className="truncate text-[13px] text-muted">{title}</h1>
             </div>

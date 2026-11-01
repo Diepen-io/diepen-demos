@@ -18,10 +18,13 @@ export default defineConfig({
   webServer: external
     ? undefined
     : {
-        command: `next dev --port ${port}`,
-        url: `http://localhost:${port}/api/health`,
+        // A build cache from older sources makes the dev server reload pages mid-test, so every run starts clean.
+        command: `rm -rf .next-e2e && next dev --port ${port}`,
+        // Waiting for the film page compiles it before the timed film tests start.
+        url: `http://localhost:${port}/`,
         reuseExistingServer: false,
         timeout: 120_000,
-        env: { AI_PROVIDER: "mock", NEXT_DIST_DIR: ".next-e2e", NEXT_TELEMETRY_DISABLED: "1" },
+        // Every flow runs from one IP, so the per-IP rate limit is raised for the suite.
+        env: { AI_PROVIDER: "mock", AI_RATE_LIMIT_PER_MINUTE: "1000", NEXT_DIST_DIR: ".next-e2e", NEXT_TELEMETRY_DISABLED: "1" },
       },
 });
