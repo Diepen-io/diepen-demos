@@ -4,29 +4,75 @@
   --background: #fafafa;
   --foreground: #171717;
   --muted: #52525b;
+  --faint: #71717a;
   --border: #e4e4e7;
   --surface: #ffffff;
+  --subtle: #f4f4f5;
   --pass: #15803d;
   --fail: #b91c1c;
   --wait: #a16207;
+  --info: #1d4ed8;
+  --pass-soft: #ecfdf3;
+  --fail-soft: #fef2f2;
+  --wait-soft: #fefce8;
+  --info-soft: #eff6ff;
   --brand: #171717;
   --brand-foreground: #ffffff;
+
+  /* Channel accents evoke each product through colour only. No logo or trademark is drawn. */
+  --channel-email: #1f6feb;
+  --channel-instagram: #d6246e;
+  --channel-instagram-alt: #f58529;
+  --channel-dm-from: #8e3bea;
+  --channel-dm-to: #3c5cf6;
+  --channel-linkedin: #0a66c2;
+  --channel-drive: #1e8e3e;
+  --channel-crm: #7c3aed;
+  --channel-calendar: #0b8043;
+  --channel-call: #dc2626;
   color-scheme: light;
+}
+
+/* Recomputed where the brand changes, so tints follow the active CompanyProfile. */
+[data-brand-scope] {
+  --brand-soft: color-mix(in oklab, var(--brand) 10%, white);
+  --brand-line: color-mix(in oklab, var(--brand) 35%, white);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-faint: var(--faint);
   --color-border: var(--border);
   --color-surface: var(--surface);
+  --color-subtle: var(--subtle);
   --color-pass: var(--pass);
   --color-fail: var(--fail);
   --color-wait: var(--wait);
+  --color-info: var(--info);
+  --color-pass-soft: var(--pass-soft);
+  --color-fail-soft: var(--fail-soft);
+  --color-wait-soft: var(--wait-soft);
+  --color-info-soft: var(--info-soft);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-line: var(--brand-line);
+  --color-channel-email: var(--channel-email);
+  --color-channel-instagram: var(--channel-instagram);
+  --color-channel-linkedin: var(--channel-linkedin);
+  --color-channel-drive: var(--channel-drive);
+  --color-channel-crm: var(--channel-crm);
+  --color-channel-calendar: var(--channel-calendar);
+  --color-channel-call: var(--channel-call);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Body copy in mockups stays at 15px so it reads in a 1080p recording. */
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.45;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.35;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
@@ -36,6 +82,11 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--brand) 22%, white);
+  color: var(--foreground);
 }
 
 :focus-visible {
@@ -77,4 +128,156 @@ p {
 
 input[type="range"] {
   accent-color: var(--foreground);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d8 transparent;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+/* A new message, file or row arrives. Starts visible enough that a paused film frame still reads. */
+.enter {
+  animation: enter-item 420ms var(--ease-out) both;
+}
+
+@keyframes enter-item {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+    filter: blur(3px);
+  }
+}
+
+.typing-dot {
+  animation: typing-dot 1.2s var(--ease-in-out) infinite;
+}
+
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.speaking-bar {
+  animation: speaking-bar 900ms var(--ease-in-out) infinite;
+  transform-origin: bottom;
+}
+
+@keyframes speaking-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.offer-pulse {
+  animation: offer-pulse 1.8s var(--ease-out) infinite;
+}
+
+@keyframes offer-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand) 40%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px color-mix(in oklab, var(--brand) 0%, transparent);
+  }
+}
+
+/* One beat of attention on something that just changed, for example a booking the film points at. */
+.pulse-once {
+  animation: offer-pulse 1.2s var(--ease-out) 2;
+}
+
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: currentColor;
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.sheet-panel {
+  animation: sheet-in 320ms var(--ease-out) both;
+}
+
+.sheet-panel[data-state="closing"] {
+  animation: sheet-out 200ms var(--ease-out) both;
+}
+
+.sheet-backdrop {
+  animation: fade-in 240ms var(--ease-out) both;
+}
+
+.sheet-backdrop[data-state="closing"] {
+  animation: fade-out 200ms var(--ease-out) both;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes sheet-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter,
+  .typing-dot,
+  .speaking-bar,
+  .offer-pulse,
+  .pulse-once,
+  .caret::after,
+  .sheet-panel,
+  .sheet-backdrop {
+    animation: none;
+  }
+
+  .press:active {
+    transform: none;
+  }
+
+  .scroll-area {
+    scroll-behavior: auto;
+  }
 }
