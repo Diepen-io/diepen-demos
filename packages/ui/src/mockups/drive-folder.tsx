@@ -33,6 +33,31 @@ function FolderGlyph() {
 }
 
 /**
+ * The parent folders on a small muted line that wraps, and the open folder on its own line under
+ * it, so every part of the path stays readable in a narrow lane.
+ */
+function FolderPath({ path }: { path: string[] }) {
+  const parents = path.slice(0, -1);
+  return (
+    <nav aria-label="Folder path" className="flex min-w-0 flex-col gap-0.5 border-b border-border px-4 py-3">
+      {parents.length > 0 && (
+        <ol className="flex min-w-0 flex-wrap items-center gap-x-1 text-meta text-muted">
+          {parents.map((part, index) => (
+            <li key={`${part}-${index}`} className="flex min-w-0 items-center gap-1">
+              {index > 0 && <Icon name="chevronRight" size={13} className="shrink-0 text-faint" />}
+              <span className="min-w-0 break-words">{part}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      <p aria-current="page" className="min-w-0 truncate text-lg font-medium text-foreground">
+        {path.at(-1)}
+      </p>
+    </nav>
+  );
+}
+
+/**
  * A cloud folder. Subfolders with `files` render as a tree, and a file that moves between
  * them (same id, new folder) slides there, as when an old version goes to "99 Replaced".
  */
@@ -41,18 +66,8 @@ export function DriveFolder({ path, folders = [], files = [], wrapNames, classNa
   const count = files.length + folders.reduce((sum, folder) => sum + (folder.files?.length ?? 0), 0);
 
   return (
-    <ChannelFrame channel="Drive" icon="folder" accent="var(--channel-drive)" meta={`${count} files`} className={className}>
-      <nav aria-label="Folder path" className="flex min-w-0 items-center gap-1 border-b border-border px-4 py-3">
-        {path.map((part, index) => {
-          const current = index === path.length - 1;
-          return (
-            <span key={`${part}-${index}`} className={cx("flex items-center gap-1", current ? "min-w-0" : "hidden shrink-0 @md:flex")}>
-              {index > 0 && <Icon name="chevronRight" size={16} className={cx("shrink-0 text-faint", current && "hidden @md:block")} />}
-              <span className={cx("truncate", current ? "text-lg font-medium text-foreground" : "text-[15px] text-muted")}>{part}</span>
-            </span>
-          );
-        })}
-      </nav>
+    <ChannelFrame channel="Drive" icon="folder" accent="var(--channel-drive)" meta={count === 1 ? "1 file" : `${count} files`} className={className}>
+      <FolderPath path={path} />
 
       <MotionConfig reducedMotion="user">
         <LayoutGroup>

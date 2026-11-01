@@ -2,6 +2,9 @@ import { expectAllOutputs, inputTab, output, rosaCall, transcriptBox, turnIntoPr
 import { fakeSpeechSays, installFakeSpeech, removeSpeechRecognition } from "./support/speech";
 import { expect, test } from "./support/test";
 
+// A flow waits for a dev compile, then up to 30 s per output (`outputTimeout`) and the 700 ms reveal steps; a loaded machine needs the margin.
+test.describe.configure({ timeout: 90_000 });
+
 // F8
 test("explains that recording needs another browser, and paste still works @meetings.live-record", async ({ page }) => {
   await removeSpeechRecognition(page);

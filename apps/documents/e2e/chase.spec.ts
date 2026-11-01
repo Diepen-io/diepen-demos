@@ -4,6 +4,10 @@ import { lane, showLane } from "./support/lanes";
 import { action, expectUploadState, openEmail, openUploadPage, signByTypedName, useSample } from "./support/live-page";
 import { itemLabels, samples, type ItemId } from "./support/samples";
 
+// Each test signs and checks five or six files through /api/check one after the other; on a loaded
+// machine one check can take 10 s, so the test gets that per file plus the chase itself.
+const chaseTimeout = 150_000;
+
 const stillOpen: ItemId[] = ["bank-interest", "home-office", "health-insurance"];
 const done: ItemId[] = ["engagement-letter", "payslip-summary", "donation-receipt"];
 
@@ -33,7 +37,7 @@ async function expectListsExactlyTheOpenItems(message: Locator) {
 }
 
 test("Done for now sends a follow-up that lists exactly the 3 open items @documents.chase", async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(chaseTimeout);
   await sendFirstBatch(page);
   await pressDoneForNow(page);
 
@@ -42,7 +46,7 @@ test("Done for now sends a follow-up that lists exactly the 3 open items @docume
 });
 
 test("Skip 3 days sends the reminder, and a second skip escalates to the firm @documents.chase", async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(chaseTimeout);
   await sendFirstBatch(page);
   await pressDoneForNow(page);
   await openEmail(page, /3 documents still needed/);
@@ -61,7 +65,7 @@ test("Skip 3 days sends the reminder, and a second skip escalates to the firm @d
 });
 
 test("Done for now on a complete request sends no email and marks it ready @documents.chase", async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(chaseTimeout);
   await openUploadPage(page);
   await signByTypedName(page);
   for (const sample of [samples.payslip, samples.bank2025, samples.donation, samples.homeOfficeSigned, samples.healthInsurance]) {

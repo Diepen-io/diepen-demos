@@ -30,6 +30,8 @@ export type EmailMessageProps = {
   /** Times offered in this email, shown as chips under the body. */
   slots?: SlotChip[];
   onPickSlot?: (iso: string) => void;
+  /** The offered times are no longer on offer, for example after a handover. */
+  slotsDisabled?: boolean;
   /** A quiet line under the email, for example "Replied in 1.8 s". */
   meta?: string;
   isNew?: boolean;
@@ -37,7 +39,7 @@ export type EmailMessageProps = {
 };
 
 export function EmailMessage(props: EmailMessageProps) {
-  const { from, to, subject, time, body, attachments, tag, state, bodyAction, action, slots, onPickSlot, meta, isNew, className } = props;
+  const { from, to, subject, time, body, attachments, tag, state, bodyAction, action, slots, onPickSlot, slotsDisabled, meta, isNew, className } = props;
   const paragraphs = body.split(/\n{2,}/);
   const hasExtras = Boolean(slots?.length || meta || action);
   return (
@@ -90,7 +92,7 @@ export function EmailMessage(props: EmailMessageProps) {
       )}
       {hasExtras && (
         <div className="flex flex-col items-start gap-2 @lg:pl-[52px]">
-          {slots && slots.length > 0 && <SlotChips slots={slots} onPick={onPickSlot} />}
+          {slots && slots.length > 0 && <SlotChips slots={slots} onPick={onPickSlot} disabled={slotsDisabled} />}
           {meta && <p className="tabular text-meta text-faint">{meta}</p>}
           {action}
         </div>

@@ -17,6 +17,7 @@ The bottom layer. It imports nothing else from this repo and is the only code th
 | `mock-provider` | The mock adapter. Answers with the request's `mock()`, checked against the schema |
 | `guards` | Cost guards: `createGuards(options)`, the shared `guards`, `check(request)`, `clampMaxTokens`, `checkInputSize` |
 | `route-responses` | `fallbackResponse` (429 or 413 with `{ fallback: "film" }`), `unavailableResponse` (503), `textStreamResponse` |
+| `request-body` | `readBodyBytes(request, maxBytes)` and `readBodyText`: read a route's body under a byte cap, checked on `content-length` and again while chunks arrive, else `BodyTooLargeError`. The bytes sit in a plain `ArrayBuffer`, so they go straight into a `Response` or a `Blob` |
 | `text-stream-client` | Browser-safe: `readTextStream`, `readFallback`, `providerOf`. The only module app UI may import |
 | `errors` | `AiUnavailableError`, `AiRefusalError`, `AiOutputError`, `isAiError` |
 
@@ -48,7 +49,7 @@ The design system. It never imports `@diepen/ai`.
 | Folder | Holds |
 | --- | --- |
 | `film/` | `defineFilmScript` and the script types, `useFilm`, `FilmStage` (with `layout`, `renderLane`, `brand`, `actions`, `liveHref`), `LaneFeed`, `EndCard`, `FilmClock`, `CaptionBar`, `FilmControls`. `?t=<ms>` opens paused at that moment. Details below |
-| `mockups/` | `EmailInbox`, `EmailMessage`, `InstagramDm`, `LinkedinDm`, `ChatWidget`, `ChannelTabs`, `Calendar`, `DriveFolder`, `CrmCard`, `Transcript`, `ProposalDocument`, `Checklist`, `Composer`, slot and starter chips |
+| `mockups/` | `EmailInbox`, `EmailMessage`, `InstagramDm`, `LinkedinDm`, `ChatWidget`, `ChannelTabs`, `Calendar`, `DriveFolder`, `CrmCard`, `Transcript`, `ProposalDocument`, `Checklist`, `Composer`, slot and starter chips. Details below |
 | `brand/` | `BrandProvider` and `useBrand` (details below), `BrandMark`, `FictionalBadge`, `MakeItYours`, `requestBrandProfile`, and `brand-link` (`shareLink`, `pathWithBrand`) |
 | `shell/` | `DemoShell` (Film or Live switch, "Make it yours", footer), `PageTitle` (details below), `useRecordMode` (`?record=1`), `FallbackNote` (`?fallback=limit`), `ProviderNote` |
 | `primitives/` | `Button`, `Input`, `Textarea`, `Field`, `Badge`, `StatusBadge`, `Avatar`, `Icon`, `Sheet`, `Segmented`, `cx` |
@@ -84,3 +85,8 @@ The design system. It never imports `@diepen/ai`.
 - Travel items show their full label on up to two lines and fly without a trail line.
 - The scrubber announces "0:13 of 1:26". On phones every film control, the shell buttons, the Film and Live switch and the "Make it yours" fields are at least 44 px tall.
 
+### Mockups
+
+- Slot chips that can be picked are 44 px tall on phones. They take `disabled`: unpicked times turn grey and are not buttons, and the list carries `data-disabled`. Every conversation mockup sets it while `handover` is set, so after a handover no app has to dim or unhook the chips itself.
+- `Composer`: on phones (below 640 px) every field and button is at least 44 px tall. The email composer is compact there: two lines and a round Send button beside them, without the attachment and shortcut row, so the thread keeps its room.
+- `DriveFolder` shows the parent folders as a small muted line that wraps and the open folder on its own line under it, and counts "1 file" in the singular. With `wrapNames`, a file name breaks only after `_` (a `<wbr>`) or `-`, never inside a word.

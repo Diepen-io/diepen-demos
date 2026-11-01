@@ -359,7 +359,7 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | `ui/check-card.tsx` | One check result in the system lane: Reading, Checked or Problem found, fields, figures, summary |
 | `ui/schedule-card.tsx` | The next chase and its date, with the 3 day bar |
 | `ui/firm-lane.tsx` | Checklist (`@diepen/ui/mockups/checklist`), the summary card and the escalation task |
-| `ui/drive-lane.tsx` | Drive tree with `@diepen/ui/mockups/drive-folder`. Long names wrap only after `_` or `-` (a zero-width space follows each `_`). It keeps the newest file in view. A file preview waits for a later version |
+| `ui/drive-lane.tsx` | Drive tree with `@diepen/ui/mockups/drive-folder`. Passes `wrapNames`, so long names wrap only after `_` or `-`; the folder path shows the firm and the client on a small line above the open folder. It keeps the newest file in view. A file preview waits for a later version |
 | `ui/email-views.tsx` | The request, follow-up and reminder emails with `@diepen/ui/mockups/email-inbox` and `email-message` |
 
 ### film/

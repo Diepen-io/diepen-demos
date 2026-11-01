@@ -77,11 +77,9 @@ export function driveFolder(page: Page, folder: string): Locator {
   return lane(page, "drive").getByRole("treeitem").filter({ hasText: new RegExp(`^\\s*${escapeRegExp(folder)}`) });
 }
 
-/** Drive names carry a zero-width break after each underscore, so a long name wraps only there. */
 export async function expectDriveFile(page: Page, folder: string, fileName: string): Promise<void> {
   await showLane(page, "drive");
-  const shown = new RegExp(`^${escapeRegExp(fileName).replaceAll("_", "_\u200b?")}$`);
-  await expect(driveFolder(page, folder).getByText(shown).first()).toBeVisible();
+  await expect(driveFolder(page, folder).getByText(fileName, { exact: true }).first()).toBeVisible();
 }
 
 export async function openLetter(page: Page): Promise<Locator> {

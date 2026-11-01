@@ -57,7 +57,7 @@ export function LinkedinDm({ customer, business, messages, typing, className, ..
                 <div className="min-w-0 flex-1">
                   {startsGroup && <p className="text-[15px] font-semibold">{author.name}</p>}
                   <p className="text-body whitespace-pre-line text-foreground">{message.text}</p>
-                  <MessageExtras message={message} onPickSlot={controls.onPickSlot} align="start" />
+                  <MessageExtras message={message} controls={controls} align="start" />
                 </div>
               </div>
             </div>

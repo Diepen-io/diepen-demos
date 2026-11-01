@@ -79,7 +79,7 @@ export function InstagramDm({ customer, account, messages, typing, seen, classNa
                 </p>
               </div>
               <div className={own ? "pl-12" : "pl-9"}>
-                <MessageExtras message={message} onPickSlot={controls.onPickSlot} align={own ? "end" : "start"} />
+                <MessageExtras message={message} controls={controls} align={own ? "end" : "start"} />
               </div>
               {own && seen && index === lastBusiness && <p className="mt-1 mr-1 self-end text-meta text-faint">Seen</p>}
             </div>

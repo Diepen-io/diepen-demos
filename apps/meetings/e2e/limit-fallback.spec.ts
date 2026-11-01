@@ -2,6 +2,9 @@ import { storyClock } from "./support/film";
 import { inputTab, transcriptBox, turnIntoProposal } from "./support/live";
 import { expect, test } from "./support/test";
 
+// A flow waits for a dev compile, then up to 30 s per output (`outputTimeout`) and the 700 ms reveal steps; a loaded machine needs the margin.
+test.describe.configure({ timeout: 90_000 });
+
 // F12
 test("lands on the film with the fallback note when a cost guard trips @meetings.limit-fallback", async ({ page, consoleGuard }) => {
   consoleGuard.allow(/status of 429/);

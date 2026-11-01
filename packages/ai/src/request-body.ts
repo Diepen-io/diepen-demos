@@ -10,7 +10,8 @@ export class BodyTooLargeError extends Error {
   }
 }
 
-export async function readBodyBytes(request: Request, maxBytes: number): Promise<Uint8Array> {
+/** The bytes sit in a plain `ArrayBuffer`, so they go straight into a `Response` or a `Blob`. */
+export async function readBodyBytes(request: Request, maxBytes: number): Promise<Uint8Array<ArrayBuffer>> {
   const declared = Number(request.headers.get("content-length"));
   if (Number.isFinite(declared) && declared > maxBytes) throw new BodyTooLargeError(maxBytes);
   if (!request.body) return new Uint8Array();

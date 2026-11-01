@@ -8,12 +8,19 @@ import { HandoverNote } from "./handover-note";
 import { SlotChips } from "./slot-chips";
 import { StarterChips } from "./starter-chips";
 
+/** Once a person has taken over, the times offered earlier are no longer on offer. */
+export function slotsOnOffer(controls: ConversationControls): { onPick?: (iso: string) => void; disabled: boolean } {
+  return controls.handover ? { disabled: true } : { onPick: controls.onPickSlot, disabled: false };
+}
+
 /** The meta line and slot chips under one message, the same on every channel. */
-export function MessageExtras({ message, onPickSlot, align }: { message: ConversationMessage; onPickSlot?: (iso: string) => void; align: "start" | "end" }) {
+export function MessageExtras({ message, controls, align }: { message: ConversationMessage; controls: ConversationControls; align: "start" | "end" }) {
   if (!message.meta && !message.slots?.length) return null;
   return (
     <div className={align === "end" ? "mt-1.5 flex flex-col items-end gap-1.5" : "mt-1.5 flex flex-col items-start gap-1.5"}>
-      {message.slots && message.slots.length > 0 && <SlotChips slots={message.slots} onPick={onPickSlot} className={align === "end" ? "justify-end" : undefined} />}
+      {message.slots && message.slots.length > 0 && (
+        <SlotChips slots={message.slots} {...slotsOnOffer(controls)} className={align === "end" ? "justify-end" : undefined} />
+      )}
       {message.meta && <p className="tabular text-meta text-faint">{message.meta}</p>}
     </div>
   );
