@@ -22,6 +22,7 @@ export default defineConfig({
         url: `http://localhost:${port}/api/health`,
         reuseExistingServer: false,
         timeout: 120_000,
-        env: { AI_PROVIDER: "mock", NEXT_DIST_DIR: ".next-e2e", NEXT_TELEMETRY_DISABLED: "1" },
+        // Every flow sends from one address, so the per-minute limit is lifted; the guard itself has unit tests.
+        env: { AI_PROVIDER: "mock", AI_RATE_LIMIT_PER_MINUTE: "1000", NEXT_DIST_DIR: ".next-e2e", NEXT_TELEMETRY_DISABLED: "1" },
       },
 });
