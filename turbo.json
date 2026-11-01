@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": ["AI_PROVIDER", "AI_DAILY_REQUEST_CAP", "AI_RATE_LIMIT_PER_MINUTE", "AI_MAX_OUTPUT_TOKENS", "NEXT_PUBLIC_*"]
+    },
+    "dev": { "cache": false, "persistent": true },
+    "typecheck": { "dependsOn": ["^typecheck"], "outputs": [] },
+    "test": { "outputs": [] },
+    "e2e": { "outputs": [], "cache": false }
+  }
+}

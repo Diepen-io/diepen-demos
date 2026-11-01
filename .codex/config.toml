@@ -1,0 +1,12 @@
+# Codex reads AGENTS.md like every other tool. This file only adds the secrets it must never open.
+
+default_permissions = "project"
+
+[permissions.project]
+extends = ":workspace"
+
+[permissions.project.filesystem.":workspace_roots"]
+".env" = "deny"
+".env.*" = "deny"
+"**/.env" = "deny"
+"**/.env.*" = "deny"

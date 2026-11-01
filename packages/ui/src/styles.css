@@ -1,0 +1,80 @@
+/* The diepen.ai palette and type, shared by every demo. Brand colours from a CompanyProfile
+   arrive as --brand and --brand-foreground on the element that wraps the demo. */
+:root {
+  --background: #fafafa;
+  --foreground: #171717;
+  --muted: #52525b;
+  --border: #e4e4e7;
+  --surface: #ffffff;
+  --pass: #15803d;
+  --fail: #b91c1c;
+  --wait: #a16207;
+  --brand: #171717;
+  --brand-foreground: #ffffff;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-surface: var(--surface);
+  --color-pass: var(--pass);
+  --color-fail: var(--fail);
+  --color-wait: var(--wait);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap-style: balance;
+}
+
+p {
+  text-wrap-style: pretty;
+}
+
+.panel {
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 8px 24px -8px rgb(0 0 0 / 0.08);
+}
+
+.image-outline {
+  outline: 1px solid oklch(0 0 0 / 0.1);
+  outline-offset: -1px;
+}
+
+.press {
+  transition: transform 160ms var(--ease-out);
+}
+
+.press:active {
+  transform: scale(0.96);
+}
+
+input[type="range"] {
+  accent-color: var(--foreground);
+}

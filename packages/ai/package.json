@@ -1,0 +1,14 @@
+{
+  "name": "@diepen/ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "exports": { "./*": "./src/*.ts" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": { "@anthropic-ai/sdk": "1.3.0", "zod": "4.6.7" },
+  "devDependencies": { "@types/node": "26.6.6", "typescript": "6.0.3", "vitest": "5.0.5" }
+}
