@@ -90,3 +90,18 @@ export function formatSlotChip(slot: string): string {
   const { weekday, day, month, time } = wallParts(slot);
   return `${weekday.slice(0, 3)} ${day} ${month.slice(0, 3)}, ${time}`;
 }
+
+/**
+ * Two times worth choosing between: the first free slot and the first free slot on a later day.
+ * Without a later day, the second starts at least two hours after the first, so an offer is
+ * never two slots back to back.
+ */
+export function spreadSlots(free: readonly string[]): string[] {
+  const [first] = free;
+  if (!first) return [];
+  const day = first.slice(0, 10);
+  const second =
+    free.find((slot) => slot.slice(0, 10) > day) ??
+    free.find((slot) => slot.startsWith(day) && minutesOf(slot) - minutesOf(first) >= 120);
+  return second ? [first, second] : [first];
+}

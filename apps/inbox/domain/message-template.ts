@@ -12,7 +12,7 @@ const optionalPattern = /\[([^[\]]*)\]/g;
 const lettersOnly = (name: string) => name.toLowerCase().replace(/[^\p{L}]/gu, "");
 
 /** Lowercase for the middle of a sentence, unless the name starts with an acronym such as "MOT". */
-function midSentence(name: string): string {
+export function midSentence(name: string): string {
   const [first = "", second = ""] = name;
   if (second && second === second.toUpperCase() && second !== second.toLowerCase()) return name;
   return first.toLowerCase() + name.slice(1);

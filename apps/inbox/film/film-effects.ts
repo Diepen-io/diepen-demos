@@ -23,7 +23,10 @@ export type FilmEffect =
   | { type: "handover"; conversation: ConversationRef; note: string }
   /** 08:00: the business opens and the owner looks at the list. */
   | { type: "open" }
-  | { type: "select"; conversation: ConversationRef }
+  /** Opens one row of the owner view, or closes the open one without a conversation. */
+  | { type: "select"; conversation?: ConversationRef }
+  /** The owner view shows only the conversations with this status. */
+  | { type: "filter"; status: ConversationStatus }
   /** The calendar points back at the night's bookings. */
   | { type: "highlight" };
 

@@ -3,6 +3,8 @@ import { Icon, type IconName } from "@diepen/ui/primitives/icon";
 
 export type LivePart = "customer" | "owner" | "calendar";
 
+export const livePartsLabel = "Live demo parts";
+
 const parts: { id: LivePart; label: string; icon: IconName }[] = [
   { id: "customer", label: "Customer", icon: "chat" },
   { id: "owner", label: "Owner view", icon: "user" },
@@ -21,7 +23,7 @@ export function LivePartTabs({ value, onChange, changed }: LivePartTabsProps) {
   return (
     <div
       role="tablist"
-      aria-label="Live demo parts"
+      aria-label={livePartsLabel}
       className="fixed inset-x-0 bottom-0 z-40 flex gap-1 border-t border-border bg-surface/95 px-3 pt-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden"
     >
       {parts.map((part) => {

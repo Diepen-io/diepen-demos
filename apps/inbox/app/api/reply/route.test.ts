@@ -71,6 +71,20 @@ describe("POST /api/reply", () => {
     await expectInvalid({ ...validBody, messages });
   });
 
+  it("U13: stops reading a streamed body without a declared length at 32 KB", async () => {
+    let sent = 0;
+    const endless = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        sent += 4096;
+        controller.enqueue(new Uint8Array(4096).fill(32));
+      },
+    });
+    const response = await POST(new Request("http://localhost/api/reply", { method: "POST", body: endless, duplex: "half" } as RequestInit));
+
+    expect(response.status).toBe(400);
+    expect(sent).toBeLessThan(64 * 1024);
+  });
+
   it("U13: rejects a body over 32 KB even when every field is valid", async () => {
     const body = { ...validBody, profile: { ...profile, tagline: "x".repeat(40_000) } };
     expect(JSON.stringify(body).length).toBeGreaterThan(32 * 1024);

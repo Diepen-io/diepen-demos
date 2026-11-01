@@ -1,3 +1,4 @@
+import { BodyTooLargeError, readBodyText } from "@diepen/ai/request-body";
 import { companyProfileSchema } from "@diepen/voice/profile";
 import { z } from "zod";
 import { channelSchema } from "@/domain/channel";
@@ -31,11 +32,16 @@ export type ReplyRequestResult =
   | { success: true; data: ReplyRequest }
   | { success: false; issues: { message: string; path: PropertyKey[] }[] };
 
-/** Reads and validates the body, refusing anything over the size limit before it parses JSON. */
+/** Reads and validates the body. The size cap holds while the body streams in, before it parses JSON. */
 export async function readReplyRequest(request: Request): Promise<ReplyRequestResult> {
-  const text = await request.text();
-  if (new TextEncoder().encode(text).length > maxReplyRequestBytes) {
-    return { success: false, issues: [{ message: "The request is larger than 32 KB", path: [] }] };
+  let text: string;
+  try {
+    text = await readBodyText(request, maxReplyRequestBytes);
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) {
+      return { success: false, issues: [{ message: "The request is larger than 32 KB", path: [] }] };
+    }
+    throw error;
   }
   let json: unknown;
   try {

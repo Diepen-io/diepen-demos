@@ -80,6 +80,8 @@ export type InboxSnapshot = {
   open: boolean;
   /** The row the owner opened. */
   selectedRow?: string;
+  /** The status the owner filters the list by. */
+  ownerFilter?: ConversationStatus;
   /** The calendar points back at the night's bookings. */
   highlightBookings: boolean;
 };

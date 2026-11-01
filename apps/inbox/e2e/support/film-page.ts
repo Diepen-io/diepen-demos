@@ -7,7 +7,7 @@ export function filmLane(page: Page, id: FilmLaneId): Locator {
   return page.locator(`[data-film-lane="${id}"]`);
 }
 
-/** The story clock. Its accessible name reads like "Story time Wed 06:34". */
+/** The story clock. Its accessible name reads like "Story time Wed 00:33". */
 export function storyClock(page: Page): Locator {
   return page.getByRole("timer");
 }

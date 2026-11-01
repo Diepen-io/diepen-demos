@@ -53,8 +53,8 @@ describe("buildInboxFilm", () => {
 
   it("U6: the end card has a metric, a before and an after number", () => {
     expect(script.end.metric).not.toBe("");
-    expect(script.end.before).toBe("7 hours");
-    expect(script.end.after).toBe("30 seconds");
+    expect(script.end.before).toBe("9 hours");
+    expect(script.end.after).toBe("38 seconds");
   });
 
   it.each(presetList.map((preset) => [preset.name, preset] as const))(

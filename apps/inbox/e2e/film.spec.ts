@@ -16,8 +16,8 @@ test("F1: opens on the end card with the reply time numbers and the fictional no
   const card = endCard(page);
   await expect(card).toBeVisible({ timeout: 15_000 });
   await expect(card).toContainText("Reply time");
-  await expect(card).toContainText("7 hours");
-  await expect(card).toContainText("30 seconds");
+  await expect(card).toContainText("9 hours");
+  await expect(card).toContainText("38 seconds");
   await expect(card).toContainText(preset.name);
   await expect(card).toContainText("fictional");
 });

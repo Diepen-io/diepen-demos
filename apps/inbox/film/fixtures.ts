@@ -30,6 +30,15 @@ export const filmCustomers: Record<ConversationRef, FilmCustomer> = {
   C4: { name: "Daniel Moore", channel: "chat", detail: "Visitor on {website}" },
 };
 
+/** Mail the business had read before closing, so the inbox is not empty when the film starts. */
+export type EarlierEmail = { id: string; from: string; subject: string; snippet: string; time: string };
+
+export const earlierEmails: EarlierEmail[] = [
+  { id: "earlier-lab", from: "Kestrel Dental Lab", subject: "Crown ready for Thursday", snippet: "The crown for your Thursday patient is ready for pickup.", time: "17:52" },
+  { id: "earlier-marta", from: "Marta Jansen", subject: "Re: Moving my cleaning", snippet: "Friday at 11:00 is perfect, thank you!", time: "16:20" },
+  { id: "earlier-supply", from: "Lindmark Dental Supply", subject: "Your order has shipped", snippet: "Gloves and polishing paste arrive on Wednesday.", time: "14:05" },
+];
+
 /** The structured reply live mode returns, plus `notes`: the facts the film shows as tags. */
 export type FilmReply = Omit<StructuredReply, "reply"> & { notes?: string[] };
 
@@ -37,7 +46,7 @@ export type FilmMessage = {
   id: string;
   conversation: ConversationRef;
   role: "customer" | "assistant";
-  /** Story time. From 00:31 on it is 11 November. */
+  /** Story time. From 00:00 on it is 11 November. */
   at: string;
   text: string;
   reply?: FilmReply;
@@ -75,45 +84,45 @@ export const filmMessages: FilmMessage[] = [
     status: "booked",
     bookedSlot: "2026-11-12T09:00",
   }),
-  message("C2-1", "23:13:00", "customer", "hi! do you do {serviceB}? how much is it"),
-  message("C2-2", "23:13:24", "assistant", "Hi Priya! Yes, we do.[ {ServiceB} is {priceB}.] Is it for a date you have in mind, or whenever suits you?", {
+  message("C2-1", "22:14:00", "customer", "hi! do you do {serviceB}? how much is it"),
+  message("C2-2", "22:14:38", "assistant", "Hi Priya! Yes, we do.[ {ServiceB} is {priceB}.] Is it for a date you have in mind, or whenever suits you?", {
     intent: "Asks about {serviceB}",
     status: "answered",
     qualifying: ["Is it for a date you have in mind?"],
   }),
-  message("C2-3", "23:15:40", "customer", "it's for my sister's wedding in march, so no rush. I'll check dates with her and come back to you"),
-  message("C2-4", "23:15:52", "assistant", "Congratulations to your sister! Message me here when you have dates and I'll find you a time well before March.", {
+  message("C2-3", "22:16:40", "customer", "it's for my sister's wedding in march, so no rush. I'll check dates with her and come back to you"),
+  message("C2-4", "22:16:52", "assistant", "Congratulations to your sister! Message me here when you have dates and I'll find you a time well before March.", {
     intent: "Asks about {serviceB}",
     status: "answered",
     notes: ["Wants a date before March"],
   }),
-  message("C3-1", "00:31:00", "customer", "Hello, I run the office at Fernhill Architects. We're a team of 14 and we'd like to offer {serviceA} as a staff benefit next year. Do you work with companies? Happy to set up a call."),
-  message("C3-2", "00:31:36", "assistant", "Hi Tom, thanks for getting in touch. Yes, {owner} sets up company arrangements personally. Two quick questions so the call is useful: about how many of the 14 would take part, and would you like one visit day or appointments spread over the year?\n\n{assistant}", {
+  message("C3-1", "23:31:00", "customer", "Hello, I run the office at Fernhill Architects. We're a team of 14 and we'd like to offer {serviceA} as a staff benefit next year. Do you work with companies? Happy to set up a call."),
+  message("C3-2", "23:31:36", "assistant", "Hi Tom, thanks for getting in touch. Yes, {owner} sets up company arrangements personally. Two quick questions so the call is useful: about how many of the 14 would take part, and would you like one visit day or appointments spread over the year?\n\n{assistant}", {
     intent: "Company offer for 14 people",
     status: "answered",
     qualifying: ["How many of the 14 would take part?", "One visit day or appointments spread over the year?"],
   }),
-  message("C3-3", "00:33:02", "customer", "Probably 10 to 12. Spread over the year works better for us."),
-  message("C3-4", "00:33:20", "assistant", "Thanks, that helps. {owner} has a {minutes}-minute call free on Wednesday at 16:00 or Friday at 10:30. Which suits you better?\n\n{assistant}", {
+  message("C3-3", "23:33:02", "customer", "Probably 10 to 12. Spread over the year works better for us."),
+  message("C3-4", "23:33:20", "assistant", "Thanks, that helps. {owner} has a {minutes}-minute call free on Thursday or Friday at 10:30. Which day suits you better?", {
     intent: "Call with the owner",
     status: "booking_offered",
-    offeredSlots: ["2026-11-11T16:00", "2026-11-13T10:30"],
+    offeredSlots: ["2026-11-12T10:30", "2026-11-13T10:30"],
     notes: ["10 to 12 people", "Spread over the year"],
   }),
-  message("C3-5", "00:34:10", "customer", "Friday at 10:30 works."),
-  message("C3-6", "00:34:19", "assistant", "Booked: a call with {owner} on Friday 13 November at 10:30. I've passed on your numbers, so you won't need to repeat them.\n\n{assistant}", {
+  message("C3-5", "23:34:10", "customer", "Friday at 10:30 works."),
+  message("C3-6", "23:34:19", "assistant", "Booked: a call with {owner} on Friday 13 November at 10:30. I've passed on your numbers, so you won't need to repeat them.", {
     intent: "Call with the owner",
     status: "booked",
     bookedSlot: "2026-11-13T10:30",
   }),
-  message("C4-1", "06:34:00", "customer", "Hi. I had {aServiceA} with you on Monday and I'm really not happy with how it went. I'd like a refund."),
-  message("C4-2", "06:34:18", "assistant", "I'm sorry to hear that, Daniel. {handoverMessage} What's the best way to reach you, here or by phone?", {
+  message("C4-1", "00:33:00", "customer", "Hi. I had {aServiceA} with you on Monday and I'm really not happy with how it went. I'd like a refund."),
+  message("C4-2", "00:33:36", "assistant", "I'm sorry to hear that, Daniel. Refund requests go to {owner}, and I've passed yours on. What's the best way to reach you, here or by phone?", {
     intent: "Refund request",
     status: "needs_human",
     handoverReason: "Refund request after a visit on Monday",
   }),
-  message("C4-3", "06:35:02", "customer", "Phone please. 07700 900123"),
-  message("C4-4", "06:35:10", "assistant", "Thank you, Daniel. {owner} has your number and your message.", {
+  message("C4-3", "00:34:20", "customer", "Phone please. 07700 900123"),
+  message("C4-4", "00:34:28", "assistant", "Thank you, Daniel. {owner} has your number and your message, and will call you back.", {
     intent: "Refund request",
     status: "needs_human",
     handoverReason: "Refund request after a visit on Monday. Call back on 07700 900123",

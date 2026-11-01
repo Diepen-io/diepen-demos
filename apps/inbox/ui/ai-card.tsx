@@ -53,7 +53,8 @@ export function AiCard({ card, fresh }: { card: AiCardView; fresh: boolean }) {
         ) : (
           <span />
         )}
-        {card.status ? <StatusChip status={card.status} /> : null}
+        {/* While a reply is being written the old status is stale, so the chip waits for the reply. */}
+        {card.status && !card.typing ? <StatusChip status={card.status} /> : null}
       </div>
     </article>
   );

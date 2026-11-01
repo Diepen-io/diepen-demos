@@ -13,6 +13,8 @@ export type LiveMessage = {
   offeredSlots?: string[];
   pickedSlot?: string;
   replyMs?: number;
+  /** The request for a reply failed. The message stays in view until the visitor sends again. */
+  failed?: boolean;
 };
 
 export type LiveThread = {
@@ -62,7 +64,8 @@ export function liveInboxReducer(state: LiveState, action: LiveAction): LiveStat
       return update({ ...state, nextId: state.nextId + 1 }, action.channel, (thread) => ({
         ...thread,
         subject: thread.subject ?? action.subject,
-        messages: [...thread.messages, message],
+        // A new send replaces a message that got no answer, so a retry never shows it twice.
+        messages: [...thread.messages.filter((item) => !item.failed), message],
         sending: true,
         notice: undefined,
       }));
@@ -70,7 +73,7 @@ export function liveInboxReducer(state: LiveState, action: LiveAction): LiveStat
     case "fail":
       return update(state, action.channel, (thread) => ({
         ...thread,
-        messages: thread.messages.slice(0, -1),
+        messages: thread.messages.map((item, index) => (index === thread.messages.length - 1 ? { ...item, failed: true } : item)),
         sending: false,
         notice: "No answer this time. Send it again.",
       }));
