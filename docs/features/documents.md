@@ -198,7 +198,7 @@ The page keeps the live session in browser memory only; a reload or "Start over"
 6. "Review and sign" opens the engagement letter with a signature pad ("Sign here") and "Type your name instead". "Sign" stays disabled until there is a stroke or a typed name. Signing turns the item Checked and puts the signed copy in `01 Engagement`. Signing makes no server call.
 7. "Done for now" posts the session to `/api/chase` with `event: "submitted"`. When items are outstanding, the follow-up email arrives in the inbox at once and the system lane shows "Reminder 2" with its date. When nothing is outstanding, the firm lane shows "Complete. Ready to prepare the return." and no email goes out.
 8. "Skip 3 days" posts the session to `/api/chase` with `event: "skip-days"`. The clock jumps three days and whatever the schedule says is due goes out: the follow-up if "Done for now" was never pressed, else the second reminder, else the escalation, which appears in the firm lane as a task "Call Daniel Okafor: 3 documents still open after 2 reminders". After the escalation, or once the request is complete, "Skip 3 days" is disabled.
-9. "Start over" clears the session, revokes the file preview URLs and returns to step 1.
+9. "Start over" clears the session and returns to step 1.
 
 ### Upload limits
 
@@ -210,7 +210,7 @@ The page keeps the live session in browser memory only; a reload or "Start over"
 
 Messages: "Use a PDF, PNG or JPEG." and "Files up to 4 MB." Neither sends a request.
 Under the upload items: "PDF, PNG or JPEG, up to 4 MB. Your file goes to Claude for this one check. This demo keeps no copy."
-The route reads the file into memory, passes it to the OCR port and the AI provider, and drops it. Nothing writes the bytes to disk, a log or a store. The browser keeps an object URL for the Drive preview until "Start over".
+The route reads the file into memory, passes it to the OCR port and the AI provider, and drops it. Nothing writes the bytes to disk, a log or a store, and the browser keeps only the file names.
 
 ### Keyless and cost guards
 
@@ -254,6 +254,9 @@ All paths are under `apps/documents/`.
 | `domain/live-session.ts` | `liveSessionSchema`: the serialisable state `/api/chase` reads and returns |
 | `domain/sample-documents.ts` | The 9 samples: file name, item id, menu label, recorded `CheckResult`. Type imports only |
 | `domain/story-time.ts` | `addDays`, ISO without offset, `formatStoryTime` ("Mon 9 Mar, 12:40") |
+| `domain/file-type.ts` | The accepted types by first bytes and the 4,000,000 byte limit, shared by the browser and `/api/check` |
+| `domain/checklist-summary.ts` | The firm's summary (headline, problem notes, key figures) and `firmNote` for a problem row |
+| `domain/engagement-terms.ts` | The service and price the engagement letter names |
 
 State machine, exactly:
 
@@ -318,6 +321,7 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | `infrastructure/google-document-ai-ocr.ts` | `OcrService` named `google-document-ai`: calls `processDocument({ name: "projects/{project}/locations/{location}/processors/{processorId}", rawDocument: { content: base64, mimeType } })` on a client created with `apiEndpoint: "{location}-documentai.googleapis.com"`, returns `{ ocrText: document.text }`. Takes the client as a constructor parameter typed `Pick<DocumentProcessorServiceClient, "processDocument">`, so tests pass a fake. Wraps client errors in `OcrError` |
 | `infrastructure/ocr-settings.ts` | Reads `OCR_PROVIDER` (`claude` default, or `google-document-ai`) and, for Google, `GOOGLE_CLOUD_PROJECT`, `GOOGLE_DOCUMENT_AI_LOCATION`, `GOOGLE_DOCUMENT_AI_PROCESSOR_ID` with zod. Missing settings or an unknown value throw an error that names each missing variable |
 | `infrastructure/in-process-scheduler.ts` | `JobScheduler` on a virtual clock: jobs in a map by id, `advanceTo(time, handler)` runs due jobs in `runAt` order. Seeded from and written back to `session.jobs`, because the demo keeps no server state |
+| `infrastructure/fixture-page-fetcher.ts` | The page "Make it yours" reads under the mock provider |
 | `infrastructure/simulated-drive-store.ts` | `FileStore` that keeps no bytes and returns the Drive path. The browser draws the folder |
 | `infrastructure/container.ts` | The one place that picks adapters: `getProvider()` from `@diepen/ai`, the OCR service from `ocr-settings.ts` (the Google client is loaded with a dynamic `import("@google-cloud/documentai")` only when selected), the simulated Drive store, and `runChase(session, profile, event)`, which seeds the in-process scheduler, calls `chaseMissingDocuments`, then advances the scheduler to now (submitted) or now + 3 days (skip-days) with `sendDueChase` as the handler |
 
@@ -328,7 +332,11 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | File | Holds |
 | --- | --- |
 | `ui/live-demo.tsx` | The `/live` layout: the four lanes, the clock bar with "Skip 3 days" and "Start over", the provider and fallback notes |
-| `ui/live-session-reducer.ts` | Browser state: the domain `LiveSession`, the inbox, the check results by item, the Drive tree, preview URLs. Uses the domain transitions |
+| `ui/live-state.ts` | The live page's state and `sessionOf`, the serialisable session `/api/chase` reads |
+| `ui/live-session-reducer.ts` | Browser state changes: uploads, check answers, signing, chases. Uses the domain transitions |
+| `ui/use-live-demo.ts` | The live page's actions, wired to the two routes, and the story clock |
+| `ui/live-toolbar.tsx`, `ui/live-client-lane.tsx`, `ui/live-side-lanes.tsx` | The clock bar and the four live lanes |
+| `ui/documents-lanes.ts` | The four lanes and their widths, shared by the film and live mode |
 | `ui/live-api.ts` | `postCheck(file, itemId, profile)` and `postChase(session, event, profile)`; turns a `{ fallback: "film" }` answer into the fallback state |
 | `ui/client-phone.tsx` | The client lane: inbox, email view, upload page, letter, switching between them |
 | `ui/upload-page.tsx` | The DocuSign-style page: header, item rows with state chips, upload, "Use a sample", "Done for now" |
@@ -340,7 +348,7 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | `ui/check-card.tsx` | One check result in the system lane: Reading, Checked or Problem found, fields, figures, summary |
 | `ui/schedule-card.tsx` | The next chase and its date, with the 3 day bar |
 | `ui/firm-lane.tsx` | Checklist (`@diepen/ui/mockups/checklist`), the summary card and the escalation task |
-| `ui/drive-lane.tsx` | Drive tree with `@diepen/ui/mockups/drive-folder` and the file preview |
+| `ui/drive-lane.tsx` | Drive tree with `@diepen/ui/mockups/drive-folder`, long names wrapped. A file preview waits for a later version |
 | `ui/email-views.tsx` | The request, follow-up and reminder emails with `@diepen/ui/mockups/email-inbox` and `email-message` |
 
 ### film/
@@ -351,6 +359,8 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | `film/documents-beat.ts` | The `DocumentsBeat` union: `checklist`, `email`, `upload-page`, `signature`, `files-dropped`, `check`, `filed`, `summary`, `schedule`, `complete` |
 | `film/film-state.ts` | Folds the beats a lane has landed into its view state with the domain functions |
 | `film/render-film-lane.tsx` | `renderLane` for `FilmStage`: maps each lane's state to the same `ui/` components live mode uses |
+| `film/film-client-lane.tsx`, `film/film-side-lanes.tsx`, `film/film-views.ts` | The film's lanes and the lookups they share |
+| `film/documents-film-stage.tsx` | The film inside the demo shell, sized to fit one screen |
 
 ### app/
 
@@ -360,8 +370,8 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | `/live` | page | Live mode. The upload page is a view inside it, not its own route |
 | `/api/check` | POST | Checks one uploaded file |
 | `/api/chase` | POST | Submits or skips days, returns the chases sent |
-| `/api/brand` | POST | Re-exports `handleBrandRequest` from `@diepen/voice/brand-route` |
-| `/api/health` | GET | `{ ok: true, app: "documents", ai: "claude" \| "mock", ocr: "claude" \| "google-document-ai" }`; 500 with the missing variable names when the OCR settings are invalid |
+| `/api/brand` | POST | `createBrandHandler` from `@diepen/voice/brand-route`, wired in the container. Under the mock provider it reads a fixture page, so tests and keyless runs never fetch the internet |
+| `/api/health` | GET | `{ ok: true, app: "documents", provider: "claude" \| "mock", ocr: "claude" \| "google-document-ai" }`; 500 with the missing variable names when the OCR settings are invalid |
 
 `POST /api/check` takes `multipart/form-data`, not base64 JSON, because base64 would cut the usable file size by a third under the 4.5 MB body limit.
 
@@ -460,15 +470,15 @@ Unit checks run in Vitest with `AI_PROVIDER=mock`. Flow checks run in Playwright
 
 | Id | A user can | Reach it | As | Status |
 | --- | --- | --- | --- | --- |
-| `documents.film` | Watch the 72 second film from request to complete checklist, ending on hours a month spent chasing documents | `/` | anon | planned |
-| `documents.controls` | Pause, play, restart and change the speed of the film, and open it at a moment with `?t=` | `/`, film controls, `/?t=27000` | anon | planned |
-| `documents.upload` | Open the request email, upload a sample or own file for an item, and see the check, the Drive folder and the firm checklist update | `/live`, "Upload and sign" | anon | planned |
-| `documents.problem` | Upload a problem sample, see Problem found with the reason, then fix it with the right file | `/live`, "Use a sample" | anon | planned |
-| `documents.sign` | Sign the engagement letter on the upload page and see the signed copy filed | `/live`, "Review and sign" | anon | planned |
-| `documents.chase` | Get the follow-up that names what is missing, skip 3 days for the second reminder, then see the escalation to the firm | `/live`, "Done for now", "Skip 3 days" | anon | planned |
-| `documents.own-file` | Upload their own PDF, PNG or JPEG up to 4 MB for one check that keeps no copy | `/live`, "Upload" | anon | planned |
-| `documents.brand` | See the film and live mode in their own company's name, logo, colours and voice | `/live`, "Make it yours" | anon | planned |
-| `documents.fallback` | See the film with a short note when the live demo hits its limit | `/live` | anon | planned |
+| `documents.film` | Watch the 72 second film from request to complete checklist, ending on hours a month spent chasing documents | `/` | anon | shipped |
+| `documents.controls` | Pause, play, restart and change the speed of the film, and open it at a moment with `?t=` | `/`, film controls, `/?t=27000` | anon | shipped |
+| `documents.upload` | Open the request email, upload a sample or own file for an item, and see the check, the Drive folder and the firm checklist update | `/live`, "Upload and sign" | anon | shipped |
+| `documents.problem` | Upload a problem sample, see Problem found with the reason, then fix it with the right file | `/live`, "Use a sample" | anon | shipped |
+| `documents.sign` | Sign the engagement letter on the upload page and see the signed copy filed | `/live`, "Review and sign" | anon | shipped |
+| `documents.chase` | Get the follow-up that names what is missing, skip 3 days for the second reminder, then see the escalation to the firm | `/live`, "Done for now", "Skip 3 days" | anon | shipped |
+| `documents.own-file` | Upload their own PDF, PNG or JPEG up to 4 MB for one check that keeps no copy | `/live`, "Upload" | anon | shipped |
+| `documents.brand` | See the film and live mode in their own company's name, logo, colours and voice | `/live`, "Make it yours" | anon | shipped |
+| `documents.fallback` | See the film with a short note when the live demo hits its limit | `/live` | anon | shipped |
 
 No id is a prefix of another followed by `-` or `.`, because `verify flow` greps `@<id>\b` and would also run the longer id's tests.
 

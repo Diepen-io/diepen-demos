@@ -1,3 +1,11 @@
+import { activeOcrName, activeProviderName } from "@/infrastructure/container";
+
 export function GET() {
-  return Response.json({ ok: true, app: "documents" });
+  try {
+    return Response.json({ ok: true, app: "documents", provider: activeProviderName(), ocr: activeOcrName() });
+  } catch (error) {
+    // A misconfigured OCR adapter must show here, before the first upload fails.
+    const message = error instanceof Error ? error.message : String(error);
+    return Response.json({ ok: false, app: "documents", error: message }, { status: 500 });
+  }
 }

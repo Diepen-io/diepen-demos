@@ -55,7 +55,7 @@ export function Checklist({ client, title, items, className }: ChecklistProps) {
         {items.map((item) => (
           <li
             key={item.id}
-            className={cx("flex flex-col gap-2 border-b border-border px-4 py-3 @md:flex-row @md:items-start @md:gap-4", item.isNew && "enter")}
+            className={cx("flex flex-col gap-2 border-b border-border px-4 py-3 @xs:flex-row @xs:items-start @xs:gap-4", item.isNew && "enter")}
           >
             <div className="min-w-0 flex-1">
               <p className="text-body font-medium text-foreground">{item.name}</p>

@@ -1,3 +1,72 @@
 @import "tailwindcss";
 @import "@diepen/ui/styles.css";
 @source "../../../packages/ui/src";
+
+/* The document chaser's own motion. Curves come from the shared tokens in @diepen/ui. */
+
+/* A new phone screen slides up a little as it replaces the last one. */
+.screen-in {
+  animation: screen-in 280ms var(--ease-out) both;
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* A file is being read: a short bar sweeps across, like a scanner. */
+.reading-bar {
+  animation: reading-bar 1.1s var(--ease-in-out) infinite;
+}
+
+@keyframes reading-bar {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+/* A file on its way up fills its bar once. */
+.upload-bar {
+  animation: upload-bar 1.3s var(--ease-out) both;
+}
+
+@keyframes upload-bar {
+  from {
+    transform: scaleX(0.04);
+  }
+}
+
+/* The "Signed" stamp lands on the letter. */
+.stamp {
+  animation: stamp 260ms var(--ease-out) both;
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    scale: 1.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-in,
+  .upload-bar,
+  .stamp {
+    animation: none;
+  }
+
+  .reading-bar {
+    animation: reading-pulse 1.4s ease infinite;
+  }
+
+  @keyframes reading-pulse {
+    50% {
+      opacity: 0.4;
+    }
+  }
+}

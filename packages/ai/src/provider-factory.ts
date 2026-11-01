@@ -6,7 +6,9 @@ import type { AiProvider } from "./provider.ts";
 type ProviderEnv = Partial<Record<"AI_PROVIDER" | "ANTHROPIC_API_KEY", string>>;
 
 /** Mock when asked for, and whenever no key is set, so a fresh checkout runs without secrets. */
-export function createProvider(env: ProviderEnv = process.env): AiProvider {
+export function createProvider(
+  env: ProviderEnv = { AI_PROVIDER: process.env.AI_PROVIDER, ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY },
+): AiProvider {
   if (env.AI_PROVIDER === "mock" || !env.ANTHROPIC_API_KEY) return new MockProvider();
   return new ClaudeProvider(new Anthropic({ apiKey: env.ANTHROPIC_API_KEY }));
 }
