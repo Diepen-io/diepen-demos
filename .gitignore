@@ -15,3 +15,7 @@ next-env.d.ts
 .DS_Store
 .vercel
 .next-*/
+
+# Written by next dev on every start; the repo AGENTS.md holds the project facts.
+apps/*/AGENTS.md
+apps/*/CLAUDE.md
