@@ -23,7 +23,10 @@ Leander confirms or changes each open row.
 | M4 | Live transcript limits | 30,000 characters, 20 words minimum, 400 turns, 10 minutes of recording. Zoom, Teams and Otter export formats wait for a later version | Meetings live mode | 2026-11-01 |
 | S6 | One URL parameter for a tripped cost guard | `?fallback=limit` in every app; the shell shows the note | All apps | 2026-11-01 |
 | D7 | How many output tokens may one request use? Thinking tokens count too | 4000 (`AI_MAX_OUTPUT_TOKENS`). At the daily cap of 300 Sonnet requests that is at most about 12 USD a day | Cost, document checks, call outputs | 2026-11-01 |
-| D4 | What does live mode do without `ANTHROPIC_API_KEY`? | The mock provider answers and the screen says "Demo answers, no API key set" | Local testing | 2026-11-01 |
+| N1 | Who writes the document chaser's follow-up and reminder emails? | A fixed template filled from the profile, not Claude. A voice task can come later | Documents live mode | 2026-11-01 |
+| N2 | Does "Make it yours" change which documents the chaser requests? | No. The six tax-return documents stay for every industry | Documents film | 2026-11-01 |
+| N3 | Where does the documents end number come from? | An example calculation for a fictional firm: 40 returns a month, 3 chases each, 6 minutes per chase, against 1.5 minutes per return to read the summary. 12 hours before, 1 after | Documents end card | 2026-11-01 |
+| D4 | What does live mode do without `ANTHROPIC_API_KEY`? | The mock provider answers and the screen says "Demo answers. No API key is set." | Local testing | 2026-11-01 |
 
 ## Decided
 

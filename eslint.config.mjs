@@ -94,6 +94,7 @@ export default defineConfig([
       group: [
         "@/application/**", "@/infrastructure/**", "@/ui/**", "@/app/**", "@/film/**",
         "react", "react-dom", "next", "next/**", "@diepen/ai", "@diepen/ai/*", "@diepen/ui", "@diepen/ui/*",
+        "@diepen/voice/*", "!@diepen/voice/profile",
       ],
       message: "domain is the core. It imports only other domain modules, zod and @diepen/voice/profile.",
     }),

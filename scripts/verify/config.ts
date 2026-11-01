@@ -48,8 +48,9 @@ export const config = {
   start: (port: number) => `pnpm --filter @diepen/${app} exec next dev --port ${port}`,
   // A path only this app answers with 2xx, so another app on the port never counts as ready.
   readyPath: "/api/health",
+  // The tag must end the id: "@inbox.film" must not also match "@inbox.film-controls".
   flow: (id: string, outDir: string) =>
-    `pnpm --filter @diepen/${app} exec playwright test --grep "@${escapeRegExp(id)}\\b" --trace on --output "${outDir}"`,
+    `pnpm --filter @diepen/${app} exec playwright test --grep "@${escapeRegExp(id)}(?![\\w.-])" --trace on --output "${outDir}"`,
   routes: (): string[] => pageRoutes(app),
   expectedFailures: [] as RegExp[],
   featureMap: `docs/features/${app}.md`,
