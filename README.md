@@ -16,7 +16,7 @@ Every company and person in them is fictional.
 
 ## Two modes
 
-- **Film** (`/`): a scripted scenario plays like a short film, one lane per party, with compressed time and one number at the end. It runs from recorded fixtures, with no API key and no network.
+- **Film** (`/`): a five-beat film, one element per beat, ending on the one number. It runs from recorded fixtures, with no API key and no network.
 - **Live** (`/live`): you play the customer, the client or the seller, and Claude answers for real.
 
 **Make it yours** reads a website and drafts a company profile: name, logo, colours, tone of voice, policies and knowledge.
