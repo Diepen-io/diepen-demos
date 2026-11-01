@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { BrandProvider } from "../brand/brand-provider";
 import { DemoShell } from "./demo-shell";
+import { PageTitle } from "./page-title";
 
 const [preset] = presetList as [CompanyProfile];
 
@@ -45,5 +46,22 @@ describe("DemoShell", () => {
     });
     expect(screen.queryByText(/Live answers are paused/)).toBeNull();
     expect(window.location.search).toBe("");
+  });
+
+  it("keeps one h1: a title inside the shell becomes an h2", () => {
+    render(
+      <BrandProvider defaultProfile={preset}>
+        <DemoShell title="Inbox autopilot" mode="film">
+          <PageTitle>One night, four channels</PageTitle>
+        </DemoShell>
+      </BrandProvider>,
+    );
+    expect(screen.getAllByRole("heading", { level: 1 }).map((heading) => heading.textContent)).toEqual(["Inbox autopilot"]);
+    expect(screen.getByRole("heading", { level: 2, name: "One night, four channels" })).toBeTruthy();
+  });
+
+  it("lets a title outside a shell be the page's h1", () => {
+    render(<PageTitle>Call to close</PageTitle>);
+    expect(screen.getByRole("heading", { level: 1, name: "Call to close" })).toBeTruthy();
   });
 });

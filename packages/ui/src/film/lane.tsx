@@ -59,7 +59,7 @@ export function Lane({ lane, id, focused, receiving, bodyRef, contentRef, classN
           <Icon name={lane.icon ?? "user"} size={20} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[17px] leading-tight font-semibold tracking-[-0.01em]">{lane.label}</span>
+          <span className="line-clamp-2 text-[17px] leading-tight font-semibold tracking-[-0.01em] text-balance">{lane.label}</span>
           <span className="block truncate text-[14px] leading-snug text-muted">{lane.role}</span>
         </span>
         <span

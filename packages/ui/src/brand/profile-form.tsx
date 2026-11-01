@@ -9,6 +9,7 @@ import { ColorsField } from "./colors-field";
 import { FormSection } from "./form-section";
 import { KnowledgeFields } from "./knowledge-fields";
 import { ListField } from "./list-field";
+import { PeopleFields } from "./people-fields";
 
 export type ProfileFormProps = {
   draft: CompanyProfile;
@@ -36,20 +37,9 @@ export function ProfileForm({ draft, onChange }: ProfileFormProps) {
             />
           )}
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Industry">
-            {(control) => <Input {...control} value={draft.industry} onChange={(event) => set("industry", event.target.value)} />}
-          </Field>
-          <Field label="Assistant signs as" hint="For example Mia from Northlight">
-            {(control) => (
-              <Input
-                {...control}
-                value={draft.people.assistantName}
-                onChange={(event) => set("people", { ...draft.people, assistantName: event.target.value })}
-              />
-            )}
-          </Field>
-        </div>
+        <Field label="Industry">
+          {(control) => <Input {...control} value={draft.industry} onChange={(event) => set("industry", event.target.value)} />}
+        </Field>
         <Field label="Logo URL" hint="Leave empty to use your initials">
           {(control) => (
             <Input
@@ -67,6 +57,8 @@ export function ProfileForm({ draft, onChange }: ProfileFormProps) {
         </Field>
       </FormSection>
 
+      <PeopleFields value={draft.people} onChange={(people) => set("people", people)} />
+
       <FormSection title="Colours">
         <ColorsField value={draft.colors} onChange={(colors) => set("colors", colors)} />
       </FormSection>
@@ -75,6 +67,16 @@ export function ProfileForm({ draft, onChange }: ProfileFormProps) {
         <Field label="Tone" hint="How replies should sound">
           {(control) => (
             <Textarea {...control} rows={2} value={draft.voice.tone} onChange={(event) => set("voice", { ...draft.voice, tone: event.target.value })} />
+          )}
+        </Field>
+        <Field label="Sign-off" hint="The closing lines of every email the demo drafts">
+          {(control) => (
+            <Textarea
+              {...control}
+              rows={2}
+              value={draft.voice.signOff}
+              onChange={(event) => set("voice", { ...draft.voice, signOff: event.target.value })}
+            />
           )}
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">

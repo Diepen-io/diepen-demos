@@ -28,8 +28,8 @@ export function TravelToken({ kind, label, brand, compact }: TravelTokenProps) {
   return (
     <div
       className={cx(
-        "flex items-center gap-2.5 font-medium whitespace-nowrap",
-        compact ? "max-w-[170px] text-[13px]" : "max-w-[300px] text-[15px]",
+        "flex items-center gap-2.5 leading-snug font-medium",
+        compact ? "w-max max-w-[220px] text-[13px]" : "w-max max-w-[320px] text-[15px]",
         tone,
         shape,
         lifted,
@@ -47,7 +47,8 @@ export function TravelToken({ kind, label, brand, compact }: TravelTokenProps) {
       ) : (
         <Icon name={icons[kind]} size={compact ? 14 : 16} className="shrink-0 opacity-80" />
       )}
-      <span className="truncate">{label}</span>
+      {/* Two lines before an ellipsis: a label cut mid-word said less than the beat it carries. */}
+      <span className="line-clamp-2 text-balance">{label}</span>
     </div>
   );
 }

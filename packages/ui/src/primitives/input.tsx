@@ -11,5 +11,5 @@ export const fieldClass = cx(
 );
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
-  return <input className={cx(fieldClass, "h-10", className)} {...props} />;
+  return <input className={cx(fieldClass, "h-10 max-sm:h-11", className)} {...props} />;
 }

@@ -108,6 +108,20 @@ describe("useFilm", () => {
     expect(result.current.playing).toBe(false);
     field.remove();
 
+    const speed = document.body.appendChild(document.createElement("button"));
+    press(" ", speed);
+    expect(result.current.playing).toBe(true);
+    press(" ", speed);
+    expect(result.current.playing).toBe(false);
+    speed.remove();
+
+    const dialog = document.body.appendChild(document.createElement("div"));
+    dialog.setAttribute("role", "dialog");
+    const apply = dialog.appendChild(document.createElement("button"));
+    press(" ", apply);
+    expect(result.current.playing).toBe(false);
+    dialog.remove();
+
     act(() => result.current.seek(8000));
     press("r");
     expect(result.current).toMatchObject({ t: 0, playing: true });

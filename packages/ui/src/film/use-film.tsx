@@ -12,7 +12,7 @@ import {
 export type UseFilmOptions = {
   /** Starts playing on mount, unless the URL has `?t=`. */
   autoplay?: boolean;
-  /** Space, R and the arrow keys control the film while focus is outside a text field. */
+  /** Space, R and the arrow keys control the film wherever focus is, except in a text field or a dialog. */
   keyboard?: boolean;
   /** Arrow keys seek by this many film ms. */
   seekStepMs?: number;
@@ -24,6 +24,8 @@ export type FilmController = {
   speed: FilmSpeed;
   ended: boolean;
   durationMs: number;
+  /** Goes up on every seek and restart. */
+  jumps: number;
   play: () => void;
   pause: () => void;
   toggle: () => void;
@@ -97,7 +99,7 @@ export function useFilm(
     if (!keyboard) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey || event.defaultPrevented) return;
-      if (isTypingTarget(event.target)) return;
+      if (keepsOwnKeys(event.target)) return;
       const action = keyAction(event, latest.current.t, seekStepMs);
       if (!action) return;
       event.preventDefault();
@@ -124,12 +126,12 @@ export function useFilm(
 
 function keyAction(event: KeyboardEvent, t: number, step: number) {
   const target = event.target instanceof HTMLElement ? event.target : null;
-  // A focused button or link answers Space itself; a slider or radio group answers the arrows itself.
-  const ownsSpace = Boolean(target?.closest("button, a, summary"));
+  // Space toggles the film even on a focused film button: after a click on Speed, Space must
+  // pause, not press Speed again. Arrows stay with controls that use them, such as the scrubber.
   const ownsArrows = Boolean(target?.closest("input, [role=slider], [role=radiogroup], [role=tablist]"));
   switch (event.key) {
     case " ":
-      return ownsSpace ? null : ({ type: "toggle" } as const);
+      return { type: "toggle" } as const;
     case "r":
     case "R":
       return { type: "restart" } as const;
@@ -142,8 +144,10 @@ function keyAction(event: KeyboardEvent, t: number, step: number) {
   }
 }
 
-function isTypingTarget(target: EventTarget | null): boolean {
+/** Text fields keep their keys, and so does a dialog such as "Make it yours", whose buttons Space presses. */
+function keepsOwnKeys(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
+  if (target.closest("[role=dialog]")) return true;
   if (target.isContentEditable) return true;
   if (target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) return true;
   return target instanceof HTMLInputElement && !["range", "checkbox", "radio", "button", "submit"].includes(target.type);

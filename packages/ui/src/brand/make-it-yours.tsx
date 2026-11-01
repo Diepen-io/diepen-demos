@@ -25,8 +25,8 @@ export type MakeItYoursProps = { open: boolean; onClose: () => void };
 
 /** Turns the demo into the visitor's company: read their website, edit the draft, apply it. */
 export function MakeItYours({ open, onClose }: MakeItYoursProps) {
-  const { profile, setProfile, resetProfile, defaultProfile } = useBrand();
-  const [draft, setDraft] = useState(profile);
+  const { savedProfile, setProfile, resetProfile, defaultProfile, fixed, shareHref } = useBrand();
+  const [draft, setDraft] = useState(savedProfile);
   // A new draft remounts the form, so fields that keep their own text start from it.
   const [draftVersion, setDraftVersion] = useState(0);
   const [website, setWebsite] = useState("");
@@ -38,7 +38,7 @@ export function MakeItYours({ open, onClose }: MakeItYoursProps) {
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
-    if (open) loadDraft(profile);
+    if (open) loadDraft(savedProfile);
   }
 
   useEffect(() => () => request.current?.abort(), []);
@@ -89,7 +89,7 @@ export function MakeItYours({ open, onClose }: MakeItYoursProps) {
 
   async function onCopyLink() {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(shareHref());
       setCopied("copied");
     } catch {
       setCopied("failed");
@@ -110,17 +110,20 @@ export function MakeItYours({ open, onClose }: MakeItYoursProps) {
         </Button>
         <Button size="sm" onClick={onApply}>Apply</Button>
       </div>
-      <p className="text-[13px] text-faint">Your profile lives in this browser and in the link you copy.</p>
+      <p className="text-[13px] text-faint">
+        {fixed ? "Apply opens live mode in your brand. " : ""}Your profile lives in this browser and in the link you copy.
+      </p>
     </div>
   );
 
   return (
-    <Sheet open={open} onClose={onClose} title="Make it yours" description="Run this demo with your company's name, colours and voice." footer={footer}>
+    <Sheet open={open} onClose={onClose} title="Make it yours" description={fixed ? "Run live mode with your company's name, colours and voice." : "Run this demo with your company's name, colours and voice."} footer={footer}>
       <form onSubmit={onLookup} className="flex flex-col gap-2">
         <label htmlFor="make-it-yours-website" className="text-[13px] font-medium">Your website</label>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
           <Input
             id="make-it-yours-website"
+            name="website"
             type="text"
             inputMode="url"
             autoComplete="url"
@@ -143,7 +146,7 @@ export function MakeItYours({ open, onClose }: MakeItYoursProps) {
       </div>
 
       <h3 className="mt-6 mb-2 text-sm font-semibold">Example companies</h3>
-      <PresetPicker presets={presetList} activeId={profile.id} onPick={onPreset} />
+      <PresetPicker presets={presetList} activeId={savedProfile.id} onPick={onPreset} />
 
       <h3 className="mt-7 text-sm font-semibold">Your profile</h3>
       <p className="mt-1 mb-4 text-[13px] text-muted">Every reply in the demo is written from these details.</p>

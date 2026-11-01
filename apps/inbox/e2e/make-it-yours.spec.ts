@@ -14,18 +14,24 @@ test.use({ actionTimeout: 15_000 });
 const preset = defaultPresetFor("inbox");
 const propertyManager = presets["brickfern-property"];
 
-test("F11: picking the property manager preset rebrands the film @inbox.make-it-yours", async ({ page }) => {
+test("F11: picking the property manager preset on the film opens live mode in that company @inbox.make-it-yours", async ({ page }) => {
   await gotoApp(page, "/?t=66000");
   expect(await brandColour(page)).toBe(preset.colors.brand);
 
-  await pickPreset(page, propertyManager.name);
+  const panel = await openMakeItYours(page);
+  await panel.getByRole("button").filter({ hasText: propertyManager.name }).click();
 
-  await expect(filmLane(page, "owner")).toContainText(propertyManager.name);
-  await expect(filmLane(page, "ai")).toHaveAttribute(
-    "aria-label",
-    new RegExp(`^${escapeRegExp(propertyManager.people.assistantName)}`),
-  );
+  await expect(page).toHaveURL(/\/live\?brand=brickfern-property$/);
+  await expect(page.getByRole("banner")).toContainText(propertyManager.name);
   await expect.poll(() => brandColour(page)).toBe(propertyManager.colors.brand);
+});
+
+test("F11: the film keeps its own company when a saved profile exists (decision F1) @inbox.make-it-yours", async ({ page }) => {
+  await gotoApp(page, `/?t=66000&brand=${propertyManager.id}`);
+
+  await expect(filmLane(page, "owner")).toContainText(preset.name);
+  await expect(filmLane(page, "ai")).toHaveAttribute("aria-label", new RegExp(`^${escapeRegExp(preset.people.assistantName)}`));
+  expect(await brandColour(page)).toBe(preset.colors.brand);
 });
 
 test("F11: picking the property manager preset makes live replies name that company @inbox.make-it-yours", async ({ page }) => {
@@ -39,10 +45,14 @@ test("F11: picking the property manager preset makes live replies name that comp
   await expect(page.getByText(body.reply.reply).filter({ visible: true }).first()).toBeVisible();
 });
 
-test("F12: a ?brand= profile of the visitor's own company changes the end card note @inbox.make-it-yours", async ({ page }) => {
+test("F12: a ?brand= link to the film keeps the fictional end card and carries the profile to live mode @inbox.make-it-yours", async ({ page }) => {
   await gotoApp(page, `/?t=80000&brand=${encodeProfile(testProfile)}`);
 
-  await expect(endCard(page)).toContainText(`${testProfile.name}'s brand`);
+  await expect(endCard(page)).toContainText(preset.name);
+  await expect(endCard(page).getByRole("link", { name: "Try it live" })).toHaveAttribute(
+    "href",
+    `/live?brand=${encodeProfile(testProfile)}`,
+  );
 });
 
 test("F12: a ?brand= profile names the company in the live owner view and in a reply @inbox.make-it-yours", async ({ page }) => {
@@ -70,9 +80,9 @@ test("F13: reading a website applies the drafted profile without the browser lea
   // "Opening example.com" is a status too, so wait for the draft itself before applying it.
   await expect(panel.getByRole("status").filter({ hasText: "Draft ready from example.com" })).toBeVisible({ timeout: 20_000 });
   await panel.getByRole("button", { name: "Apply" }).click();
-  await expect(panel).toBeHidden();
 
-  // The mock provider drafts the profile from the domain name only.
-  await expect(filmLane(page, "owner")).toContainText("Example");
+  // Applying on the film opens live mode in the draft. The mock provider drafts it from the domain name only.
+  await expect(page).toHaveURL(/\/live\?brand=/);
+  await expect(page.getByRole("banner")).toContainText("Example");
   expect(offSite).toEqual([]);
 });
