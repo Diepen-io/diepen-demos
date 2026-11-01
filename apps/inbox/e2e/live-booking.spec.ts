@@ -11,8 +11,8 @@ test("F8: a visitor books an offered slot and sees it in the calendar and the ow
 
   const offer = await sendMessage(page, "Can I book an appointment?");
   expect(offer.reply.status).toBe("booking_offered");
-  // With the visitor's clock at Tuesday 21:42 the first free slots are on Wednesday afternoon.
-  expect(offer.reply.offeredSlots).toEqual(["2026-11-11T12:30", "2026-11-11T13:00"]);
+  // With the visitor's clock at Tuesday 21:42 the first free slot is Wednesday 12:30; the second is on another day.
+  expect(offer.reply.offeredSlots).toEqual(["2026-11-11T12:30", "2026-11-12T09:00"]);
 
   const chips = page.getByRole("list", { name: "Offered times" }).filter({ visible: true }).getByRole("button");
   await expect(chips).toHaveCount(2);

@@ -1,4 +1,4 @@
-import { formatSlot } from "./calendar";
+import { formatSlot, spreadSlots } from "./calendar";
 import type { StructuredReply } from "./conversation";
 
 const maxOffered = 3;
@@ -6,7 +6,7 @@ const maxOffered = 3;
 /**
  * Holds a model's reply to the calendar before it reaches the customer. Offered times must be
  * free, at most three; a booking must be free and one of the times offered in the last turn.
- * A reply that breaks a rule becomes a new offer of the first two free slots.
+ * A reply that breaks a rule becomes a new offer of two free slots that are not back to back.
  */
 export function checkReply<Reply extends StructuredReply>(
   reply: Reply,
@@ -28,7 +28,7 @@ export function checkReply<Reply extends StructuredReply>(
 
 function newOffer<Reply extends StructuredReply>(reply: Reply, free: readonly string[]): Reply {
   const { bookedSlot: _dropped, ...rest } = reply;
-  const [first, second] = free;
+  const [first, second] = spreadSlots(free);
   if (!first) {
     return { ...rest, status: "answered", offeredSlots: undefined, reply: "There is no free time in the next three working days. Shall I ask the team to find you one?" } as Reply;
   }

@@ -25,7 +25,7 @@ test("F9: a refund request goes to a person, stops the AI and can start over @in
   await openLive(page);
 
   await openChannel(page, "Instagram");
-  const handover = await sendMessage(page, "I'd like a refund for my last visit.");
+  const handover = await sendMessage(page, "I'm not happy with how it went and I'd like a refund.");
   expect(handover.reply.status).toBe("needs_human");
   const handoverMessage = page.getByText(preset.policies.handoverMessage).filter({ visible: true });
   await expect(handoverMessage.first()).toBeVisible();
@@ -47,4 +47,17 @@ test("F9: a refund request goes to a person, stops the AI and can start over @in
   await expect(handoverMessage).toHaveCount(0);
   await expect(page.getByRole("textbox", { name: "Message" }).filter({ visible: true })).toBeVisible();
   expect(channelsAsked.filter((channel) => channel === "instagram")).toHaveLength(1);
+});
+
+test("F17: after a handover the times offered earlier can no longer be picked @inbox.live-handover", async ({ page }) => {
+  await openLive(page);
+  await openChannel(page, "Website chat");
+
+  await sendMessage(page, "Can I book an appointment?");
+  const chips = page.getByRole("list", { name: "Offered times" }).filter({ visible: true });
+  await expect(chips.getByRole("button")).toHaveCount(2);
+
+  await sendMessage(page, "I waited 40 minutes past my appointment time and nobody told me why. Not acceptable.");
+  await expect(page.getByRole("button", { name: "Start over" })).toBeVisible();
+  await expect(chips.getByRole("button")).toHaveCount(0);
 });

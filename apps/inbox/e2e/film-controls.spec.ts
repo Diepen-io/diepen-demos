@@ -38,9 +38,9 @@ test("F3: Pause holds the clock, Play resumes it, Restart goes back to 21:40, sp
   }
 });
 
-test("F4: ?t=53000 opens on the Website chat tab at 06:34 @inbox.film-controls", async ({ page }) => {
+test("F4: ?t=53000 opens on the Website chat tab at 00:33 @inbox.film-controls", async ({ page }) => {
   await gotoApp(page, "/?t=53000");
 
   await expect(filmChannelTab(page, "Website chat")).toHaveAttribute("aria-selected", "true");
-  await expect(storyClock(page)).toHaveAccessibleName(/06:34/);
+  await expect(storyClock(page)).toHaveAccessibleName(/00:33/);
 });

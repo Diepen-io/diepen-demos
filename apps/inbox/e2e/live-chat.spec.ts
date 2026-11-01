@@ -16,8 +16,15 @@ test.describe.configure({ timeout: 90_000 });
 // A missing control fails in seconds instead of holding the whole test timeout.
 test.use({ actionTimeout: 15_000 });
 
-/** The first sentence of a reply: text that sits in one line of the thread on every channel. */
-const firstSentence = (text: string) => text.split(/(?<=[.!?])\s/)[0] ?? text;
+/**
+ * The first sentence of a reply's answer: text that sits in one paragraph of the thread on every
+ * channel. An email's greeting is a paragraph of its own, so the answer starts after it.
+ */
+function firstSentence(text: string): string {
+  const [first = text, second] = text.split(/\n{2,}/);
+  const answer = second !== undefined && first.endsWith(",") ? second : first;
+  return answer.split(/(?<=[.!?])\s/)[0] ?? answer;
+}
 
 test("F6: every channel answers an opening hours question and the owner view shows it as Answered @inbox.live-chat", async ({ page }) => {
   await openLive(page);
@@ -64,4 +71,22 @@ test("F15: /live answers one message with no console errors and no failed reques
   await expect(page.getByText(firstSentence(body.reply.reply)).filter({ visible: true }).first()).toBeVisible();
 
   expect(problems).toEqual([]);
+});
+
+test("F18: a starter whose reply fails stays in the thread, and sending again replaces it @inbox.live-chat", async ({ page }) => {
+  await openLive(page);
+  await openChannel(page, "Website chat");
+  await page.route("**/api/reply", (route) => route.fulfill({ status: 503, json: { fallback: "film", reason: "unavailable" } }));
+
+  const starter = "Can I book a time this week?";
+  await page.getByRole("button", { name: starter }).filter({ visible: true }).click();
+
+  await expect(page.getByRole("alert").filter({ hasText: "No answer this time" })).toBeVisible();
+  await expect(page.getByText(starter, { exact: true }).filter({ visible: true })).toHaveCount(1);
+  await expect(page.getByText("Not answered").filter({ visible: true })).toBeVisible();
+
+  await page.unroute("**/api/reply");
+  await sendMessage(page, starter);
+  await expect(page.getByText(starter, { exact: true }).filter({ visible: true })).toHaveCount(1);
+  await expect(page.getByText("Not answered")).toHaveCount(0);
 });

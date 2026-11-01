@@ -4,6 +4,7 @@ import { getProvider } from "@diepen/ai/provider-factory";
 import { fetchPage as webPageFetcher, type PageFetcher } from "@diepen/voice/page-fetcher";
 import { answerInquiry, type Inquiry } from "@/application/answer-inquiry";
 import { fixturePageFetcher } from "./fixture-page-fetcher";
+import { withTypingPace } from "./typing-pace";
 
 /**
  * The one place that picks the adapters. Routes take everything from here; a test builds its own
@@ -14,12 +15,13 @@ export type ContainerOptions = { provider?: AiProvider; guards?: Guards };
 export function createContainer({ provider = getProvider(), guards = sharedGuards }: ContainerOptions = {}) {
   // Without a key nothing may leave the server, so "Make it yours" reads a fixture page.
   const fetchPage: PageFetcher = provider.name === "mock" ? fixturePageFetcher : webPageFetcher;
+  const paced = withTypingPace(provider);
   return {
     provider,
     providerName: provider.name,
     guards,
     fetchPage,
-    answerInquiry: (inquiry: Inquiry) => answerInquiry({ ai: provider }, inquiry),
+    answerInquiry: (inquiry: Inquiry) => answerInquiry({ ai: paced }, inquiry),
   };
 }
 

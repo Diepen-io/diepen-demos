@@ -8,10 +8,10 @@ import { FilmLane } from "./film-lanes";
 
 const layout: FilmLayout = {
   columns: [
-    { lanes: ["customers"], width: "38fr" },
-    { lanes: ["ai"], width: "20fr" },
-    { lanes: ["calendar"], width: "20fr" },
-    { lanes: ["owner"], width: "22fr" },
+    { lanes: ["customers"], width: "35fr" },
+    { lanes: ["ai"], width: "18fr" },
+    { lanes: ["calendar"], width: "26fr" },
+    { lanes: ["owner"], width: "21fr" },
   ],
 };
 
@@ -25,7 +25,8 @@ export function InboxFilm() {
       script={script}
       layout={layout}
       liveHref={hrefWithBrand("/live")}
-      className="md:h-auto! md:min-h-0 md:flex-1"
+      // On a phone the shell header sits above the stage, so the stage leaves its height free for the caption and controls.
+      className="max-md:h-[calc(100dvh-7.25rem)] md:h-auto! md:min-h-0 md:flex-1"
       renderLane={(lane, ctx) => <FilmLane laneId={lane.id} snapshot={snapshotAt(ctx.t, profile)} t={ctx.t} profile={profile} />}
     />
   );

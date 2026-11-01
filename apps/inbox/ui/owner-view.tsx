@@ -18,6 +18,8 @@ export type OwnerViewProps = {
   showFilters: boolean;
   /** The row whose thread is open. */
   openRow?: string;
+  /** Shows only the rows with this status, and marks its filter chip. */
+  filter?: ConversationStatus;
   onToggleRow?: (id: string) => void;
   nameOf?: (row: OwnerRowData) => string;
   isNew?: (row: OwnerRowData) => boolean;
@@ -36,7 +38,8 @@ const filterOrder: { status: ConversationStatus; tone: BadgeTone }[] = [
 
 /** The list an owner opens in the morning: every conversation and its status, needs a human first. */
 export function OwnerView(props: OwnerViewProps) {
-  const { company, rows, subtitle, badge, showFilters, openRow, onToggleRow, nameOf, isNew, cursor, emptyText, className } = props;
+  const { company, rows, subtitle, badge, showFilters, openRow, filter, onToggleRow, nameOf, isNew, cursor, emptyText, className } = props;
+  const shown = filter ? rows.filter((row) => row.status === filter) : rows;
   const counts = filterOrder
     .map(({ status, tone }) => ({ status, tone, count: rows.filter((row) => row.status === status).length }))
     .filter((filter) => filter.count > 0);
@@ -57,18 +60,18 @@ export function OwnerView(props: OwnerViewProps) {
         <ul aria-label="Filters" className="flex flex-wrap gap-1.5 border-b border-border px-4 py-2.5">
           {counts.map(({ status, tone, count }) => (
             <li key={status} className="enter">
-              <Badge tone={tone}>
+              <Badge tone={tone} className={cx("transition-shadow duration-300", status === filter && "ring-2 ring-current/60")}>
                 {statusLabels[status]} <span className="tabular font-semibold">{count}</span>
               </Badge>
             </li>
           ))}
         </ul>
       ) : null}
-      {rows.length === 0 ? (
+      {shown.length === 0 ? (
         <p className="m-auto max-w-[24ch] px-4 text-center text-[14px] text-faint">{emptyText}</p>
       ) : (
         <ol className="scroll-area flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3">
-          {rows.map((row, index) => (
+          {shown.map((row, index) => (
             <OwnerRow
               key={row.id}
               row={row}

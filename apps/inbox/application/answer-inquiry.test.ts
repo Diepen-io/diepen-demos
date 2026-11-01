@@ -1,7 +1,7 @@
 import type { AiProvider, ObjectRequest } from "@diepen/ai/provider";
 import { defaultPresetFor } from "@diepen/voice/presets";
 import { describe, expect, it } from "vitest";
-import { freeSlots } from "@/domain/calendar";
+import { freeSlots, spreadSlots } from "@/domain/calendar";
 import { answerInquiry } from "./answer-inquiry";
 
 const profile = defaultPresetFor("inbox");
@@ -55,11 +55,11 @@ describe("answerInquiry with the mock provider", () => {
     expect(replyMs).toBeGreaterThanOrEqual(0);
   });
 
-  it("U11: offers the first two free slots for a booking request", async () => {
+  it("U11: offers two free slots that are not back to back for a booking request", async () => {
     const { reply } = await answerInquiry({ ai: mockLikeProvider() }, inquiry([{ role: "customer", text: "Can I book?" }]));
 
     expect(reply.status).toBe("booking_offered");
-    expect(reply.offeredSlots).toEqual(free.slice(0, 2));
+    expect(reply.offeredSlots).toEqual(spreadSlots(free));
   });
 
   it("U11: books the offered slot whose time the customer names", async () => {
@@ -115,6 +115,6 @@ describe("answerInquiry and the provider", () => {
 
     expect(reply.status).toBe("booking_offered");
     expect(reply.bookedSlot).toBeUndefined();
-    expect(reply.offeredSlots).toEqual(free.slice(0, 2));
+    expect(reply.offeredSlots).toEqual(spreadSlots(free));
   });
 });

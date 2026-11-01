@@ -38,7 +38,8 @@ function addMessage(snapshot: InboxSnapshot, effect: Extract<FilmEffect, { type:
     role: message.role,
     text: message.text,
     at: message.at,
-    slots: message.reply?.offeredSlots?.map((iso) => ({ iso })),
+    // The customer's answer carries the picked time, so the choice shows even when the offer has scrolled away.
+    slots: pick ? [{ iso: pick, picked: true }] : message.reply?.offeredSlots?.map((iso) => ({ iso })),
     since: moment.since,
   };
   const conversations = replace(threads, ref, (thread) => ({
@@ -127,6 +128,8 @@ export function applyEffect(snapshot: InboxSnapshot, effect: FilmEffect, moment:
       return { ...snapshot, open: true };
     case "select":
       return { ...snapshot, selectedRow: effect.conversation };
+    case "filter":
+      return { ...snapshot, ownerFilter: effect.status };
     case "highlight":
       return { ...snapshot, highlightBookings: true };
   }

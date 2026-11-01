@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatSlot, formatSlotChip, freeSlots } from "./calendar";
+import { formatSlot, formatSlotChip, freeSlots, spreadSlots } from "./calendar";
 
 // The busy pattern of section 3 of docs/features/inbox.md, written out so the test checks the plan.
 const busyByDate: Record<string, [string, string][]> = {
@@ -56,6 +56,20 @@ describe("freeSlots", () => {
 
     expect(slots).not.toContain("2026-11-16T12:30");
     expect(slots[0]).toBe("2026-11-16T13:00");
+  });
+});
+
+describe("spreadSlots", () => {
+  it("U3: offers the first free slot and the first one on a later day, never two back to back", () => {
+    expect(spreadSlots(freeSlots("2026-11-10T21:42", [], 30))).toEqual(["2026-11-11T12:30", "2026-11-12T09:00"]);
+  });
+
+  it("U3: on the last free day, keeps at least two hours between the two times", () => {
+    expect(spreadSlots(["2026-11-13T10:30", "2026-11-13T11:00", "2026-11-13T11:30", "2026-11-13T12:30"])).toEqual([
+      "2026-11-13T10:30",
+      "2026-11-13T12:30",
+    ]);
+    expect(spreadSlots(["2026-11-13T10:30", "2026-11-13T11:00"])).toEqual(["2026-11-13T10:30"]);
   });
 });
 

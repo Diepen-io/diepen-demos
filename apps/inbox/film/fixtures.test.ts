@@ -21,12 +21,12 @@ describe("film fixtures", () => {
     expect(fixtureTexts.length).toBeGreaterThan(20);
   });
 
-  it("U5: average first reply is 30 seconds", () => {
-    expect(averageFirstReplySeconds(filmConversations)).toBe(30);
+  it("U5: average first reply is 38 seconds", () => {
+    expect(averageFirstReplySeconds(filmConversations)).toBe(38);
   });
 
-  it("U5: average wait until the 08:00 opening is 420 minutes", () => {
-    expect(averageWaitUntilOpening(filmConversations, "08:00")).toBe(420 * 60);
+  it("U5: average wait until the 08:00 opening is 540 minutes", () => {
+    expect(averageWaitUntilOpening(filmConversations, "08:00")).toBe(540 * 60);
   });
 
   it("U5: ends with two bookings, one answer and one handover", () => {

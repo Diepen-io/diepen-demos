@@ -35,7 +35,7 @@ export function countByStatus(conversations: readonly Conversation[]): Record<Co
 
 const plural = (count: number, unit: string) => `${count} ${unit}${count === 1 ? "" : "s"}`;
 
-/** "30 seconds", "12 minutes", "7 hours" or "7.5 hours". */
+/** "38 seconds", "12 minutes", "9 hours" or "7.5 hours". */
 export function formatDuration(seconds: number): string {
   if (seconds < 90) return plural(Math.round(seconds), "second");
   if (seconds < 90 * 60) return plural(Math.round(seconds / 60), "minute");

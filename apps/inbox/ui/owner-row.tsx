@@ -1,4 +1,5 @@
 import { cx } from "@diepen/ui/primitives/class-names";
+import { useScrollToLatest } from "@diepen/ui/mockups/scroll-to-latest";
 import { Icon } from "@diepen/ui/primitives/icon";
 import type { OwnerRow as OwnerRowData } from "@/domain/inbox-snapshot";
 import { ChannelMark } from "./channel-mark";
@@ -56,10 +57,15 @@ export function OwnerRow({ row, name, open, fresh, cursor, onToggle }: OwnerRowP
   );
 }
 
+/** Older messages fade out at the top of the row's thread, which shows that it scrolls. */
+const fadeTop = { maskImage: "linear-gradient(to bottom, transparent, #000 28px)" };
+
+/** The thread scrolls inside the row and opens on its latest message, so the call button stays in view. */
 function RowDetail({ row }: { row: OwnerRowData }) {
+  const thread = useScrollToLatest<HTMLOListElement>(row.thread?.length ?? 0);
   return (
     <div className="enter flex flex-col gap-2.5 border-t border-border/80 px-3 pt-3 pb-3.5">
-      <ol className="flex flex-col gap-1.5">
+      <ol ref={thread} className="scroll-area flex max-h-32 flex-col gap-1.5 overflow-y-auto" style={fadeTop}>
         {(row.thread ?? []).map((message) => (
           <li
             key={message.id}
@@ -68,12 +74,12 @@ function RowDetail({ row }: { row: OwnerRowData }) {
               message.role === "customer" ? "self-start bg-surface shadow-[inset_0_0_0_1px_var(--border)]" : "self-end bg-brand text-brand-foreground",
             )}
           >
-            <span className="line-clamp-4">{message.text}</span>
+            {message.text}
           </li>
         ))}
       </ol>
       {row.phone ? (
-        <span className="inline-flex h-9 items-center gap-2 self-start rounded-[10px] bg-brand px-3.5 text-[14px] font-medium text-brand-foreground shadow-[0_1px_2px_rgb(0_0_0/0.12)]">
+        <span className="inline-flex h-9 items-center gap-2 self-start rounded-[10px] bg-brand px-3 text-[14px] whitespace-nowrap font-medium text-brand-foreground shadow-[0_1px_2px_rgb(0_0_0/0.12)]">
           <Icon name="phone" size={15} />
           Call {row.phone}
         </span>
