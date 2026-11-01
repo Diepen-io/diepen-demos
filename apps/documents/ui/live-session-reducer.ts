@@ -1,8 +1,8 @@
+import { anyFileReceived } from "@/domain/chase-emails";
 import { transition, type ItemEvent } from "@/domain/checklist";
 import { fileIntoDrive, newestEntryId } from "@/domain/drive-folder";
 import type { ItemId, UploadItemId } from "@/domain/document-request";
 import type { DocumentsLaneId } from "./documents-lanes";
-import type { InboxEmail } from "./email-views";
 import type { LetterSignature } from "./engagement-letter";
 import type { CheckAnswer, ChaseAnswer } from "./live-api";
 import { initialLiveState, type ClientScreen, type LiveState } from "./live-state";
@@ -15,14 +15,12 @@ export type LiveAction =
   | { type: "check-started"; checkId: string; itemId: UploadItemId; fileName: string }
   | { type: "check-finished"; checkId: string; answer: CheckAnswer }
   | { type: "check-aborted"; checkId: string }
-  | { type: "chase-answered"; answer: ChaseAnswer; emails: InboxEmail[] }
+  | { type: "chase-answered"; answer: ChaseAnswer; event: "submitted" | "skip-days" }
   | { type: "tick"; now: string }
   | { type: "seen"; lane: DocumentsLaneId }
-  | { type: "reset"; requestEmail: InboxEmail };
+  | { type: "reset" };
 
 export const abortedMessage = "The check did not finish. Upload the file again.";
-
-const chaseTitles = { "follow-up": "Follow-up", reminder: "Reminder 2", escalation: "Task for the team" } as const;
 
 function withEvent(state: LiveState, itemId: ItemId, event: ItemEvent): LiveState["items"] {
   return state.items.map((item) => (item.id === itemId ? transition(item, event).item : item));
@@ -97,17 +95,29 @@ export function liveReducer(state: LiveState, action: LiveAction): LiveState {
     case "chase-answered": {
       const { session, sent } = action.answer;
       const escalation = sent.find((chase) => chase.kind === "escalation");
-      const chases = sent.map((chase) => ({ id: chase.id, title: chaseTitles[chase.kind], sentAt: chase.sentAt }));
+      const received = anyFileReceived(state.items);
+      const emails = sent.flatMap((chase) =>
+        chase.kind === "escalation"
+          ? []
+          : [{ id: chase.id, kind: chase.kind, sentAt: chase.sentAt, outstanding: chase.outstanding, anyFileReceived: received, unread: true, fresh: true }],
+      );
+      // "Done for now" sends the follow-up at once; everything after it waits for its day.
+      const chases = sent.map((chase) => ({
+        id: chase.id,
+        kind: chase.kind,
+        sentAt: chase.sentAt,
+        trigger: action.event === "submitted" ? ("done" as const) : ("schedule" as const),
+      }));
       return {
         ...state,
         session: { requestId: session.requestId, sentAt: session.sentAt, submittedAt: session.submittedAt, chases: session.chases, jobs: session.jobs, escalated: session.escalated },
         now: session.now,
-        emails: [...state.emails, ...action.emails],
+        emails: [...state.emails, ...emails],
         chasesSent: [...state.chasesSent, ...chases],
         feed: [...state.feed, ...chases.map((chase) => ({ kind: "chase" as const, id: chase.id }))],
-        screen: action.emails.length > 0 ? "inbox" : state.screen,
-        escalation: escalation ? { subject: escalation.subject, body: escalation.body } : state.escalation,
-        changed: touch(state, "system", ...(action.emails.length > 0 ? (["client"] as const) : []), ...(escalation ? (["firm"] as const) : [])),
+        screen: emails.length > 0 ? "inbox" : state.screen,
+        escalation: escalation ? { outstanding: escalation.outstanding } : state.escalation,
+        changed: touch(state, "system", ...(emails.length > 0 ? (["client"] as const) : []), ...(escalation ? (["firm"] as const) : [])),
       };
     }
     case "tick":
@@ -115,6 +125,6 @@ export function liveReducer(state: LiveState, action: LiveAction): LiveState {
     case "seen":
       return state.changed.includes(action.lane) ? { ...state, changed: state.changed.filter((lane) => lane !== action.lane) } : state;
     case "reset":
-      return initialLiveState(action.requestEmail);
+      return initialLiveState();
   }
 }

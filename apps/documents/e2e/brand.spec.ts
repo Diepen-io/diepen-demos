@@ -40,3 +40,14 @@ test("the film keeps its own fictional firm with a ?brand= link (decision F1) @d
   await openFilm(page, `${brandQuery}&t=0`);
   await expect(page.getByText(new RegExp(`^${film.name} needs 6 documents`))).toBeVisible();
 });
+
+test("a profile stored from an earlier visit writes the request email on a fresh load @documents.brand", async ({ page }) => {
+  const stored = encodeProfile(brickfern);
+  await page.addInitScript((value) => window.localStorage.setItem("diepen-demos:brand", value), stored);
+  await openLive(page);
+  const client = await showLane(page, "client", firm);
+  await expect(client.getByText(brickfern.people.assistantName).first()).toBeVisible();
+  await openRequestEmail(page);
+  await expect(client).toContainText(`${brickfern.name} needs these 6 documents`);
+  await expect(client).toContainText(brickfern.voice.signOff.split("\n")[1] ?? "");
+});

@@ -77,11 +77,11 @@ export function driveFolder(page: Page, folder: string): Locator {
   return lane(page, "drive").getByRole("treeitem").filter({ hasText: new RegExp(`^\\s*${escapeRegExp(folder)}`) });
 }
 
-/** A long name may be cut in the middle on a phone; the full name then stays in the title. */
+/** Drive names carry a zero-width break after each underscore, so a long name wraps only there. */
 export async function expectDriveFile(page: Page, folder: string, fileName: string): Promise<void> {
   await showLane(page, "drive");
-  const entry = driveFolder(page, folder);
-  await expect(entry.getByText(fileName, { exact: true }).or(entry.getByTitle(fileName, { exact: true })).first()).toBeVisible();
+  const shown = new RegExp(`^${escapeRegExp(fileName).replaceAll("_", "_\u200b?")}$`);
+  await expect(driveFolder(page, folder).getByText(shown).first()).toBeVisible();
 }
 
 export async function openLetter(page: Page): Promise<Locator> {
@@ -97,7 +97,7 @@ export function signButton(client: Locator): Locator {
 
 export async function signByTypedName(page: Page): Promise<void> {
   const client = await openLetter(page);
-  await client.getByRole("button", { name: "Type your name instead" }).click();
+  await client.getByRole("button", { name: "Type your name" }).click();
   await client.getByRole("textbox", { name: /name/i }).fill("Daniel Okafor");
   await signButton(client).click();
   await expectFirmState(page, "engagement-letter", "Checked");

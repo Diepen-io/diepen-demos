@@ -2,7 +2,120 @@
 @import "@diepen/ui/styles.css";
 @source "../../../packages/ui/src";
 
-/* The document chaser's own motion. Curves come from the shared tokens in @diepen/ui. */
+/* The document chaser's own layout and motion. Curves come from the shared tokens in @diepen/ui. */
+
+/*
+ * The phone keeps its 9:19 shape at a size the lane alone sets: as tall as the lane allows, never
+ * wider than it, never taller than a real phone. Its parts scale with its width, so the clock and
+ * the island never meet, whatever the lane size.
+ */
+.phone-slot {
+  container-type: size;
+}
+
+.phone-frame {
+  container: phone / inline-size;
+  height: min(100cqh, 820px, 100cqw * 19 / 9);
+  width: min(100cqh * 9 / 19, 820px * 9 / 19, 100cqw);
+  padding: 2.4cqw;
+  border-radius: 13cqw;
+}
+
+.phone-screen {
+  border-radius: 10.6cqw;
+}
+
+.phone-status {
+  height: 12cqw;
+  padding-inline: 8cqw;
+  font-size: min(4.5cqw, 14px);
+}
+
+.phone-island {
+  top: 2.6cqw;
+  width: 30cqw;
+  height: 7.4cqw;
+}
+
+.phone-home {
+  height: 6.5cqw;
+}
+
+/* A narrow phone lays its screen out a little smaller, as a real phone of that width would. */
+@container phone (max-width: 260px) {
+  .phone-content {
+    zoom: 0.86;
+  }
+}
+
+@container phone (max-width: 225px) {
+  .phone-content {
+    zoom: 0.8;
+  }
+}
+
+/*
+ * On a phone the plan puts the caption above the lane and the controls below it. The stage's own
+ * order puts the caption under the lanes, so the documents film moves it up.
+ */
+@media (max-width: 767px) {
+  .documents-film > header {
+    order: -2;
+  }
+
+  .documents-film > [aria-live] {
+    order: -1;
+    min-height: 2.6em;
+  }
+}
+
+/*
+ * Firm and Drive lanes are size containers. On a short desktop screen their content zooms out a
+ * step, so the checklist and its summary still read whole instead of being cut. A phone shows one
+ * lane at a time at full size.
+ */
+.lane-fill {
+  container: lane / size;
+}
+
+@media (min-width: 768px) {
+  @container lane (max-height: 660px) {
+    .lane-dense {
+      zoom: 0.9;
+    }
+  }
+
+  @container lane (max-height: 540px) {
+    .lane-dense {
+      zoom: 0.8;
+    }
+  }
+
+  @container lane (max-height: 490px) {
+    .lane-dense {
+      zoom: 0.74;
+    }
+
+    .lane-dense .summary-problem {
+      display: none;
+    }
+  }
+
+  @container lane (max-height: 420px) {
+    .lane-dense {
+      zoom: 0.68;
+    }
+  }
+}
+
+/*
+ * Where the Drive lane is wide enough for the whole folder path, the path wraps instead of cutting
+ * off the folder the client's files are in.
+ */
+.drive-lane nav[aria-label="Folder path"] {
+  flex-wrap: wrap;
+  row-gap: 0.125rem;
+}
 
 /* A new phone screen slides up a little as it replaces the last one. */
 .screen-in {

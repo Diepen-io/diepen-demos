@@ -1,4 +1,5 @@
 import type { CheckResult } from "@/domain/check-result";
+import { capitalised } from "@/domain/plain-words";
 import { Badge, StatusBadge } from "@diepen/ui/primitives/badge";
 import { cx } from "@diepen/ui/primitives/class-names";
 import { Icon } from "@diepen/ui/primitives/icon";
@@ -14,17 +15,24 @@ export type CheckCardModel = {
   result?: CheckResult;
   /** One figure only, for a batch of passing files. */
   compact?: boolean;
+  /** A later upload of the same item passed, so this card shrinks to its file name. */
+  replaced?: boolean;
   fresh?: boolean;
 };
 
+/** "Daniel Okafor, 2025, 1 page, signed", or "No name or year found, 1 page". */
 function facts(result: CheckResult): string {
-  const parts = [result.person ?? "No name found", result.year === null ? "No year found" : String(result.year)];
+  const who = result.person === null && result.year === null
+    ? ["no name or year found"]
+    : [result.person ?? "no name found", result.year === null ? "no year found" : String(result.year)];
+  const parts = [...who];
   if (result.pageCount !== undefined) parts.push(`${result.pageCount} ${result.pageCount === 1 ? "page" : "pages"}`);
-  if (result.signed !== undefined) parts.push(result.signed ? "Signed" : "Not signed");
-  return parts.join(", ");
+  if (result.signed !== undefined) parts.push(result.signed ? "signed" : "not signed");
+  return capitalised(parts.join(", "));
 }
 
-function PhaseBadge({ phase, result }: Pick<CheckCardModel, "phase" | "result">) {
+function PhaseBadge({ phase, result, replaced }: Pick<CheckCardModel, "phase" | "result" | "replaced">) {
+  if (replaced) return <Badge tone="neutral" icon="folder">Replaced</Badge>;
   if (phase === "done" && result) return <StatusBadge status={result.status === "ok" ? "checked" : "problem"} />;
   if (phase === "reading") return <Badge tone="info" icon="search">Reading</Badge>;
   if (phase === "aborted") return <Badge tone="wait" icon="alert">Not finished</Badge>;
@@ -32,13 +40,13 @@ function PhaseBadge({ phase, result }: Pick<CheckCardModel, "phase" | "result">)
 }
 
 /** One uploaded file in the system lane: queued, being read, then what the check found. */
-export function CheckCard({ fileName, phase, result, compact, fresh }: CheckCardModel) {
-  const done = phase === "done" && result;
+export function CheckCard({ fileName, phase, result, compact, replaced, fresh }: CheckCardModel) {
+  const done = phase === "done" && result && !replaced;
   const problem = done && result.status === "problem";
   return (
     <article
       className={cx(
-        "flex flex-col gap-3 rounded-xl bg-surface p-3.5 shadow-[inset_0_0_0_1px_var(--border)] transition-shadow duration-500",
+        "flex shrink-0 flex-col gap-3 rounded-xl bg-surface p-3.5 shadow-[inset_0_0_0_1px_var(--border)] transition-shadow duration-500",
         problem && "shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--fail)_30%,white)]",
         fresh && "enter",
       )}
@@ -48,7 +56,7 @@ export function CheckCard({ fileName, phase, result, compact, fresh }: CheckCard
           <FileIcon kind={fileKindOf(fileName)} size={24} />
           <MiddleTruncate text={fileName} className="flex-1 text-[14px] font-medium" />
         </span>
-        <PhaseBadge phase={phase} result={result} />
+        <PhaseBadge phase={phase} result={result} replaced={replaced} />
       </header>
 
       {phase === "reading" && (

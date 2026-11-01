@@ -4,7 +4,7 @@ import { expect } from "./documents-test";
 /**
  * The four lanes of the film and of live mode. Each is a region named "<label>, <role>", as the
  * `Lane` component of @diepen/ui names it. Below 768 px one lane shows at a time and the "Parties"
- * tabs, named by the lane's role, switch between them.
+ * tabs, named Firm, Client, System and Drive, switch between them.
  */
 
 export type LaneId = "firm" | "client" | "system" | "drive";
@@ -13,6 +13,8 @@ export type LaneId = "firm" | "client" | "system" | "drive";
 export type Firm = { name: string; industry: string };
 
 export const defaultFirm: Firm = { name: "Ledgerwick Tax & Accounting", industry: "Tax and accounting firm" };
+
+export const tabLabels: Record<LaneId, string> = { firm: "Firm", client: "Client", system: "System", drive: "Drive" };
 
 const fixedLanes: Record<Exclude<LaneId, "firm">, { label: string; role: string }> = {
   client: { label: "Daniel Okafor", role: "Client" },
@@ -41,7 +43,7 @@ export function laneTabs(page: Page): Locator {
 export async function showLane(page: Page, id: LaneId, firm: Firm = defaultFirm): Promise<Locator> {
   const tabs = laneTabs(page);
   if (await tabs.isVisible()) {
-    const tab = tabs.getByRole("tab", { name: laneLabel(id, firm).role, exact: true });
+    const tab = tabs.getByRole("tab", { name: tabLabels[id], exact: true });
     if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
   }
   const region = lane(page, id, firm);

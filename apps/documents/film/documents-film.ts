@@ -63,7 +63,10 @@ function beats(profile: CompanyProfile): Beat[] {
     beat(16, 22300, "firm", { kind: "checklist", changes: [{ itemId: "payslip-summary", event: "checkPassed" }] }, { travel: travel("system", "event", "Checked") }),
     beat(17, 24000, "system", { kind: "check", fileNames: [bank2024], step: "result" }, { caption: "Wrong year caught. This is his 2024 bank statement." }),
     filed(18, 25500, { kind: "filed", itemId: "bank-interest", fileName: "2024_Okafor-Daniel_Bank-interest-statement_wrong-year.pdf", status: "problem" }, "system"),
-    beat(19, 26300, "firm", { kind: "checklist", changes: [{ itemId: "bank-interest", event: "checkFailed" }] }, { travel: travel("system", "event", "Problem found") }),
+    // A shorter flight lands the problem in the firm lane by 27,000 ms, the moment `?t=27000` shows.
+    beat(19, 26300, "firm", { kind: "checklist", changes: [{ itemId: "bank-interest", event: "checkFailed" }] }, {
+      travel: { ...travel("system", "event", "Problem found"), durationMs: 700 },
+    }),
     beat(20, 27500, "system", { kind: "check", fileNames: [donation], step: "result" }, { caption: "Key numbers come out of every document." }),
     filed(21, 28800, { kind: "filed", itemId: "donation-receipt", fileName: "2025_Okafor-Daniel_Donation-receipt.pdf", status: "ok" }, "system"),
     beat(22, 29600, "firm", { kind: "checklist", changes: [{ itemId: "donation-receipt", event: "checkPassed" }] }, { travel: travel("system", "event", "Checked") }),

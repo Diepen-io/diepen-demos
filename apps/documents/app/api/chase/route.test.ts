@@ -42,6 +42,17 @@ describe("POST /api/chase @documents.chase", () => {
     expect(await response.json()).toEqual({ error: "body_too_large", maxBytes: 65_536 });
   });
 
+  it("answers 413 for a body over 64 KB that declares no length", async () => {
+    const text = JSON.stringify({ session: filmSession(), event: "submitted", padding: "x".repeat(65_536) });
+    const request = new Request("https://documents.demo.example/api/chase", {
+      method: "POST",
+      body: new Blob([text]).stream(),
+      headers: { "content-type": "application/json" },
+      duplex: "half",
+    } as RequestInit);
+    expect((await POST(request)).status).toBe(413);
+  });
+
   it("answers 200 with the session and the chases sent", async () => {
     const response = await POST(post({ session: filmSession(), event: "submitted", profile: presets["ledgerwick-accounting"] }));
     expect(response.status).toBe(200);

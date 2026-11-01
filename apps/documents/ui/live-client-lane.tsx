@@ -4,13 +4,16 @@ import { clientReason } from "@/domain/client-reasons";
 import { isUploadItemId, requestItem } from "@/domain/document-request";
 import { Button } from "@diepen/ui/primitives/button";
 import type { CompanyProfile } from "@diepen/voice/profile";
+import { useState } from "react";
 import { ClientPhone } from "./client-phone";
 import { EmailView, PhoneInbox } from "./email-views";
-import { EngagementLetter } from "./engagement-letter";
+import { EngagementLetter, type LetterSignature } from "./engagement-letter";
+import { composeInboxEmail } from "./inbox-emails";
+import type { LiveState } from "./live-state";
+import { SignaturePad } from "./signature-pad";
+import { touchTarget } from "./touch-target";
 import type { UploadRow } from "./upload-item";
 import { UploadPage } from "./upload-page";
-import { SignaturePad } from "./signature-pad";
-import type { LiveState } from "./live-state";
 import type { useLiveDemo } from "./use-live-demo";
 
 type Actions = ReturnType<typeof useLiveDemo>["actions"];
@@ -19,6 +22,7 @@ export type LiveClientLaneProps = {
   state: LiveState;
   profile: CompanyProfile;
   actions: Actions;
+  /** Wide screens draw the phone; a real phone shows the screen in the page's own flow. */
   framed: boolean;
   onDone: () => void;
   busy: boolean;
@@ -41,9 +45,11 @@ function rowsOf(state: LiveState): UploadRow[] {
   });
 }
 
-/** Daniel's phone in live mode: the visitor plays the client. */
+/** Daniel's phone in live mode: the visitor plays the client. Emails are written with the active profile. */
 export function LiveClientLane({ state, profile, actions, framed, onDone, busy }: LiveClientLaneProps) {
-  const open = state.emails.find((email) => email.id === state.openEmailId);
+  const [draft, setDraft] = useState<LetterSignature>();
+  const emails = state.emails.map((record) => composeInboxEmail(profile, record));
+  const open = emails.find((email) => email.id === state.openEmailId);
   let content;
   if (state.screen === "email" && open) {
     const label = open.kind === "request" ? "Upload and sign" : "Upload documents";
@@ -51,7 +57,11 @@ export function LiveClientLane({ state, profile, actions, framed, onDone, busy }
       <EmailView
         email={open}
         onBack={() => actions.show("inbox")}
-        action={<Button variant="brand" size="sm" onClick={() => actions.show("upload")}>{label}</Button>}
+        action={
+          <Button variant="brand" size="sm" className={touchTarget} onClick={() => actions.show("upload")}>
+            {label}
+          </Button>
+        }
       />
     );
   } else if (state.screen === "upload") {
@@ -74,16 +84,26 @@ export function LiveClientLane({ state, profile, actions, framed, onDone, busy }
   } else if (state.screen === "letter") {
     content = (
       <div className="px-4 py-4">
-        <EngagementLetter profile={profile} signature={state.signature}>
-          <SignaturePad onSign={actions.sign} onCancel={() => actions.show("upload")} />
+        <EngagementLetter profile={profile} signature={state.signature ?? draft}>
+          <SignaturePad
+            onSign={(signature) => {
+              setDraft(undefined);
+              actions.sign(signature);
+            }}
+            onDraft={setDraft}
+            onCancel={() => {
+              setDraft(undefined);
+              actions.show("upload");
+            }}
+          />
         </EngagementLetter>
       </div>
     );
   } else {
-    content = <PhoneInbox emails={state.emails} onOpen={actions.openEmail} />;
+    content = <PhoneInbox emails={emails} onOpen={actions.openEmail} />;
   }
   return (
-    <ClientPhone framed={framed} time={state.now.slice(11, 16)} screenKey={`${state.screen}-${state.openEmailId ?? ""}`}>
+    <ClientPhone framed={framed} flow={!framed} time={state.now.slice(11, 16)} screenKey={`${state.screen}-${state.openEmailId ?? ""}`}>
       {content}
     </ClientPhone>
   );

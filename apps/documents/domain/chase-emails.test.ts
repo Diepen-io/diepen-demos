@@ -1,7 +1,7 @@
 import { filmSession } from "@/test-support/live-sessions";
 import type { CompanyProfile } from "@diepen/voice/profile";
 import { describe, expect, it } from "vitest";
-import { escalationTask, followUpEmail, reminderEmail, requestEmail } from "./chase-emails";
+import { anyFileReceived, escalationTask, followUpEmail, reminderEmail, requestEmail } from "./chase-emails";
 import { clientReason } from "./client-reasons";
 import { createTaxReturnRequest } from "./document-request";
 import type { LiveSession } from "./live-session";
@@ -45,7 +45,7 @@ const filmOutstanding = outstandingOf(filmSession());
 const dashes = /[–—]/;
 
 describe("followUpEmail @documents.chase", () => {
-  const email = followUpEmail(profile, filmOutstanding);
+  const email = followUpEmail(profile, filmOutstanding, true);
 
   it("lists exactly the bank, home office and health insurance items with their client reasons", () => {
     expect(filmOutstanding.map((entry) => entry.itemId)).toEqual(["bank-interest", "home-office", "health-insurance"]);
@@ -67,6 +67,20 @@ describe("followUpEmail @documents.chase", () => {
 
   it("ends with the profile's sign-off", () => {
     expect(email.body.trimEnd().endsWith(profile.voice.signOff)).toBe(true);
+  });
+
+  it("thanks the client for his documents only when he has sent some", () => {
+    expect(email.body).toContain("Thank you for your documents.");
+    const nothingYet = followUpEmail(profile, filmOutstanding, false);
+    expect(nothingYet.body).not.toContain("Thank you");
+    expect(nothingYet.body).toContain("Harbour Tax Studio is ready to start on your 2025 tax return");
+  });
+
+  it("knows whether any file came in, and does not count the signed letter as one", () => {
+    const items = createTaxReturnRequest("2026-03-09T09:00").items;
+    expect(anyFileReceived(items)).toBe(false);
+    expect(anyFileReceived(items.map((item) => (item.id === "engagement-letter" ? { ...item, state: "checked" as const } : item)))).toBe(false);
+    expect(anyFileReceived(items.map((item) => (item.id === "bank-interest" ? { ...item, state: "problem" as const } : item)))).toBe(true);
   });
 });
 
@@ -90,7 +104,7 @@ describe("clientReason @documents.chase", () => {
     expect(clientReason(item, state("missing_page"))).toBe("A page is missing.");
     expect(clientReason(item, state("wrong_document"))).toBe("The file you sent is a different document.");
     expect(clientReason(item, state("unreadable"))).toBe("Part of it cannot be read. A sharper scan or photo helps.");
-    expect(clientReason(item, state("other"))).toBe("We need a new copy.");
+    expect(clientReason(item, state("other"))).toBe("Please send a clearer copy or the right document.");
     const two = { ...state("missing_page"), issues: [{ kind: "missing_page" as const }, { kind: "wrong_year" as const }] };
     expect(clientReason(item, two)).toBe("A page is missing.");
   });
@@ -101,7 +115,7 @@ describe("composed text has no em or en dash @documents.chase", () => {
     const everyItem = request.items.map((item) => ({ itemId: item.id, reason: "Not received yet." }));
     const texts = [
       requestEmail(profile, everyItem),
-      followUpEmail(profile, filmOutstanding),
+      followUpEmail(profile, filmOutstanding, true),
       reminderEmail(profile, filmOutstanding),
       escalationTask(profile, filmOutstanding),
       ...filmOutstanding.map((entry) => entry.reason),

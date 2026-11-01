@@ -45,3 +45,8 @@ export function formatLongDate(time: string): string {
   const date = new Date(storyTimeToMs(time.length === 10 ? `${time}T00:00` : time));
   return `${date.getUTCDate()} ${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
 }
+
+/** "Mon 09:00", as an inbox lists mail across days. */
+export function formatWeekdayTime(time: string): string {
+  return `${weekdays[new Date(storyTimeToMs(time)).getUTCDay()]} ${time.slice(11, 16)}`;
+}

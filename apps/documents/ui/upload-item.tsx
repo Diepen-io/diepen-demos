@@ -8,9 +8,11 @@ import { cx } from "@diepen/ui/primitives/class-names";
 import { Icon } from "@diepen/ui/primitives/icon";
 import { FileIcon, fileKindOf } from "@diepen/ui/mockups/file-icon";
 import { useCallback, useRef, useState, type DragEvent } from "react";
+import { phoneFocusTarget } from "./client-phone";
 import { acceptAttribute } from "./file-guard";
 import { MiddleTruncate } from "./middle-truncate";
 import { SampleMenu } from "./sample-menu";
+import { touchTarget } from "./touch-target";
 
 export type UploadRow = {
   item: Pick<RequestItem, "id" | "label" | "detail" | "kind">;
@@ -48,6 +50,7 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
 
   return (
     <li
+      {...phoneFocusTarget(item.id)}
       onDragOver={(event) => {
         if (!canUpload) return;
         event.preventDefault();
@@ -61,8 +64,8 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
         row.fresh && "enter",
       )}
     >
-      <div className="flex items-start gap-3">
-        <div className="min-w-0 flex-1">
+      <div className="flex flex-wrap items-start gap-x-3 gap-y-1.5">
+        <div className="min-w-[9rem] flex-1">
           <p className="text-[15px] leading-snug font-medium">{item.label}</p>
           <p className="text-meta text-muted">{item.detail}</p>
         </div>
@@ -90,7 +93,7 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
       {error && <p className="text-[14px] leading-snug text-fail">{error}</p>}
 
       {item.kind === "signature" && state === "missing" && (
-        <Button variant="brand" size="sm" className="self-start" onClick={actions?.onReviewSign}>
+        <Button variant="brand" size="sm" className={cx("self-start", touchTarget)} onClick={actions?.onReviewSign}>
           Review and sign
           <Icon name="chevronRight" size={15} />
         </Button>
@@ -98,11 +101,11 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
       {canUpload && isUploadItemId(item.id) && (
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" size="sm" onClick={() => input.current?.click()}>
+            <Button variant="secondary" size="sm" className={touchTarget} onClick={() => input.current?.click()}>
               <Icon name="paperclip" size={14} />
               {state === "problem" ? "Upload again" : "Upload"}
             </Button>
-            <Button variant="ghost" size="sm" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
+            <Button variant="ghost" size="sm" className={touchTarget} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
               Use a sample
               <Icon name="chevronRight" size={14} className={cx("transition-transform duration-200", menuOpen && "rotate-90")} />
             </Button>

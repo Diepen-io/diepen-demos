@@ -1,10 +1,11 @@
+import type { OutstandingEntry } from "@/domain/chase-emails";
 import type { CheckResult } from "@/domain/check-result";
 import { createTaxReturnRequest, requestSentAt, type ItemId, type RequestItem, type UploadItemId } from "@/domain/document-request";
 import { createDriveTree, type DriveTree } from "@/domain/drive-folder";
-import type { LiveSession } from "@/domain/live-session";
+import type { ChaseKind, LiveSession } from "@/domain/live-session";
 import type { DocumentsLaneId } from "./documents-lanes";
-import type { InboxEmail } from "./email-views";
 import type { LetterSignature } from "./engagement-letter";
+import type { EmailRecord } from "./inbox-emails";
 
 /** Everything the live page holds. It lives in browser memory only: a reload or "Start over" begins again. */
 
@@ -14,6 +15,9 @@ export type FeedEntry = { kind: "check"; id: string } | { kind: "chase"; id: str
 
 export type ClientScreen = "inbox" | "email" | "upload" | "letter";
 
+/** A chase as the system lane lists it. `done` went out when Daniel pressed "Done for now". */
+export type SentChaseCard = { id: string; kind: ChaseKind; sentAt: string; trigger: "done" | "schedule" };
+
 export type LiveState = {
   items: RequestItem[];
   results: Partial<Record<ItemId, CheckResult>>;
@@ -21,15 +25,16 @@ export type LiveState = {
   feed: FeedEntry[];
   drive: DriveTree;
   filedAt: Record<string, string>;
-  emails: InboxEmail[];
-  chasesSent: { id: string; title: string; sentAt: string }[];
+  emails: EmailRecord[];
+  chasesSent: SentChaseCard[];
   screen: ClientScreen;
   openEmailId?: string;
   signature?: LetterSignature;
   rowErrors: Partial<Record<ItemId, string>>;
   lastFile: Partial<Record<UploadItemId, string>>;
   session: Omit<LiveSession, "items" | "now">;
-  escalation?: { subject: string; body: string };
+  /** The firm's task after two unanswered reminders: what was still open. */
+  escalation?: { outstanding: OutstandingEntry[] };
   /** The story clock, minute precision. */
   now: string;
   /** Lanes that changed since their tab was last open, for the dots on a phone. */
@@ -39,7 +44,16 @@ export type LiveState = {
 /** Daniel opens the email at lunch on Monday; live mode starts there. */
 export const liveStartsAt = "2026-03-09T12:40";
 
-export function initialLiveState(requestEmail: InboxEmail): LiveState {
+const requestRecord: EmailRecord = {
+  id: "request",
+  kind: "request",
+  sentAt: requestSentAt,
+  outstanding: [],
+  anyFileReceived: false,
+  unread: true,
+};
+
+export function initialLiveState(): LiveState {
   return {
     items: createTaxReturnRequest(requestSentAt).items,
     results: {},
@@ -47,7 +61,7 @@ export function initialLiveState(requestEmail: InboxEmail): LiveState {
     feed: [],
     drive: createDriveTree(),
     filedAt: {},
-    emails: [requestEmail],
+    emails: [requestRecord],
     chasesSent: [],
     screen: "inbox",
     rowErrors: {},

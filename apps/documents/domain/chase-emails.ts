@@ -1,5 +1,5 @@
 import type { CompanyProfile } from "@diepen/voice/profile";
-import { client, requestItem, taxYear, type ItemId } from "./document-request";
+import { client, isUploadItemId, requestItem, taxYear, type ItemId, type ItemState } from "./document-request";
 import { formatLongDate } from "./story-time";
 
 /**
@@ -36,11 +36,20 @@ export function requestEmail(profile: CompanyProfile, entries: readonly Outstand
   };
 }
 
-export function followUpEmail(profile: CompanyProfile, entries: readonly OutstandingEntry[]): ComposedMessage {
+/** True once the client has sent any file. Signing the letter alone sends none. */
+export function anyFileReceived(items: readonly { id: ItemId; state: ItemState }[]): boolean {
+  return items.some((item) => isUploadItemId(item.id) && item.state !== "missing");
+}
+
+/** `received` says whether the client has sent any file yet, so the email never thanks him for nothing. */
+export function followUpEmail(profile: CompanyProfile, entries: readonly OutstandingEntry[], received: boolean): ComposedMessage {
+  const opening = received
+    ? `Thank you for your documents. ${profile.name} has checked what you sent. These are still needed:`
+    : `${profile.name} is ready to start on your ${taxYear} tax return and needs these documents from you:`;
   return {
     subject: `${documents(entries.length)} still needed for your ${taxYear} tax return`,
     body: letter(profile, [
-      `Thank you for your documents. ${profile.name} has checked what you sent. These are still needed:`,
+      opening,
       numberedList(entries),
       "Upload them on the same page as before.",
     ]),

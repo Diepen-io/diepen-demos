@@ -91,6 +91,27 @@ describe("POST /api/check validation @documents.own-file", () => {
     expect(await response.json()).toMatchObject({ error: "file_too_large" });
   });
 
+  it("answers 413 for a body over 4,400,000 bytes that declares no length, and stops reading it", async () => {
+    let pulled = 0;
+    const chunk = new Uint8Array(500_000);
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        pulled += chunk.byteLength;
+        if (pulled > 20_000_000) controller.close();
+        else controller.enqueue(chunk);
+      },
+    });
+    const request = new Request("https://documents.demo.example/api/check", {
+      method: "POST",
+      body,
+      headers: { "content-type": "multipart/form-data; boundary=x" },
+      duplex: "half",
+    } as RequestInit);
+    const response = await POST(request);
+    expect(response.status).toBe(413);
+    expect(pulled).toBeLessThan(6_000_000);
+  });
+
   it("answers 415 for a text file named .pdf", async () => {
     const text = new File(["Dear tax office, this is plain text."], "statement.pdf", { type: "application/pdf" });
     const response = await POST(post({ file: text, itemId: "bank-interest" }));

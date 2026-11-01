@@ -1,6 +1,6 @@
 import { isComplete } from "@/domain/checklist";
 import { driveListing } from "@/test-support/live-sessions";
-import { defineFilmScript } from "@diepen/ui/film/film-script";
+import { beatsUntil, defineFilmScript } from "@diepen/ui/film/film-script";
 import { presets } from "@diepen/voice/presets";
 import { describe, expect, it } from "vitest";
 import { documentsFilm } from "./documents-film";
@@ -61,9 +61,8 @@ describe("the documents film @documents.film", () => {
     ]);
   });
 
-  it("shows the bank statement as a problem once beat 19 has landed", () => {
-    const landed = script.beats.filter((beat) => beat.at <= 26_300);
-    const bank = foldBeats(landed).checklist.find((item) => item.id === "bank-interest");
+  it("shows the bank statement as a problem at 27,000 ms, the moment acceptance check 23 opens", () => {
+    const bank = foldBeats(beatsUntil(script, 27_000)).checklist.find((item) => item.id === "bank-interest");
     expect(bank?.state).toBe("problem");
   });
 });

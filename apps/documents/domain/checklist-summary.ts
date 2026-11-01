@@ -19,7 +19,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 
 const notes: Record<IssueKind, (result: CheckResult) => string> = {
   wrong_year: (result) => (result.year === null ? "Wrong year sent" : `${result.year} version sent`),
-  wrong_person: (result) => (result.person === null ? "Someone else's sent" : `${result.person}'s sent`),
+  wrong_person: (result) => (result.person === null ? "Sent for someone else" : `Sent for ${result.person}`),
   missing_signature: () => "Signature missing",
   missing_page: () => "A page is missing",
   wrong_document: () => "Different document sent",

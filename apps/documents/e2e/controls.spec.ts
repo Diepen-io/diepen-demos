@@ -53,13 +53,8 @@ test("each speed setting changes the pace @documents.controls", async ({ page })
   expect(two / half).toBeGreaterThan(2.5);
 });
 
-/**
- * Check 23 names `?t=27000`, but beat 19 starts at 26,300 ms and travels for the default 800 ms,
- * so it lands at 27,100 ms. At 27,200 ms it has landed, and the wrong-year caption
- * and the clock at 12:47 still show.
- */
 test("opens at a moment after the wrong-year statement reached the firm @documents.controls", async ({ page }) => {
-  await openFilm(page, "?t=27200");
+  await openFilm(page, "?t=27000");
   await expect(page.getByText(/Wrong year caught/)).toBeVisible();
   await expect(storyClock(page)).toHaveAccessibleName("Story time Mon 12:47");
   await showLane(page, "firm");

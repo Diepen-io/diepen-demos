@@ -1,11 +1,13 @@
 "use client";
 
 import { checklistSummary, firmNote } from "@/domain/checklist-summary";
+import { sampleNamed } from "@/domain/sample-documents";
 import { formatStoryTime } from "@/domain/story-time";
 import { CheckCard, type CheckPhase } from "@/ui/check-card";
 import { DriveLane } from "@/ui/drive-lane";
 import { FirmLane } from "@/ui/firm-lane";
-import { ScheduleCard } from "@/ui/schedule-card";
+import { replacedChecks } from "@/ui/replaced-checks";
+import { ScheduleCard, sentOnSchedule } from "@/ui/schedule-card";
 import { SystemIdle } from "@/ui/system-idle";
 import { memo } from "react";
 import type { FilmState } from "./film-state";
@@ -30,7 +32,9 @@ export function freshSummaryAt(state: FilmState, t: number): boolean {
   return at !== undefined && t - at < freshMs;
 }
 
-export const FilmFirmLane = memo(function FilmFirmLane({ state, freshRows, freshSummary }: { state: FilmState; freshRows: string; freshSummary: boolean }) {
+type FirmProps = { state: FilmState; freshRows: string; freshSummary: boolean; requestSentAt: string | undefined };
+
+export const FilmFirmLane = memo(function FilmFirmLane({ state, freshRows, freshSummary, requestSentAt }: FirmProps) {
   const results = resultsByItem(state);
   const fresh = new Set(freshRows.split(","));
   const rows = state.checklist.map((item) => ({
@@ -40,7 +44,15 @@ export const FilmFirmLane = memo(function FilmFirmLane({ state, freshRows, fresh
     fresh: fresh.has(item.id),
   }));
   const summary = state.summaryAt === undefined ? undefined : checklistSummary(state.checklist, results);
-  return <FirmLane rows={rows} summary={summary} complete={state.completeAt !== undefined} freshSummary={freshSummary} />;
+  return (
+    <FirmLane
+      rows={rows}
+      requestSentAt={requestSentAt}
+      summary={summary}
+      complete={state.completeAt !== undefined}
+      freshSummary={freshSummary}
+    />
+  );
 });
 
 function phaseOf(state: FilmState, index: number): CheckPhase {
@@ -51,6 +63,13 @@ function phaseOf(state: FilmState, index: number): CheckPhase {
 }
 
 export function FilmSystemLane({ state, t, storyTime }: Props) {
+  // A card counts as replaced once the newer file has landed in Drive, as the caption says.
+  const filedItems = new Set(state.drive.folders.flatMap((folder) => folder.files.filter((file) => file.status === "ok").map((file) => file.itemId)));
+  const itemOf = (check: FilmState["checks"][number]) => sampleNamed(check.fileName)?.itemId;
+  const replaced = replacedChecks(state.checks, itemOf, (check) => {
+    const itemId = itemOf(check);
+    return itemId !== undefined && resultOf(check.fileName)?.status === "ok" && filedItems.has(itemId);
+  });
   const cards = state.checks.map((check, index) => ({
     at: check.arrivedAt,
     node: (
@@ -61,6 +80,7 @@ export function FilmSystemLane({ state, t, storyTime }: Props) {
         phase={phaseOf(state, index)}
         result={check.resultAt === undefined ? undefined : resultOf(check.fileName)}
         compact={check.compact}
+        replaced={replaced.has(check)}
         fresh={t - check.arrivedAt < freshMs}
       />
     ),
@@ -77,8 +97,7 @@ export function FilmSystemLane({ state, t, storyTime }: Props) {
           key="schedule"
           title={schedule.title}
           dueLabel={formatStoryTime(schedule.dueAt)}
-          progress={sent ? 1 : (storyTime - from) / (due - from)}
-          sent={sent}
+          status={sent ? sentOnSchedule : { kind: "scheduled", progress: (storyTime - from) / (due - from) }}
           fresh={t - schedule.at < freshMs}
         />
       ),

@@ -1,7 +1,8 @@
-import { engagementService } from "@/domain/engagement-terms";
+import { engagementContact, engagementService } from "@/domain/engagement-terms";
 import { BrandMark } from "@diepen/ui/brand/brand-mark";
 import type { CompanyProfile } from "@diepen/voice/profile";
 import type { ReactNode } from "react";
+import { phoneFocusTarget } from "./client-phone";
 
 export type LetterSignature =
   | {
@@ -51,12 +52,11 @@ function Signature({ signature }: { signature: LetterSignature }) {
 /** The letter Daniel signs on the upload page, written from the firm's profile. */
 export function EngagementLetter({ profile, signature, stamp, children }: EngagementLetterProps) {
   const service = engagementService(profile);
-  const owner = profile.people.owner;
   return (
     <article aria-label="Engagement letter" className="flex flex-col gap-4 text-[14px] leading-relaxed">
       <header className="flex items-center gap-2.5">
         <BrandMark profile={profile} size={30} />
-        <span className="min-w-0 truncate text-[14px] font-semibold">{profile.name}</span>
+        <span className="min-w-0 text-[14px] leading-snug font-semibold text-balance">{profile.name}</span>
       </header>
       <div>
         <h3 className="text-[19px] leading-tight font-semibold tracking-[-0.015em]">Engagement letter</h3>
@@ -78,13 +78,11 @@ export function EngagementLetter({ profile, signature, stamp, children }: Engage
           </div>
         )}
         <div className="flex justify-between gap-3">
-          <dt className="text-muted">Your adviser</dt>
-          <dd className="text-right font-medium">
-            {owner.name}, {owner.role}
-          </dd>
+          <dt className="text-muted">Your contact</dt>
+          <dd className="text-right font-medium">{engagementContact(profile.people.owner)}</dd>
         </div>
       </dl>
-      <div className="relative">
+      <div className="relative" {...phoneFocusTarget("signature")}>
         <div className="flex h-14 items-end border-b border-foreground/40 pb-1">{signature && <Signature signature={signature} />}</div>
         <p className="mt-1 text-meta text-muted">Daniel Okafor, client</p>
         {stamp && (
