@@ -3,21 +3,18 @@
 import { Button } from "@diepen/ui/primitives/button";
 import { Icon } from "@diepen/ui/primitives/icon";
 import { Segmented } from "@diepen/ui/primitives/segmented";
-import { useState } from "react";
 import { formatCallTime } from "@/domain/transcript";
 import { unnamedProspect } from "@/domain/call-sides";
-import type { SpeechRecognizer } from "@/ui/speech/speech-recognizer";
-import { useRecording, type RecordingStatus } from "./use-recording";
+import type { Recording, RecordingStatus } from "./use-recording";
 
 export type RecordPanelProps = {
-  recognizer: SpeechRecognizer;
-  /** The seller's first name, for the "Speaking now" toggle and the transcript lines. */
+  /** False when the browser has no speech recognition. */
+  supported: boolean;
+  /** The page holds the recording, so pressing "Turn this call into a proposal" can stop it. */
+  recording: Recording;
+  /** The seller's short name, for the "Speaking now" toggle. */
   sellerName: string;
-  /** Receives each finished line, as "[00:03] Jonas: text". */
-  onLine: (line: string) => void;
 };
-
-type Side = "seller" | "prospect";
 
 const notes: Partial<Record<RecordingStatus, string>> = {
   denied: "The microphone is blocked. Allow it in the address bar, or paste a transcript.",
@@ -26,13 +23,10 @@ const notes: Partial<Record<RecordingStatus, string>> = {
 };
 
 /** Records a role-played call with the browser's speech recognition, one speaker at a time. */
-export function RecordPanel({ recognizer, sellerName, onLine }: RecordPanelProps) {
-  const [side, setSide] = useState<Side>("seller");
-  const speakerName = side === "seller" ? sellerName : unnamedProspect;
-  const recording = useRecording(recognizer, speakerName, onLine);
-  const { status } = recording;
+export function RecordPanel({ supported, recording, sellerName }: RecordPanelProps) {
+  const { status, speakerName } = recording;
 
-  if (!recognizer.supported) {
+  if (!supported) {
     return (
       <p className="flex gap-2.5 rounded-xl bg-subtle px-3.5 py-3 text-[14px] leading-snug text-muted">
         <Icon name="info" size={17} className="mt-px shrink-0" />
@@ -48,9 +42,10 @@ export function RecordPanel({ recognizer, sellerName, onLine }: RecordPanelProps
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <span className="text-[13px] font-medium text-muted">Speaking now</span>
         <Segmented
+          className="max-sm:*:h-11"
           label="Speaking now"
-          value={side}
-          onChange={setSide}
+          value={recording.side}
+          onChange={recording.setSide}
           options={[
             { value: "seller", label: sellerName },
             { value: "prospect", label: unnamedProspect },
@@ -60,12 +55,12 @@ export function RecordPanel({ recognizer, sellerName, onLine }: RecordPanelProps
 
       <div className="flex items-center gap-3">
         {isRecording ? (
-          <Button variant="secondary" onClick={recording.stop}>
+          <Button variant="secondary" className="max-sm:h-11" onClick={recording.stop}>
             <span aria-hidden="true" className="size-2.5 rounded-[3px] bg-channel-call" />
             Stop
           </Button>
         ) : (
-          <Button variant="secondary" onClick={recording.start}>
+          <Button variant="secondary" className="max-sm:h-11" onClick={recording.start}>
             <Icon name="mic" size={16} />
             {status === "denied" || status === "failed" ? "Try again" : "Start"}
           </Button>

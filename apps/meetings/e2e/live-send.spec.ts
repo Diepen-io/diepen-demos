@@ -9,5 +9,7 @@ test("sends the follow-up email and shows transcript to proposal sent @meetings.
 
   await expect(output(page, "email")).toContainText(/Sent \d{2}:\d{2}/);
   await expect(output(page, "crm")).toContainText("Proposal sent");
+  await expect(output(page, "crm")).toContainText("Proposal sent. Next: Proposal review with Tom Becker on");
+  await expect(output(page, "crm")).not.toContainText("Send the proposal today");
   await expect(page.getByText(/Transcript to proposal sent: \d+/)).toBeVisible();
 });

@@ -23,4 +23,4 @@ export type MeetingsFilmData =
   | { kind: "email"; email: MeetingOutputs["followUpEmail"]; to: string }
   | { kind: "meeting"; meeting: MeetingOutputs["nextMeeting"] }
   | { kind: "sent"; time: string }
-  | { kind: "stage"; stage: DealStage };
+  | { kind: "stage"; stage: DealStage; nextStep: string };

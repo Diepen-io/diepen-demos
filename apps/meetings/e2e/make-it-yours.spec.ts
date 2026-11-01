@@ -22,8 +22,8 @@ test("runs live mode in the visitor's brand, owner and price @meetings.make-it-y
 
 test("plays the film in its own fictional company, even with a ?brand= link (decision F1) @meetings.make-it-yours", async ({ page }) => {
   const film = presets["brickfern-property"];
-  await page.goto(`/?brand=${brand}&t=63000`);
-  await expect(lane(page, "proposal")).toContainText(`${film.name} takes over on 1 January 2027`);
+  await page.goto(`/?brand=${brand}&t=49500`);
+  await expect(lane(page, "proposal")).toContainText(film.name);
   await expect(lane(page, "proposal")).not.toContainText(testProfile.name);
   await expect(lane(page, "crm")).not.toContainText(price);
 });

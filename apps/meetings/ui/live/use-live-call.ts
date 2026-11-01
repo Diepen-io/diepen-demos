@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CompanyProfile } from "@diepen/voice/profile";
-import { stageAfterSend } from "@/domain/deal-stage";
 import type { MeetingOutputs } from "@/domain/meeting-outputs";
 import { outputSequence, revealPlan } from "@/domain/output-sequence";
+import { markProposalSent } from "@/domain/proposal-sent";
+import { parseTranscript } from "@/domain/transcript";
 import { requestOutputs } from "./outputs-client";
 import { usePrefersReducedMotion } from "./use-prefers-reduced-motion";
 
@@ -16,6 +17,10 @@ const revealStepMs = 700;
 export type LiveCall = {
   status: LiveStatus;
   outputs: MeetingOutputs | null;
+  /** The transcript the AI read, trimmed, so the page can tell when the box no longer matches it. */
+  submitted: string | null;
+  /** Turns in the submitted transcript. */
+  submittedTurns: number;
   /** How many outputs show, in sequence order. */
   revealed: number;
   /** Seconds since the visitor pressed the button, while the AI works. */
@@ -36,6 +41,7 @@ export function useLiveCall(profile: CompanyProfile, filmHref: string): LiveCall
   const reducedMotion = usePrefersReducedMotion();
   const [status, setStatus] = useState<LiveStatus>("ready");
   const [outputs, setOutputs] = useState<MeetingOutputs | null>(null);
+  const [submitted, setSubmitted] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(0);
   const [waitedSeconds, setWaitedSeconds] = useState(0);
   const [sent, setSent] = useState<{ at: Date; afterMs: number } | null>(null);
@@ -85,12 +91,15 @@ export function useLiveCall(profile: CompanyProfile, filmHref: string): LiveCall
   return {
     status,
     outputs,
+    submitted,
+    submittedTurns: submitted ? parseTranscript(submitted).length : 0,
     revealed,
     waitedSeconds,
     sentAfterMs: sent?.afterMs ?? null,
     sentAt: sent?.at ?? null,
     submit(transcript) {
       pressedAt.current = Date.now();
+      setSubmitted(transcript.trim());
       setWaitedSeconds(0);
       setOutputs(null);
       setSent(null);
@@ -101,12 +110,13 @@ export function useLiveCall(profile: CompanyProfile, filmHref: string): LiveCall
       if (!outputs) return;
       const now = new Date();
       setSent({ at: now, afterMs: now.getTime() - pressedAt.current });
-      setOutputs({ ...outputs, crm: { ...outputs.crm, stage: stageAfterSend } });
+      setOutputs(markProposalSent(outputs));
       setStatus("sent");
     },
     startOver() {
       request.current?.abort();
       setOutputs(null);
+      setSubmitted(null);
       setRevealed(0);
       setSent(null);
       setStatus("ready");

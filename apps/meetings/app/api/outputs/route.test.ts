@@ -108,6 +108,22 @@ describe("POST /api/outputs @meetings.live-paste", () => {
     expect(await response.json()).toEqual({ error: "too_large" });
   });
 
+  it("answers 413 for a streamed body that declares no length and passes 100 KB", async () => {
+    const chunk = new TextEncoder().encode("a".repeat(16 * 1024));
+    let sent = 0;
+    const endless = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        sent += 1;
+        controller.enqueue(chunk);
+      },
+    });
+    const request = new Request("http://localhost/api/outputs", { method: "POST", body: endless, duplex: "half" } as RequestInit);
+    const response = await POST(request);
+    expect(response.status).toBe(413);
+    expect(await response.json()).toEqual({ error: "too_large" });
+    expect(sent).toBeLessThan(10);
+  });
+
   it("answers 429 with the film fallback when a guard trips", async () => {
     useContainer({ guards: createGuards({ dailyCap: 0 }) });
     const response = await post({ transcript: sample(), localNow });

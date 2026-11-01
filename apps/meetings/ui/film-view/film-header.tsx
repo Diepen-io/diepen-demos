@@ -2,7 +2,6 @@
 
 import { BrandMark } from "@diepen/ui/brand/brand-mark";
 import { useBrand } from "@diepen/ui/brand/brand-provider";
-import { FictionalBadge } from "@diepen/ui/brand/fictional-badge";
 import { MakeItYours } from "@diepen/ui/brand/make-it-yours";
 import { Badge } from "@diepen/ui/primitives/badge";
 import { Button } from "@diepen/ui/primitives/button";
@@ -20,12 +19,13 @@ export function FilmBrand() {
   return (
     <>
       <BrandMark profile={profile} size={36} />
-      <span className="hidden min-w-0 truncate text-[14px] font-medium text-muted 2xl:block">{profile.name}</span>
-      <span className="hidden lg:contents">
-        <FictionalBadge />
+      {/* The company and its fictional note, stacked. Between 768 and 1400 px the title needs the room, so a short badge stands in. */}
+      <span className="flex max-w-28 min-w-0 flex-col leading-tight md:max-w-52 md:max-[1399px]:hidden">
+        <span className="line-clamp-2 text-[12px] font-semibold md:truncate md:text-[13px]">{profile.name}</span>
+        {profile.fictional && <span className="text-[11px] text-muted md:text-[12px]">Fictional company</span>}
       </span>
       {profile.fictional && (
-        <span className="contents lg:hidden">
+        <span className="hidden md:max-[1399px]:contents">
           <Badge tone="neutral">Fictional</Badge>
         </span>
       )}

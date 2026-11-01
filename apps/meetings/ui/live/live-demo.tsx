@@ -4,17 +4,18 @@ import { useBrand } from "@diepen/ui/brand/brand-provider";
 import { Button } from "@diepen/ui/primitives/button";
 import { Icon } from "@diepen/ui/primitives/icon";
 import { ProviderNote } from "@diepen/ui/shell/provider-note";
-import { useState } from "react";
-import { firstName } from "@/domain/call-sides";
+import { useCallback, useState } from "react";
 import { fillTokens, profileTokens } from "@/domain/profile-tokens";
+import { sellerOf } from "@/domain/seller";
 import { checkTranscript, parseTranscript } from "@/domain/transcript";
 import { useBrowserRecognizer } from "@/ui/speech/browser-recognizer";
 import type { SpeechRecognizer } from "@/ui/speech/speech-recognizer";
 import type { InputTab } from "./input-tabs";
 import { LiveLanes } from "./live-lanes";
-import { SendResult } from "./send-result";
+import { StaleNote } from "./stale-note";
 import { TranscriptInput } from "./transcript-input";
 import { useLiveCall } from "./use-live-call";
+import { useRecording } from "./use-recording";
 import { useRevealScroll } from "./use-reveal-scroll";
 
 export type LiveDemoProps = {
@@ -30,19 +31,30 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
   const { profile, hrefWithBrand } = useBrand();
   const browserRecognizer = useBrowserRecognizer();
   const recognizer = injected ?? browserRecognizer;
+  const seller = sellerOf(profile);
   const [pickedTab, setPickedTab] = useState<InputTab | null>(null);
   const tab = pickedTab ?? (recognizer.supported ? "record" : "paste");
   const [transcript, setTranscript] = useState("");
+  const appendLine = useCallback((line: string) => setTranscript((text) => (text.trim() ? `${text.trimEnd()}\n${line}` : line)), []);
+  const recording = useRecording(recognizer, seller.short, appendLine);
   const call = useLiveCall(profile, hrefWithBrand("/"));
   useRevealScroll(call.revealed);
 
-  const ownerFirst = firstName(profile.people.owner.name);
+  const filledSample = fillTokens(sampleCall, profileTokens(profile));
+  const ownTranscript = transcript.trim() !== "" && transcript !== filledSample;
   const busy = call.status === "processing" || call.status === "revealing";
   const ready = checkTranscript(transcript).length === 0;
+  const stale = call.outputs !== null && !busy && call.submitted !== transcript.trim();
 
   function selectTab(next: InputTab) {
+    if (next !== "record") recording.stop();
     setPickedTab(next);
-    if (next === "sample") setTranscript(fillTokens(sampleCall, profileTokens(profile)));
+    if (next === "sample" && !ownTranscript) setTranscript(filledSample);
+  }
+
+  function submit() {
+    recording.stop();
+    call.submit(transcript);
   }
 
   return (
@@ -51,7 +63,8 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
         <header className="flex flex-col gap-1">
           <h2 className="text-[19px] font-semibold tracking-[-0.015em]">Turn a sales call into a proposal</h2>
           <p className="text-[14px] leading-snug text-muted">
-            Play both sides of a call as {ownerFirst} of {profile.name}, paste a real transcript, or load the sample call.
+            Play both sides of a call {seller.person ? `as ${seller.short} of ${seller.company}` : `for ${seller.company}`}, paste a real
+            transcript, or load the sample call.
           </p>
           <ProviderNote providerName={providerName} className="mt-2 self-start" />
         </header>
@@ -60,23 +73,28 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
           onTab={selectTab}
           transcript={transcript}
           onTranscript={setTranscript}
-          recognizer={recognizer}
-          sellerFirstName={ownerFirst}
-          sampleNote={`A 32-minute discovery call between ${profile.people.owner.name} and Tom Becker, a fictional landlord with 14 apartments.`}
+          recordSupported={recognizer.supported}
+          recording={recording}
+          sellerShortName={seller.short}
+          sample={{
+            note: `A 32-minute discovery call between ${seller.person ?? seller.company} and Tom Becker, a fictional landlord with 14 apartments.`,
+            replaces: ownTranscript,
+            onLoad: () => setTranscript(filledSample),
+          }}
         />
-        <Button variant="brand" size="lg" disabled={!ready || busy} onClick={() => call.submit(transcript)}>
+        <Button variant="brand" size="lg" disabled={!ready || busy} onClick={submit}>
           <Icon name="sparkle" size={18} />
           Turn this call into a proposal
         </Button>
         {call.outputs && (
-          <Button variant="ghost" className="-mt-2 self-center" onClick={call.startOver}>
+          <Button variant="ghost" className="-mt-2 self-center max-sm:h-11" onClick={call.startOver}>
             Start over
           </Button>
         )}
         {call.status === "failed" && (
           <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl bg-fail-soft px-3.5 py-3 text-[14px] text-fail">
             <p className="min-w-0 flex-1">The draft did not come through. Try again.</p>
-            <Button variant="secondary" size="sm" onClick={() => call.submit(transcript)} disabled={!ready}>
+            <Button variant="secondary" size="sm" onClick={submit} disabled={!ready}>
               Try again
             </Button>
           </div>
@@ -84,8 +102,13 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
       </section>
 
       <div className="flex min-w-0 flex-col gap-4">
-        {call.sentAfterMs !== null && <SendResult afterMs={call.sentAfterMs} />}
-        <LiveLanes call={call} profile={profile} turns={parseTranscript(transcript).length} />
+        {stale && <StaleNote onUpdate={submit} disabled={!ready} />}
+        <LiveLanes
+          call={call}
+          profile={profile}
+          stale={stale}
+          waitingFor={ready ? `Ready to read ${parseTranscript(transcript).length} turns` : "Waiting for a transcript"}
+        />
       </div>
     </div>
   );

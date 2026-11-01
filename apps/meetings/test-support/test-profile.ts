@@ -43,3 +43,21 @@ export const unpricedProfile: CompanyProfile = {
     services: testProfile.knowledge.services.map(({ name, description }) => ({ name, description })),
   },
 };
+
+/**
+ * A profile drafted from a site that names no person: brand extraction then calls the owner "the
+ * team". Its long name and lack of prices test that every sentence still reads well.
+ */
+export const teamProfile: CompanyProfile = {
+  ...unpricedProfile,
+  id: "harbourline-team",
+  name: "Harbourline Lettings and Property Services of North London",
+  people: { ...unpricedProfile.people, owner: { name: "the team", role: "Team" } },
+};
+
+/** An owner with a title, who is greeted by first name: "Dr. Lena Okafor" is "Lena". */
+export const titledProfile: CompanyProfile = {
+  ...testProfile,
+  id: "harbourline-titled",
+  people: { ...testProfile.people, owner: { name: "Dr. Lena Okafor", role: "Owner" } },
+};

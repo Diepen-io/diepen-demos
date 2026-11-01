@@ -72,11 +72,11 @@ const FilmLaneBody = memo(
         const deal = landed("deal");
         const stage = landed("stage");
         const record = deal && {
-          deal: { ...deal.data.deal, stage: stage?.data.stage ?? deal.data.deal.stage },
+          deal: stage ? { ...deal.data.deal, stage: stage.data.stage, nextStep: stage.data.nextStep } : deal.data.deal,
           isNew: deal.isNew,
           stageIsNew: Boolean(stage?.isNew),
         };
-        return <CrmLane deals={existingDeals} record={record} />;
+        return <CrmLane deals={existingDeals} record={record} fitShortScreens />;
       }
       case "proposal": {
         const proposal = landed("proposal");
@@ -90,6 +90,7 @@ const FilmLaneBody = memo(
             email={email && { email: email.data.email, to: email.data.to, draftedAt: "14:34", isNew: email.isNew }}
             sentAt={landed("sent")?.data.time}
             emptyText="The proposal lands here when the call ends."
+            fitScreen
           />
         );
       }
@@ -97,7 +98,14 @@ const FilmLaneBody = memo(
         const meeting = landed("meeting");
         const event = meeting && { id: "new-meeting", ...meeting.data.meeting };
         // The film keeps the week readable in a short lane, so the agenda shows in live mode only.
-        return <CalendarLane weekStart={filmWeekStart} events={existingEvents} meeting={event && { event, agenda: [], isNew: meeting.isNew }} />;
+        return (
+          <CalendarLane
+            weekStart={filmWeekStart}
+            events={existingEvents}
+            meeting={event && { event, agenda: [], isNew: meeting.isNew }}
+            fitShortScreens
+          />
+        );
       }
       default:
         return null;
