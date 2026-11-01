@@ -14,15 +14,10 @@ export type ProposalLaneProps = {
   /** "14:36" once the email went out. */
   sentAt?: string;
   emptyText?: string;
-  /**
-   * The film's lane is one screen high and never scrolls. Once the email lands the proposal folds
-   * to its title and price, so the email, its status and its attachment stay in view.
-   */
-  fitScreen?: boolean;
 };
 
 /** The proposal, and below it the email that carries it: reading both and pressing send is one step. */
-export function ProposalLane({ seller, client, date, proposal, email, sentAt, emptyText, fitScreen }: ProposalLaneProps) {
+export function ProposalLane({ seller, client, date, proposal, email, sentAt, emptyText }: ProposalLaneProps) {
   const sender = sellerOf(seller);
   return (
     <div data-lane="proposal" className="flex flex-col gap-3">
@@ -33,8 +28,6 @@ export function ProposalLane({ seller, client, date, proposal, email, sentAt, em
           client={client}
           date={date}
           sent={Boolean(sentAt)}
-          folded={fitScreen && Boolean(email)}
-          fitShortScreens={fitScreen}
           isNew={proposal.isNew}
         />
       ) : emptyText ? (
@@ -48,7 +41,6 @@ export function ProposalLane({ seller, client, date, proposal, email, sentAt, em
           draftedAt={email.draftedAt}
           sentAt={sentAt}
           action={email.action}
-          compact={fitScreen}
           isNew={email.isNew}
         />
       ) : null}

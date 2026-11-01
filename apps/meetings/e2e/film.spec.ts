@@ -1,43 +1,48 @@
-import type { Page } from "@playwright/test";
-import { endCard, lane, setSpeed } from "./support/film";
+import { presets } from "@diepen/voice/presets";
+import { beatMs, keynoteStep } from "./support/film";
 import { runSampleCall } from "./support/live";
 import { expect, test } from "./support/test";
 
-const laneIds = ["call", "ai", "crm", "proposal", "calendar"] as const;
+const company = presets["brickfern-property"].name;
 
-async function expectEndCard(page: Page, timeout: number) {
-  const card = endCard(page);
-  await expect(card).toBeVisible({ timeout });
-  await expect(card).toContainText("2 days");
-  await expect(card).toContainText("4 minutes");
-  await expect(card).toContainText(/fictional/i);
-}
+/** What each step shows, in order: four beats, then the finale. */
+const steps = [
+  ["The call ends.", "Call with Tom Becker"],
+  ["The numbers, pulled from the call.", "Days empty"],
+  ["Proposal drafted.", "EUR 34 per unit per month"],
+  ["Sent 4 minutes later.", "Sent 14:36"],
+  ["Call end to proposal sent", "Try it live"],
+] as const;
 
-// F1. The film offers speeds up to 2x, so the fastest playthrough of the 67 s to the end card takes about 34 s.
-test("plays from the start to the end card at the fastest speed @meetings.film", async ({ page }) => {
-  test.setTimeout(90_000);
-  await page.goto("/");
-  await setSpeed(page, 2);
-  await expectEndCard(page, 45_000);
+// F1, F4
+test("opens each of the five steps in order with ?t= @meetings.film-controls", async ({ page }) => {
+  for (const [index, texts] of steps.entries()) {
+    await page.goto(`/?t=${index * beatMs + 400}`);
+    await expect(keynoteStep(page)).toHaveAttribute("data-keynote-step", String(index));
+    for (const text of texts) await expect(keynoteStep(page)).toContainText(text);
+  }
 });
 
 // F2
-test("plays to the end card with every API request blocked @meetings.film", async ({ page }) => {
+test("ends on 2 days to 4 min with a link to live mode, with every API request blocked @meetings.film", async ({ page }) => {
   await page.route("**/api/**", (route) =>
     new URL(route.request().url()).pathname === "/api/health" ? route.continue() : route.abort(),
   );
-  await page.goto("/?t=60000");
+  await page.goto(`/?t=${3 * beatMs}`);
   await page.getByRole("button", { name: "Play" }).click();
-  await expectEndCard(page, 20_000);
+  const finale = page.locator("[data-keynote-finale]");
+  await expect(finale).toBeVisible({ timeout: 10_000 });
+  await expect(finale).toContainText("2 days");
+  await expect(finale).toContainText("4 min");
+  await expect(finale.getByRole("link", { name: "Try it live" })).toHaveAttribute("href", /\/live/);
 });
 
-// F4b. Decision F1: the film always tells Brickfern's story, and at 63000 the sent email and the folded proposal both show.
-test("shows the sent email under the proposal at 14:36 @meetings.film", async ({ page }) => {
-  await page.goto("/?t=63000");
-  await expect(lane(page, "proposal")).toContainText("Full rental management for Becker Residential");
-  await expect(lane(page, "proposal")).toContainText("Your proposal from Brickfern Property Management");
-  await expect(lane(page, "proposal").getByText("Sent 14:36")).toBeInViewport();
-  await expect(lane(page, "crm")).toContainText("EUR 34 per unit per month");
+// F3
+test("shows the company and its fictional badge in a recording @meetings.film", async ({ page }) => {
+  await page.goto("/?record=1&t=0");
+  await expect(page.getByRole("button", { name: "Make it yours" })).toHaveCount(0);
+  await expect(page.locator("[data-keynote-film]")).toContainText(company);
+  await expect(page.getByText("Fictional company")).toBeVisible();
 });
 
 // F16
@@ -47,30 +52,13 @@ test("never scrolls sideways at 375 px, in the film or in live mode @meetings.fi
   await page.setViewportSize({ width: 375, height: 812 });
   const scrollWidth = () => page.evaluate(() => document.documentElement.scrollWidth);
 
-  for (const path of ["/", "/?t=40000", "/?t=70000", "/live"]) {
-    await page.goto(path);
-    await expect(page.getByRole("main").first()).toBeVisible();
-    expect(await scrollWidth(), path).toBeLessThanOrEqual(375);
+  for (const step of steps.keys()) {
+    await page.goto(`/?t=${step * beatMs + 400}`);
+    await expect(keynoteStep(page)).toHaveAttribute("data-keynote-step", String(step));
+    expect(await scrollWidth(), `step ${step}`).toBeLessThanOrEqual(375);
   }
+  await page.goto("/live");
+  expect(await scrollWidth(), "/live").toBeLessThanOrEqual(375);
   await runSampleCall(page);
   expect(await scrollWidth(), "/live with all six outputs").toBeLessThanOrEqual(375);
 });
-
-// F17
-for (const viewport of [
-  { width: 1920, height: 1080 },
-  { width: 1440, height: 900 },
-]) {
-  test(`shows all five lanes without page scroll at ${viewport.width}x${viewport.height} @meetings.film`, async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop", "Runs at desktop sizes only");
-    await page.setViewportSize(viewport);
-    await page.goto("/?t=63000");
-    for (const id of laneIds) await expect(lane(page, id)).toBeInViewport();
-    const size = await page.evaluate(() => ({
-      scrollHeight: document.documentElement.scrollHeight,
-      scrollWidth: document.documentElement.scrollWidth,
-    }));
-    expect(size.scrollHeight).toBeLessThanOrEqual(viewport.height);
-    expect(size.scrollWidth).toBeLessThanOrEqual(viewport.width);
-  });
-}
