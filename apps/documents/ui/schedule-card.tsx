@@ -16,7 +16,7 @@ export type ScheduleCardModel = {
   fresh?: boolean;
 };
 
-/** A chase that went out by itself on its day, as the film's reminder does. */
+/** A chase that went out by itself on its day. */
 export const sentOnSchedule: ChaseStatus = { kind: "sent", badge: "Sent", note: "Went out on its own" };
 
 /** The next chase. Nobody presses anything: the bar fills with the story clock, then it goes out. */

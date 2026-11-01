@@ -12,111 +12,24 @@ You open one checklist per client and see what is checked, what has a problem an
 
 ## 2. Film script
 
-The film runs 72,000 ms: 61 seconds of story and an 11 second end card.
-It always tells Ledgerwick's story with the documents preset, `ledgerwick-accounting` (Ledgerwick Tax & Accounting, owner Sabine Roth, assistant "Clara from Ledgerwick"), as decision F1 says.
-`{firm}` and `{owner}` in captions and emails stand for that preset's names; "Make it yours" changes live mode only.
-The client is always Daniel Okafor, a fictional person, and the tax year is always 2025.
-Film mode reads only recorded fixtures: no key, no network, no call to `/api/check` or `/api/chase`.
+The film is a keynote film (decision F2): four beats and a finale, one element centred on the brand backdrop per beat, a caption of at most 6 words and at most one chip.
+Each beat and the finale stay on screen for 3,200 ms, so the film runs 16,000 ms.
+It always tells Ledgerwick's story with the documents preset, `ledgerwick-accounting` (Ledgerwick Tax & Accounting), as decision F1 says; "Make it yours" changes live mode only.
+The client is always Daniel Okafor, a fictional person.
+Film mode reads no fixture file, needs no key and makes no call to `/api/check` or `/api/chase`.
+`?t=<ms>` holds the film at that moment, and `?record=1` hides the controls and names the firm with its "Fictional company" badge.
 
-### Lanes
+| Step | `?t=` from | Caption | Element | Chip |
+| --- | --- | --- | --- | --- |
+| 0 | 0 | Your client uploads 6 files. | `KeynoteFileStack`: Engagement letter, Payslip summary, Bank interest, Donation receipt, Home office form, Health insurance | |
+| 1 | 3200 | Each one checked automatically. | `KeynoteRow` "Payslip summary", status pass | |
+| 2 | 6400 | Problems caught instantly. | `KeynoteRow` "Home office form", status fail | "Signature missing", tone fail |
+| 3 | 9600 | Reminders go out on their own. | `KeynoteNotification`, icon mail, app "{firm} · Email", title "3 documents still open", body "Daniel Okafor gets a reminder on day 3." | |
+| 4 | 12800 | Finale | "Hours a month chasing documents", 12 h to 1 h, and "Try it live" | |
 
-| Order | Lane id | Label | Role | Tab | Why it is its own lane |
-| --- | --- | --- | --- | --- | --- |
-| 1 | `firm` | `{firm}` | profile `industry` | Firm | The buyer. Their checklist and summary are what they would pay for. `brand: true` |
-| 2 | `client` | Daniel Okafor | Client | Client | The client's phone: inbox, upload page, signing. It shows how little the client has to do |
-| 3 | `system` | Document chaser | Automation | System | The checks and the reminder schedule. This is the work the firm does by hand today |
-| 4 | `drive` | Drive | Client folder | Drive | Where files land, named and sorted. Firms judge a system by whether their folder stays clean |
-
-The order keeps the busiest paths short: Firm to Client (request), Client to System (uploads), System to Drive (filing).
-The client lane renders as a phone frame on desktop.
-The Tab column is the lane's `tabLabel`, which the phone layout's tabs show.
-
-### Clock keyframes
-
-Story times have no zone offset and render as written, for example "Mon 9 Mar, 09:00".
-
-| At (ms) | Story time | Curve | What happens to time |
-| --- | --- | --- | --- |
-| 0 | `2026-03-09T09:00` | | The firm sends the request on Monday morning |
-| 4500 | `2026-03-09T09:00` | linear | Holds while the email travels |
-| 7000 | `2026-03-09T12:40` | ease | Daniel opens it at lunch |
-| 16000 | `2026-03-09T12:44` | linear | Signing |
-| 37000 | `2026-03-09T12:50` | linear | Uploads and checks |
-| 41000 | `2026-03-09T12:50` | linear | Holds on the follow-up |
-| 45000 | `2026-03-12T12:50` | ease | Three days pass in four seconds |
-| 47500 | `2026-03-12T12:50` | linear | Holds on the reminder |
-| 49000 | `2026-03-12T19:20` | ease | Thursday evening |
-| 60000 | `2026-03-12T19:24` | linear | Last checks and the complete checklist |
-
-### Beats
-
-One travel per beat; the beat's lane is where the item lands. Travel time is the default 800 ms, except where the table says otherwise.
-The Clock column is the minute the clock shows when the beat starts.
-Beat data is a typed `DocumentsBeat` (see Architecture, `film/`); each lane folds its beats with the domain functions, so a seek with `?t=` shows the same frame as playing to that point.
-
-| # | At (ms) | Lane | What appears | Travel (from, kind, label) | Clock | Caption |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | 0 | firm | Checklist "Daniel Okafor, Tax return 2025": 6 rows, all Missing. A card "6 documents for Daniel's tax return" with the button "Send request", until beat 2 starts; then the checklist reads "Requested Mon 09:00, due 31 Mar" | | Mon 9 Mar, 09:00 | {firm} needs 6 documents for Daniel's 2025 tax return. |
-| 2 | 3000 | client | Inbox with the unread request email "Your 2025 tax return: 6 documents" | from firm, message, "Your 2025 tax return: 6 documents" | 09:00 | One click sends the request. |
-| 3 | 5000 | client | The email opens: the 6 items as a numbered list, button "Upload and sign". After 900 ms the phone scrolls down to the button | | 09:00 | Daniel gets one email with one link. |
-| 4 | 8000 | client | Upload page: firm logo, address bar `ledgerwick.example` (a phone browser shows the site only), 6 item rows | | 12:40 | The link opens a page with his 6 items. |
-| 5 | 10500 | client | Engagement letter, the phone scrolls to the signature line, the signature draws in 1,200 ms, stamp "Signed 12:41" (the minute the beat starts) | | 12:41 | He signs the engagement letter right on the page. |
-| 6 | 13000 | drive | `01 Engagement` gets `2025_Okafor-Daniel_Engagement-letter_signed.pdf` | from client, document, file name | 12:42 | The signed copy lands in Drive, named and filed. |
-| 7 | 14200 | firm | Row "Signed engagement letter" turns Checked | from client, event, "Signed" | 12:42 | |
-| 8 | 16000 | client | 4 files fill their slots, each shows "Uploading" | | 12:44 | He adds 4 files from his phone. |
-| 9 | 16600 | system | Check card "payslip-summary-2025.pdf", "Reading" for 1,000 ms after landing | from client, document, "payslip-summary-2025.pdf" | 12:44 | |
-| 10 | 16900 | system | Queued card "bank-interest-statement-2024.pdf" | from client, document, file name | 12:44 | |
-| 11 | 17200 | system | Queued card "donation-receipt-2025.pdf" | from client, document, file name | 12:44 | |
-| 12 | 17500 | system | Queued card "home-office-confirmation-2025-unsigned.pdf" | from client, document, file name | 12:44 | |
-| 13 | 17800 | firm | Rows 2, 3, 4 and 5 turn Received | from system, event, "4 received" | 12:44 | |
-| 14 | 20000 | system | Payslip result: Annual payslip summary, Daniel Okafor, 2025, 2 of 2 pages, Gross pay EUR 58,400.00, Income tax withheld EUR 9,870.00. Badge Checked | | 12:45 | Each file is read: type, name, year, pages, signature. |
-| 15 | 21500 | drive | `02 Income` gets `2025_Okafor-Daniel_Payslip-summary.pdf` | from system, document, file name | 12:45 | |
-| 16 | 22300 | firm | Row "Annual payslip summary 2025" turns Checked | from system, event, "Checked" | 12:45 | |
-| 17 | 24000 | system | Bank result: Problem found. "Covers 1 Jan to 31 Dec 2024. The 2025 statement is needed." | | 12:46 | Wrong year caught. This is his 2024 bank statement. |
-| 18 | 25500 | drive | `00 Needs attention` gets `2024_Okafor-Daniel_Bank-interest-statement_wrong-year.pdf` | from system, document, file name | 12:46 | |
-| 19 | 26300 | firm | Row "Bank interest statement 2025" turns Problem found, note "2024 version sent" | from system, event, "Problem found", 700 ms, so it lands at 27,000 ms | 12:46 | |
-| 20 | 27500 | system | Donation result: Donation EUR 250.00, Elm Street Food Bank, 14 Dec 2025. Badge Checked | | 12:47 | Key numbers come out of every document. |
-| 21 | 28800 | drive | `04 Deductions` gets `2025_Okafor-Daniel_Donation-receipt.pdf` | from system, document, file name | 12:47 | |
-| 22 | 29600 | firm | Row "Donation receipt 2025" turns Checked | from system, event, "Checked" | 12:47 | |
-| 23 | 31000 | system | Home office result: Problem found. "The employer signature field on page 1 is empty." | | 12:48 | The home office form is missing his employer's signature. |
-| 24 | 32300 | drive | `00 Needs attention` gets `2025_Okafor-Daniel_Home-office-confirmation_missing-signature.pdf` | from system, document, file name | 12:48 | |
-| 25 | 33100 | firm | Row "Home office confirmation 2025" turns Problem found, note "Employer signature missing" | from system, event, "Problem found" | 12:48 | |
-| 26 | 34500 | firm | Summary card: "3 of 6 checked. 2 problems, 1 missing." with the two problem lines and the key figures | | 12:49 | {owner} reads one summary instead of opening 4 files. |
-| 27 | 37500 | client | Follow-up email opens: "3 documents still needed for your 2025 tax return", numbered list of the 3 with reasons | from system, message, "3 documents still needed" | 12:50 | The follow-up names exactly what is missing and why. |
-| 28 | 41000 | system | Schedule card "Reminder 2: Thu 12 Mar, 12:50" with a 3 day progress bar that fills as the clock races | | 12:50 | Three days pass. Nothing comes back. |
-| 29 | 45500 | client | Reminder email "Reminder: 3 documents still open" | from system, message, "Reminder: 3 documents still open" | Thu 12 Mar, 12:50 | Day 3: the second reminder goes out on its own. |
-| 30 | 49000 | client | Upload page again, 3 files fill their slots | | 19:20 | Daniel sends the last 3 that evening. |
-| 31 | 49600 | system | Card "bank-interest-statement-2025.pdf" | from client, document, file name | 19:20 | |
-| 32 | 49900 | system | Card "home-office-confirmation-2025-signed.pdf" | from client, document, file name | 19:20 | |
-| 33 | 50200 | system | Card "health-insurance-statement-2025.png" | from client, document, file name | 19:20 | |
-| 34 | 51000 | firm | Rows 3, 5 and 6 turn Received | from system, event, "3 received" | 19:20 | |
-| 35 | 52500 | system | 3 compact result cards, all Checked, with one key figure each | | 19:21 | |
-| 36 | 53500 | drive | `03 Bank` gets `2025_Okafor-Daniel_Bank-interest-statement.pdf`; the 2024 file moves to `99 Replaced`, and the Drive lane scrolls to the end of the tree, where `99 Replaced` and the moved files show whole. The 2024 check card shrinks to its file name with the badge "Replaced" | from system, document, file name | 19:21 | All 3 pass. The old files move to Replaced. |
-| 37 | 54000 | drive | `04 Deductions` gets `2025_Okafor-Daniel_Home-office-confirmation.pdf`; the unsigned file moves to `99 Replaced` and its check card shows "Replaced" | from system, document, file name | 19:21 | |
-| 38 | 54500 | drive | `05 Insurance` gets `2025_Okafor-Daniel_Health-insurance-statement.png` | from system, document, file name | 19:21 | |
-| 39 | 55500 | firm | Rows 3, 5 and 6 turn Checked | from system, event, "3 checked" | 19:22 | |
-| 40 | 57500 | firm | Header "6 of 6 checked", status "Complete. Ready to prepare the return." | | 19:23 | Every document is in, checked and filed. |
-
-Every caption stays at or under 80 characters.
-
-While the upload page shows, the phone keeps the row that changed last in view, and after "Every document is in" it returns to the top, where "6 of 6 done" shows.
-The Drive lane keeps the newest file in view; once `99 Replaced` holds files, it shows the end of the tree.
-
-### End card
-
-Starts at 61,000 ms and holds until 72,000 ms.
-
-| Field | Text |
-| --- | --- |
-| metric | Hours a month spent chasing documents |
-| before | 12 hours |
-| after | 1 hour |
-| lines | Each upload is checked as it arrives. |
-| | Follow-ups name the exact document and the reason. |
-| note | Simulation with a fictional firm and client. Before: an example calculation for 40 tax returns a month, 3 chases each, 6 minutes per chase. After: 1.5 minutes per return to read the summary. |
-
-The note states where both numbers come from and makes no claim about a real firm.
-The end card's "Try it live" goes to `/live` with the active brand kept.
+The finale note reads "A simulation with {firm}, a fictional firm. Example month: 40 tax returns with 3 chases of 6 minutes each, against 1.5 minutes per return to read the summary."
+It states where both numbers come from and makes no claim about a real firm.
+"Try it live" goes to `/live` with the active brand kept.
 
 ## 3. Fixtures
 
@@ -152,22 +65,22 @@ The engagement letter is no fixture: `ui/engagement-letter.tsx` renders it from 
 
 ### Sample files
 
-All live in `apps/documents/public/fixtures/`. "Film" means the film uses it; every sample is offered in live mode under its item.
+All live in `apps/documents/public/fixtures/`. Every sample is offered in live mode under its item.
 
-| # | File | Item | Person, year, pages | What is wrong | Recorded check result | Film |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | `payslip-summary-2025.pdf` | payslip-summary | Daniel Okafor, 2025, 2 pages | Nothing | ok. documentType "Annual payslip summary", pageCount 2. Figures: Gross pay EUR 58,400.00; Income tax withheld EUR 9,870.00; Employer Bramble Freight Ltd. Summary "Annual payslip summary 2025 from Bramble Freight Ltd for Daniel Okafor. Gross pay EUR 58,400.00, income tax withheld EUR 9,870.00." | yes |
-| 2 | `payslip-summary-2025-page-1-only.pdf` | payslip-summary | Daniel Okafor, 2025, 1 page printed "Page 1 of 2" | Page 2 with the tax withheld is missing | problem. missing_page "The summary says page 1 of 2. Page 2 with the tax withheld is missing." pageCount 1. Figures: Gross pay EUR 58,400.00 | no |
-| 3 | `payslip-summary-2025-amara-okafor.pdf` | payslip-summary | Amara Okafor, 2025, 2 pages | Spouse's document | problem. wrong_person "This summary is for Amara Okafor. Daniel Okafor's is needed." person "Amara Okafor". Figures: Gross pay EUR 41,200.00 | no |
-| 4 | `bank-interest-statement-2024.pdf` | bank-interest | Daniel Okafor, 2024, 1 page | Last year's statement | problem. wrong_year "Covers 1 Jan to 31 Dec 2024. The 2025 statement is needed." year 2024. Figures: Interest earned EUR 112.40 | yes |
-| 5 | `bank-interest-statement-2025.pdf` | bank-interest | Daniel Okafor, 2025, 1 page | Nothing | ok. Figures: Interest earned EUR 138.75; Tax withheld EUR 0.00. Summary "2025 interest statement from Sample Savings Bank. Interest earned EUR 138.75, no tax withheld." | yes |
-| 6 | `donation-receipt-2025.pdf` | donation-receipt | Daniel Okafor, 2025, 1 page, signed by the charity | Nothing | ok. signed true. Figures: Donation EUR 250.00; Date 14 Dec 2025; Recipient Elm Street Food Bank | yes |
-| 7 | `home-office-confirmation-2025-unsigned.pdf` | home-office | Daniel Okafor, 2025, 1 page | Employer signature line, name and date fields empty | problem. missing_signature "The employer signature field on page 1 is empty." signed false. Figures: Home office days "96 days" | yes |
-| 8 | `home-office-confirmation-2025-signed.pdf` | home-office | Daniel Okafor, 2025, 1 page | Nothing. Drawn signature, printed "Priya Shah, HR, 20 Jan 2026" | ok. signed true. Figures: Home office days "96 days" | yes |
-| 9 | `health-insurance-statement-2025.png` | health-insurance | Daniel Okafor, 2025, 1 image | Nothing. Looks like a phone photo of a letter | ok. pageCount 1. Figures: Premiums paid EUR 2,964.00; Insurer Lindgren Health | yes |
+| # | File | Item | Person, year, pages | What is wrong | Recorded check result |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `payslip-summary-2025.pdf` | payslip-summary | Daniel Okafor, 2025, 2 pages | Nothing | ok. documentType "Annual payslip summary", pageCount 2. Figures: Gross pay EUR 58,400.00; Income tax withheld EUR 9,870.00; Employer Bramble Freight Ltd. Summary "Annual payslip summary 2025 from Bramble Freight Ltd for Daniel Okafor. Gross pay EUR 58,400.00, income tax withheld EUR 9,870.00." |
+| 2 | `payslip-summary-2025-page-1-only.pdf` | payslip-summary | Daniel Okafor, 2025, 1 page printed "Page 1 of 2" | Page 2 with the tax withheld is missing | problem. missing_page "The summary says page 1 of 2. Page 2 with the tax withheld is missing." pageCount 1. Figures: Gross pay EUR 58,400.00 |
+| 3 | `payslip-summary-2025-amara-okafor.pdf` | payslip-summary | Amara Okafor, 2025, 2 pages | Spouse's document | problem. wrong_person "This summary is for Amara Okafor. Daniel Okafor's is needed." person "Amara Okafor". Figures: Gross pay EUR 41,200.00 |
+| 4 | `bank-interest-statement-2024.pdf` | bank-interest | Daniel Okafor, 2024, 1 page | Last year's statement | problem. wrong_year "Covers 1 Jan to 31 Dec 2024. The 2025 statement is needed." year 2024. Figures: Interest earned EUR 112.40 |
+| 5 | `bank-interest-statement-2025.pdf` | bank-interest | Daniel Okafor, 2025, 1 page | Nothing | ok. Figures: Interest earned EUR 138.75; Tax withheld EUR 0.00. Summary "2025 interest statement from Sample Savings Bank. Interest earned EUR 138.75, no tax withheld." |
+| 6 | `donation-receipt-2025.pdf` | donation-receipt | Daniel Okafor, 2025, 1 page, signed by the charity | Nothing | ok. signed true. Figures: Donation EUR 250.00; Date 14 Dec 2025; Recipient Elm Street Food Bank |
+| 7 | `home-office-confirmation-2025-unsigned.pdf` | home-office | Daniel Okafor, 2025, 1 page | Employer signature line, name and date fields empty | problem. missing_signature "The employer signature field on page 1 is empty." signed false. Figures: Home office days "96 days" |
+| 8 | `home-office-confirmation-2025-signed.pdf` | home-office | Daniel Okafor, 2025, 1 page | Nothing. Drawn signature, printed "Priya Shah, HR, 20 Jan 2026" | ok. signed true. Figures: Home office days "96 days" |
+| 9 | `health-insurance-statement-2025.png` | health-insurance | Daniel Okafor, 2025, 1 image | Nothing. Looks like a phone photo of a letter | ok. pageCount 1. Figures: Premiums paid EUR 2,964.00; Insurer Lindgren Health |
 
 Every recorded result has `matchesRequest: true`, and every `status` equals what `domain/check-rules.ts` computes from its issues.
-Each recorded result is one entry in `domain/sample-documents.ts`; the film, the keyless mock answers and the fixture generator all read that one file.
+Each recorded result is one entry in `domain/sample-documents.ts`; the keyless mock answers, the sample menu and the fixture generator all read that one file.
 The signed and unsigned forms carry both cues a text-only OCR can see (filled or empty name and date under the line), so the check works with Google Document AI text as well as with Claude reading the file.
 
 ### Generating them
@@ -185,7 +98,7 @@ The signed and unsigned forms carry both cues a text-only OCR can see (filled or
 ## 4. Live mode (`/live`)
 
 The visitor plays Daniel Okafor.
-The same four lanes as the film show; the client lane is interactive and the others update from real check results.
+Four lanes show; the client lane is interactive and the others update from real check results.
 The story clock starts at Mon 9 Mar, 12:40 and moves in real time; "Skip 3 days" adds three days.
 The page keeps the live session in browser memory only; a reload or "Start over" begins again.
 
@@ -239,7 +152,7 @@ The visitor's profile (from the shell's "Make it yours", in `?brand=` and local 
 - The check summaries: `buildSystemPrompt` gets the profile, so the summary for the firm follows its tone and words to use and avoid.
 - The film does not change: it always tells Ledgerwick's story (decision F1).
 
-What stays: Daniel Okafor, the tax year, the 6 items, the samples, the reminder interval and the end card numbers.
+What stays: Daniel Okafor, the tax year, the 6 items, the samples, the reminder interval and the finale numbers.
 
 ## 6. Architecture
 
@@ -347,7 +260,7 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | `ui/inbox-emails.ts` | `EmailRecord`, the facts of one email, and `composeInboxEmail`, which writes it with the active profile |
 | `ui/replaced-checks.ts` | Which check cards a later passing upload replaced |
 | `ui/touch-target.ts` | The 44 px button height on phones |
-| `ui/documents-lanes.ts` | The four lanes and their widths, shared by the film and live mode |
+| `ui/documents-lanes.ts` | The four lanes of live mode and their widths |
 | `ui/live-api.ts` | `postCheck(file, itemId, profile)` and `postChase(session, event, profile)`; turns a `{ fallback: "film" }` answer into the fallback state |
 | `ui/client-phone.tsx` | The phone frame (9:19, sized by the lane alone, status bar scaled to its width) and the screen inside it, which scrolls to a marked `phoneFocusTarget` |
 | `ui/upload-page.tsx` | The DocuSign-style page: header, item rows with state chips, upload, "Use a sample", "Done for now" |
@@ -366,18 +279,14 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 
 | File | Holds |
 | --- | --- |
-| `film/documents-film.ts` | `defineFilmScript<DocumentsBeat>`: lanes, clock, the 40 beats, end card, with `{firm}` and `{owner}` filled from a profile argument |
-| `film/documents-beat.ts` | The `DocumentsBeat` union: `checklist`, `email`, `upload-page`, `signature`, `files-dropped`, `check`, `filed`, `summary`, `schedule`, `complete` |
-| `film/film-state.ts` | Folds the beats a lane has landed into its view state with the domain functions |
-| `film/render-film-lane.tsx` | `renderLane` for `FilmStage`: maps each lane's state to the same `ui/` components live mode uses |
-| `film/film-client-lane.tsx`, `film/film-side-lanes.tsx`, `film/film-views.ts` | The film's lanes and the lookups they share |
-| `film/documents-film-stage.tsx` | The film inside the demo shell, sized to fit one screen |
+| `film/documents-keynote.tsx` | `buildDocumentsKeynote(profile)`: the four beats and the finale of section 2, checked by `defineKeynoteFilm` |
+| `ui/documents-film.tsx` | The film inside the demo shell: `KeynoteStage` with the profile and the `/live` link of the active brand |
 
 ### app/
 
 | Route | Kind | Does |
 | --- | --- | --- |
-| `/` | page | The film in the demo shell. Reads `?t=` and `?brand=` |
+| `/` | page | The film in the demo shell. Reads `?t=`, `?record=` and `?brand=` |
 | `/live` | page | Live mode. The upload page is a view inside it, not its own route |
 | `/api/check` | POST | Checks one uploaded file |
 | `/api/chase` | POST | Submits or skips days, returns the chases sent |
@@ -422,13 +331,14 @@ Order in the route: read the body with `readBodyBytes` from `@diepen/ai/request-
 
 ## 7. Layout
 
-Film and live use the same lane layout.
+The film is one screen high at every width: the step in the middle, the play button and the progress dots under it, no page scroll.
+Live mode uses four lanes.
 
-| Viewport | Film | Live |
-| --- | --- | --- |
-| 1920x1080 | Four lanes side by side in one row: Firm 30%, Client 21% (phone frame), System 22%, Drive 27%. Caption bar under the lanes; body text at least 16 px so it reads in a 1080p video. Header, lanes, caption and controls fit without page scroll | Same lanes, no caption bar; the clock bar carries "Skip 3 days" and "Start over" |
-| 1440x900, and 1280x720 (a 1080p screen at 150% zoom, where the film is recorded with `?record=1`) | Same four lanes. Firm and Drive zoom their content out a step as the lane gets shorter (to 0.9, 0.8, 0.74 and 0.68 of full size), so all 6 checklist rows and the summary read whole and Drive names wrap on two or three lines. The phone content zooms out a step on a phone narrower than 260 px. The system lane shows the newest cards and fades the older ones out at the top | Same; the upload page scrolls inside the phone frame |
-| 375 px wide | One lane at a time with the shared `LaneTabs` (Firm, Client, System, Drive). The tab follows the active beat; a tapped tab pins until the next caption. Travel shows as the tab's receiving dot. The film is one screen high: caption above the lane, controls below, no page scroll. The firm lane puts its cards above the checklist | The client lane is full width without the phone frame. Each lane is as long as its content and the page scrolls; the clock, "Skip 3 days" and the tabs stick to the top. Tabs show a dot when another lane changed |
+| Viewport | Live |
+| --- | --- |
+| 1920x1080 | Four lanes side by side in one row: Firm 30%, Client 21% (phone frame), System 22%, Drive 27%. The clock bar carries "Skip 3 days" and "Start over" |
+| 1440x900, and 1280x720 | Same four lanes. Firm and Drive zoom their content out a step as the lane gets shorter (to 0.9, 0.8, 0.74 and 0.68 of full size), so all 6 checklist rows and the summary read whole and Drive names wrap on two or three lines. The phone content zooms out a step on a phone narrower than 260 px. The upload page scrolls inside the phone frame |
+| 375 px wide | One lane at a time with the shared `LaneTabs` (Firm, Client, System, Drive). The client lane is full width without the phone frame. Each lane is as long as its content and the page scrolls; the clock, "Skip 3 days" and the tabs stick to the top. Tabs show a dot when another lane changed |
 
 The phone frame keeps a 9:19 shape at a size set by the lane alone: as tall as the lane allows, never wider than the lane, at most 820 px tall. Its status bar, island and corners scale with its width, so the clock never meets the island.
 
@@ -460,13 +370,13 @@ Unit checks run in Vitest with `AI_PROVIDER=mock`. Flow checks run in Playwright
 17. `@documents.chase` `POST /api/chase` answers 400 for an invalid session or event, 413 over 64 KB, and 200 with the response shape.
 18. `@documents.upload` `buildFixtures()` returns bytes whose SHA-256 equals each committed file in `public/fixtures/`; every PDF page contains the text "SAMPLE"; every file is under 300 KB; every sample in `domain/sample-documents.ts` has a file.
 19. `@documents.upload` Every recorded result parses with `CheckResult` and keeps its `status` after `applyCheckRules`. The voice task's `DocumentCheck` type equals `CheckResult` (`expectTypeOf`).
-20. `@documents.film` The film script passes `defineFilmScript`, runs 60,000 to 90,000 ms, has no caption over 80 characters with the default preset, has no "—" or "–", and folding all beats leaves 6 of 6 checked and the Drive tree of section 2.
+20. `@documents.film` The keynote film has the beats `uploads`, `checked`, `problem` and `reminder` and lasts 16,000 ms; the first beat shows 6 files, the problem beat shows "Home office form" with the only chip, "Signature missing"; the reminder names "{firm} · Email"; the finale is 12 h to 1 h with a note that names the firm as fictional and has no "—" or "–".
 
 ### Flow
 
-21. `@documents.film` `/` plays to the end card at the fastest speed: "Hours a month spent chasing documents", "12 hours", "1 hour" and the note starting "Simulation with a fictional firm" show. The film makes no request to `/api/check` or `/api/chase`.
-22. `@documents.controls` Pause holds the clock text for 1 second; play moves it; restart shows "Mon 9 Mar, 09:00" and the first caption; each speed setting changes the pace.
-23. `@documents.controls` `/?t=27000` opens after beat 19 has landed (its 700 ms flight ends at 27,000 ms): the wrong-year caption, the bank row Problem found in the firm lane, and the clock at "12:47".
+21. `@documents.film` `/?t=1600`, `4800`, `8000`, `11200` and `14400` show steps 0 to 4 in order in `[data-keynote-step]`, each beat with its caption; the finale shows "12 h", "1 h", the fictional firm and "Try it live" linking to `/live`; `?record=1` shows the firm's name and "Fictional company" and no play button. The film makes no request to `/api/check` or `/api/chase`.
+22. `@documents.controls` Play moves from step 0 to step 1 and pause holds it there; the progress dot "Step 3 of 5" jumps to step 2 and marks itself current.
+23. `@documents.brand` `/` with `?brand=` of another preset still shows "Ledgerwick Tax & Accounting · Email" in the reminder beat and nothing of the other preset (decision F1).
 24. `@documents.upload` On `/live`, opening the email, "Upload and sign" and "Use a sample" with `payslip-summary-2025.pdf` shows Checked on the upload page, "Gross pay" in the system lane, `2025_Okafor-Daniel_Payslip-summary.pdf` in `02 Income`, and the firm row Checked. The provider note shows.
 25. `@documents.upload` Each passing sample (bank 2025, donation, home office signed, health insurance PNG) ends Checked through a file input upload of the file from `public/fixtures/`.
 26. `@documents.problem` Each of the 4 problem samples shows Problem found with its reason line on the upload page and its file in `00 Needs attention`. Uploading the matching passing sample afterwards turns the item Checked and moves the problem file to `99 Replaced`.
@@ -477,16 +387,16 @@ Unit checks run in Vitest with `AI_PROVIDER=mock`. Flow checks run in Playwright
 31. `@documents.own-file` Uploading a small generated PDF named `my-file.pdf` shows the generic demo answer; a 4,000,001 byte file shows "Files up to 4 MB." and a `.txt` file shows "Use a PDF, PNG or JPEG.", both without a request to `/api/check`.
 32. `@documents.fallback` With `/api/check` routed to answer 429 `{ fallback: "film" }`, an upload swaps the live page to the film with the fallback note.
 33. `@documents.brand` With another preset applied through "Make it yours" (or `?brand=`), the email sender, the upload page header, the Drive root and the upload page's primary button colour use that profile, and the `profile` field sent to `/api/check` carries its name. A profile stored in local storage on an earlier visit writes the request email on a fresh load.
-34. `@documents.film` `@documents.upload` At 375x812, `/` at `?t=0`, `20000`, `37500`, `57500` and `61000`, and `/live` in the inbox, upload page, letter and each lane tab, have `scrollWidth` at most 375. The tabs read Firm, Client, System, Drive.
-35. `@documents.film` `@documents.upload` At 1920x1080 and 1440x900, all four lanes and the caption bar lie inside the viewport on `/`, and all four lanes on `/live`.
-36. `@documents.film` `@documents.upload` No console error or page error on `/` through the whole film or on `/live` through checks 24, 27 and 28.
+34. `@documents.film` `@documents.upload` At 375x812, `/` at each of the five steps, and `/live` in the inbox, upload page, letter and each lane tab, have `scrollWidth` at most 375. The tabs read Firm, Client, System, Drive.
+35. `@documents.film` `@documents.upload` At 1920x1080 and 1440x900, the finale lies inside the viewport on `/`, and all four lanes on `/live`.
+36. `@documents.film` `@documents.upload` No console error or page error on `/` in any step or on `/live` through checks 24, 27 and 28.
 
 ## 9. Feature rows
 
 | Id | A user can | Reach it | As | Status |
 | --- | --- | --- | --- | --- |
-| `documents.film` | Watch the 72 second film from request to complete checklist, ending on hours a month spent chasing documents | `/` | anon | shipped |
-| `documents.controls` | Pause, play, restart and change the speed of the film, and open it at a moment with `?t=` | `/`, film controls, `/?t=27000` | anon | shipped |
+| `documents.film` | Watch the 16 second keynote film: uploads, checks, a caught problem, the reminder, ending on hours a month chasing documents | `/` | anon | shipped |
+| `documents.controls` | Pause and play the film, jump to a beat with its progress dot, and open it at a moment with `?t=` | `/`, film controls, `/?t=8000` | anon | shipped |
 | `documents.upload` | Open the request email, upload a sample or own file for an item, and see the check, the Drive folder and the firm checklist update | `/live`, "Upload and sign" | anon | shipped |
 | `documents.problem` | Upload a problem sample, see Problem found with the reason, then fix it with the right file | `/live`, "Use a sample" | anon | shipped |
 | `documents.sign` | Sign the engagement letter on the upload page and see the signed copy filed | `/live`, "Review and sign" | anon | shipped |
@@ -502,7 +412,7 @@ No id is a prefix of another followed by `-` or `.`, because `verify flow` greps
 | Question | Default we use |
 | --- | --- |
 | Do the follow-up and reminder emails come from Claude in the firm's voice? | No. A domain template writes them, so the list of missing items is exact, the film and live mode match, and a chase costs no tokens. A `@diepen/voice/tasks/document-follow-up` task can add the voice later |
-| Does "Make it yours" change the requested documents to fit the visitor's industry? | No. The 6 tax return items stay, because the samples and the end card number are about tax returns |
+| Does "Make it yours" change the requested documents to fit the visitor's industry? | No. The 6 tax return items stay, because the samples and the finale number are about tax returns |
 | Is the upload page its own route? | No. It is a view inside `/live`, so the session needs no URL state and the feature map has two page routes |
 | How does a client build authenticate Google Document AI on Vercel? | Application Default Credentials through Vercel's OIDC and Google Workload Identity Federation. The demo deploy leaves `OCR_PROVIDER` unset and needs nothing |
 | Does the live session survive a reload? | No. It lives in browser memory; "Start over" and a reload begin again |

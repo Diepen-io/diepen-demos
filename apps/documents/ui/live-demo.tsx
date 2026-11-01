@@ -23,7 +23,7 @@ function Fill({ narrow, children }: { narrow: boolean; children: ReactNode }) {
   return narrow ? <div>{children}</div> : <div className="lane-fill absolute inset-3 md:inset-4">{children}</div>;
 }
 
-/** The `/live` layout: the film's four lanes, with the visitor playing Daniel on the phone. */
+/** The `/live` layout: four lanes, with the visitor playing Daniel on the phone. */
 export function LiveDemo({ providerName }: { providerName: string }) {
   const { state, profile, actions, chase } = useLiveDemo();
   const narrow = useNarrowScreen();

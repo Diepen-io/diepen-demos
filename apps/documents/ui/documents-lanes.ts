@@ -2,7 +2,7 @@ import type { FilmLayout } from "@diepen/ui/film/film-layout";
 import type { FilmLane } from "@diepen/ui/film/film-script";
 import type { CompanyProfile } from "@diepen/voice/profile";
 
-/** The four parties of the film and of live mode, in the order that keeps the busiest paths short. */
+/** The four parties of live mode, in the order that keeps the busiest paths short. */
 export function documentsLanes(profile: CompanyProfile): FilmLane[] {
   return [
     { id: "firm", label: profile.name, role: profile.industry, tabLabel: "Firm", icon: "briefcase", brand: true },

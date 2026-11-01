@@ -2,8 +2,8 @@ import type { CheckResult } from "./check-result";
 import type { UploadItemId } from "./document-request";
 
 /**
- * The nine fake documents in `public/fixtures/` and the check result recorded for each. The film,
- * the keyless mock answers and the fixture generator read this one list. Type imports only, so the
+ * The nine fake documents in `public/fixtures/` and the check result recorded for each. The
+ * keyless mock answers, the sample menu and the fixture generator read this one list. Type imports only, so the
  * generator runs under plain Node.
  */
 

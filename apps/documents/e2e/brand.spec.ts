@@ -1,7 +1,7 @@
 import { presets } from "@diepen/voice/presets";
 import { encodeProfile } from "@diepen/voice/profile-codec";
 import { expect, test } from "./support/documents-test";
-import { openFilm } from "./support/film-page";
+import { openFilm, stepMoments } from "./support/film-page";
 import { showLane, type Firm } from "./support/lanes";
 import { action, openLive, openRequestEmail, uploadRow, useSample } from "./support/live-page";
 import { samples } from "./support/samples";
@@ -37,8 +37,9 @@ test("live mode speaks in the applied profile's name, colours and Drive @documen
 
 test("the film keeps its own fictional firm with a ?brand= link (decision F1) @documents.brand", async ({ page }) => {
   const film = presets["ledgerwick-accounting"];
-  await openFilm(page, `${brandQuery}&t=0`);
-  await expect(page.getByText(new RegExp(`^${film.name} needs 6 documents`))).toBeVisible();
+  await openFilm(page, `${brandQuery}&t=${stepMoments[3]}`);
+  await expect(page.getByText(`${film.name} · Email`)).toBeVisible();
+  await expect(page.getByText(brickfern.name)).toHaveCount(0);
 });
 
 test("a profile stored from an earlier visit writes the request email on a fresh load @documents.brand", async ({ page }) => {

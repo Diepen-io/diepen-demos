@@ -8,7 +8,6 @@ import { cx } from "@diepen/ui/primitives/class-names";
 import { Icon } from "@diepen/ui/primitives/icon";
 import { FileIcon, fileKindOf } from "@diepen/ui/mockups/file-icon";
 import { useCallback, useRef, useState, type DragEvent } from "react";
-import { phoneFocusTarget } from "./client-phone";
 import { acceptAttribute } from "./file-guard";
 import { MiddleTruncate } from "./middle-truncate";
 import { SampleMenu } from "./sample-menu";
@@ -50,7 +49,6 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
 
   return (
     <li
-      {...phoneFocusTarget(item.id)}
       onDragOver={(event) => {
         if (!canUpload) return;
         event.preventDefault();

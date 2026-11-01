@@ -1,5 +1,4 @@
 import { expect, test } from "./support/documents-test";
-import { filmPosition } from "./support/film-page";
 import { openUploadPage, useSample } from "./support/live-page";
 import { samples } from "./support/samples";
 
@@ -23,5 +22,5 @@ test("a tripped cost guard swaps the live page to the film with a note @document
   await useSample(page, samples.payslip);
 
   await expect(page.getByRole("status").filter({ hasText: "Live answers are paused for now." })).toBeVisible();
-  await expect(filmPosition(page)).toBeVisible();
+  await expect(page.locator('[data-keynote-film="documents"]')).toBeVisible();
 });
