@@ -358,7 +358,7 @@ Order in the route: read the body with `readBodyBytes` from `@diepen/ai/request-
 
 ## 7. Layout
 
-The film is one screen high at every width: the step in the middle, the play button and the progress dots under it, no page scroll.
+The film is one screen high at every width: the step in the middle, Previous, Play and Next with the beat dots under it, no page scroll.
 Live mode uses four lanes.
 
 | Viewport | Live |
@@ -402,7 +402,7 @@ Unit checks run in Vitest with `AI_PROVIDER=mock`. Flow checks run in Playwright
 ### Flow
 
 21. `@documents.film` `/?t=1600`, `4800`, `8000`, `11200` and `14400` show steps 0 to 4 in order in `[data-keynote-step]`, each beat with its caption; the finale shows "12 h", "1 h", the fictional firm and "Try it yourself" linking to `/live`; `?record=1` shows the firm's name and "Fictional company" and no play button. The film makes no request to `/api/check` or `/api/chase`.
-22. `@documents.controls` Play moves from step 0 to step 1 and pause holds it there; the progress dot "Step 3 of 5" jumps to step 2 and marks itself current.
+22. `@documents.controls` Play moves from step 0 to step 1 and pause holds it there. Next twice and Previous once land on step 1; Previous is disabled on step 0. The fourth dot, named "Beat 4 of 5: {caption}", jumps to step 3, marks itself current, and a paused film stays there. ArrowRight and ArrowLeft go to the next and previous beat, and Space plays. Previous, Play and Next are at least 44 px tall.
 23. `@documents.brand` `/` with `?brand=` of another preset still shows "Ledgerwick Tax & Accounting · Email" in the reminder beat and nothing of the other preset (decision F1).
 24. `@documents.upload` On `/live`, opening the email, "Upload and sign" and "Use a sample" with `payslip-summary-2025.pdf` shows Checked on the upload page, "Gross pay" in the system lane, `2025_Okafor-Daniel_Payslip-summary.pdf` in `02 Income`, and the firm row Checked. The provider note shows.
 25. `@documents.upload` Each passing sample (bank 2025, donation, home office signed, health insurance PNG) ends Checked through a file input upload of the file from `public/fixtures/`.
@@ -425,7 +425,7 @@ Unit checks run in Vitest with `AI_PROVIDER=mock`. Flow checks run in Playwright
 | Id | A user can | Reach it | As | Status |
 | --- | --- | --- | --- | --- |
 | `documents.film` | Watch the 16 second keynote film: uploads, checks, a caught problem, the reminder, ending on hours a month chasing documents | `/` | anon | shipped |
-| `documents.controls` | Pause and play the film, jump to a beat with its progress dot, and open it at a moment with `?t=` | `/`, film controls, `/?t=8000` | anon | shipped |
+| `documents.controls` | Pause and play the film, step to the previous or next beat with the buttons or the arrow keys, jump to a beat with its dot, and open it at a moment with `?t=` | `/`, film controls, `/?t=8000` | anon | shipped |
 | `documents.upload` | Open the request email, upload a sample or own file for an item, and see the check, the Drive folder and the firm checklist update | `/live`, "Upload and sign" | anon | shipped |
 | `documents.problem` | Upload a problem sample, see Problem found with the reason, then fix it with the right file | `/live`, "Use a sample" | anon | shipped |
 | `documents.sign` | Sign the engagement letter on the upload page and see the signed copy filed | `/live`, "Review and sign" | anon | shipped |

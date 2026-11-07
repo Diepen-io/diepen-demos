@@ -48,6 +48,16 @@ export function playbackReducer(state: PlaybackState, action: PlaybackAction): P
   }
 }
 
+/**
+ * The start of the beat `delta` beats away from the one at `t`, for films cut into beats of
+ * `beatMs`. Clamped to the first and the last beat, so Next on the last beat stays on it.
+ */
+export function beatStart(t: number, beatMs: number, durationMs: number, delta: -1 | 1): number {
+  const last = Math.max(0, Math.ceil(durationMs / beatMs) - 1);
+  const current = Math.min(Math.floor(t / beatMs), last);
+  return clamp(current + delta, 0, last) * beatMs;
+}
+
 /** Reads `?t=<ms>` from a query string. Returns null when it is missing or not a number. */
 export function startFromSearch(search: string, durationMs: number): number | null {
   const raw = new URLSearchParams(search).get("t");

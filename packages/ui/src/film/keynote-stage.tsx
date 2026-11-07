@@ -7,7 +7,7 @@ import { FictionalBadge } from "../brand/fictional-badge";
 import { Icon } from "../primitives/icon";
 import { cx } from "../primitives/class-names";
 import { useRecordMode } from "../shell/record-mode";
-import { FilmGlyph } from "./film-glyphs";
+import { KeynoteControls } from "./keynote-controls";
 import { KeynoteChip } from "./keynote-parts";
 import { keynoteBeatMs, keynoteDurationMs, keynoteStepAt, type KeynoteFilm } from "./keynote-script";
 import { useFilm } from "./use-film";
@@ -25,10 +25,9 @@ export function KeynoteStage({ film, liveHref = "/live", autoplay = true, classN
   const { profile } = useBrand();
   const recording = useRecordMode();
   const reducedMotion = usePrefersReducedMotion();
-  const player = useFilm({ durationMs: keynoteDurationMs(film) }, { autoplay, seekStepMs: keynoteBeatMs(film) });
+  const player = useFilm({ durationMs: keynoteDurationMs(film) }, { autoplay, beatMs: keynoteBeatMs(film) });
   const step = keynoteStepAt(film, player.t);
   const beat = film.beats[step];
-  const steps = film.beats.length + 1;
 
   return (
     <section
@@ -70,38 +69,8 @@ export function KeynoteStage({ film, liveHref = "/live", autoplay = true, classN
         </div>
       </div>
 
-      <footer className="flex items-center justify-center gap-4 pb-6 md:pb-8">
-        {recording ? null : (
-          <button
-            type="button"
-            onClick={player.ended ? player.restart : player.toggle}
-            aria-label={player.ended ? "Replay" : player.playing ? "Pause" : "Play"}
-            className="press grid size-11 place-items-center rounded-full text-foreground transition-[background-color] duration-150 hover:bg-subtle"
-          >
-            <FilmGlyph name={player.ended ? "replay" : player.playing ? "pause" : "play"} size={18} />
-          </button>
-        )}
-        <ol aria-label="Film progress" className="flex items-center gap-2">
-          {Array.from({ length: steps }, (_, index) => (
-            <li key={index}>
-              <button
-                type="button"
-                aria-label={`Step ${index + 1} of ${steps}`}
-                aria-current={index === step ? "step" : undefined}
-                onClick={() => player.seek(index * keynoteBeatMs(film))}
-                disabled={recording}
-                className="grid h-11 place-items-center px-1"
-              >
-                <span
-                  className={cx(
-                    "block h-1.5 rounded-full transition-[width,background-color] duration-300 ease-out",
-                    index === step ? "w-8 bg-brand" : index < step ? "w-3 bg-foreground/40" : "w-3 bg-foreground/15",
-                  )}
-                />
-              </button>
-            </li>
-          ))}
-        </ol>
+      <footer className="pb-6 md:pb-8">
+        <KeynoteControls film={film} player={player} recording={recording} />
       </footer>
     </section>
   );

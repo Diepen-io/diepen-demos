@@ -95,7 +95,8 @@ The rules the engine holds a film to:
 | `film/keynote-stage` | `KeynoteStage` |
 | `film/keynote-film-view` | `KeynoteFilmView({ film })`: the stage under the demo shell, sized to the space under its header, with "Try it yourself" at `hrefWithBrand("/live")`. A film page builds the film on the server from its own preset (decision F1) and passes it in |
 | `film/keynote-parts` | The elements a beat shows. Large and chrome-free; text starts at 18 px so it reads in a phone feed |
-| `film/use-film`, `film/film-playback` | Playback. `?t=<ms>` opens paused at that moment |
+| `film/keynote-controls` | `KeynoteControls`: Previous beat, Play, Pause or Replay, Next beat (44 px icon buttons) and one dot button per beat, named "Beat N of M: {caption or finale label}" with `aria-current="step"` on the current one. A recording shows the dots only |
+| `film/use-film`, `film/film-playback` | Playback. `?t=<ms>` opens paused at that moment. Space toggles, R restarts, the arrow keys go to the previous or next beat start (`beatStart`), except in a text field or a dialog. A seek keeps a playing film playing and a paused one paused |
 | `film/use-stage-environment` | `usePrefersReducedMotion` and `useNarrowScreen` (below 768 px): false on the server and the first client render, so hydration matches, then the real value |
 | `film/film-easing` | `EASE_OUT`, the `--ease-out` curve of `styles.css` for the Web Animations API |
 

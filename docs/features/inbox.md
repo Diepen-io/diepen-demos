@@ -36,7 +36,7 @@ The script is `buildInboxKeynote(profile)` in `film/inbox-keynote.tsx`; its text
 - One element on screen per beat, one caption of at most 6 words, at most one chip. `defineKeynoteFilm` refuses more words, more than 4 beats or an em or en dash.
 - Captions are fixed text; message texts fill their slots from the profile.
 - Each step rises in over 320 ms (fades only under `prefers-reduced-motion`). A seek, `?t=` or a step dot shows the new step at once.
-- Controls: Play, Pause or Replay, and five step dots that jump to a step. Space, R and the arrow keys work too; an arrow moves one beat. `?t=<ms>` opens paused at that moment.
+- Controls: Previous beat, Play, Pause or Replay, Next beat, and five beat dots that jump to a beat, each named "Beat N of 5: {caption}". Space, R and the arrow keys work too; an arrow goes to the start of the previous or next beat. Going to a beat keeps a playing film playing and a paused one paused. `?t=<ms>` opens paused at that moment.
 - `?record=1` hides the controls and the shell; the stage header then shows the brand mark, the company name and the "Fictional company" badge.
 
 ### Finale
