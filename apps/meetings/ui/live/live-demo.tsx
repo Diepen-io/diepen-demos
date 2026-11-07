@@ -66,8 +66,8 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
       <MeetingsGuideBar guide={guide} onLoadSample={() => selectTab("sample")} onStartOver={call.startOver} className="lg:col-span-2" />
       <section aria-label="Your call" className="panel flex flex-col gap-4 p-4 sm:p-5 lg:sticky lg:top-28">
         <header className="flex flex-col gap-1">
-          <h2 className="text-[19px] font-semibold tracking-[-0.015em]">Turn a sales call into a proposal</h2>
-          <p className="text-[14px] leading-snug text-muted">
+          <h2 className="text-title font-semibold tracking-[-0.015em]">Turn a sales call into a proposal</h2>
+          <p className="text-body leading-snug text-muted">
             You play {seller.person ? `${seller.short} of ${seller.company}` : seller.company}. Record a call, paste one, or load our sample
             call.
           </p>
@@ -98,7 +98,7 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
           </Button>
         )}
         {call.status === "failed" && (
-          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl bg-fail-soft px-3.5 py-3 text-[14px] text-fail">
+          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl bg-fail-soft px-3.5 py-3 text-body text-fail">
             <p className="min-w-0 flex-1">The draft failed. Try again.</p>
             <Button variant="secondary" size="sm" onClick={submit} disabled={!ready} {...spotlight(guide.spotlight === "try-again")}>
               Try again

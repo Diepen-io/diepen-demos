@@ -99,7 +99,7 @@ export function SignaturePad({ onSign, onDraft, onCancel }: SignaturePadProps) {
             value={name}
             onChange={(event) => typeName(event.target.value)}
             autoComplete="name"
-            className="h-11 rounded-lg bg-surface px-3 text-[16px] text-foreground shadow-[inset_0_0_0_1px_var(--border)] focus-visible:shadow-[inset_0_0_0_1.5px_var(--foreground)] focus-visible:outline-none"
+            className="h-11 rounded-lg bg-surface px-3 text-field text-foreground shadow-[inset_0_0_0_1px_var(--border)] focus-visible:shadow-[inset_0_0_0_1.5px_var(--foreground)] focus-visible:outline-none"
           />
         </label>
       ) : (

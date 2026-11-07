@@ -41,54 +41,19 @@
   height: 6.5cqw;
 }
 
-/* A narrow phone lays its screen out a little smaller, as a real phone of that width would. */
-@container phone (max-width: 260px) {
-  .phone-content {
-    zoom: 0.86;
-  }
-}
-
-@container phone (max-width: 225px) {
-  .phone-content {
-    zoom: 0.8;
-  }
-}
-
 /*
- * Firm and Drive lanes are size containers. On a short desktop screen their content zooms out a
- * step, so the checklist and its summary still read whole instead of being cut. A phone shows one
- * lane at a time at full size.
+ * Firm and Drive lanes are size containers. Their content never zooms out, so every line keeps the
+ * type scale; the lane scrolls instead. A phone shows one lane at a time.
  */
 .lane-fill {
   container: lane / size;
 }
 
 @media (min-width: 768px) {
-  @container lane (max-height: 660px) {
-    .lane-dense {
-      zoom: 0.9;
-    }
-  }
-
-  @container lane (max-height: 540px) {
-    .lane-dense {
-      zoom: 0.8;
-    }
-  }
-
+  /* On a short screen the firm's problem notes give way, so the checklist keeps its full size. */
   @container lane (max-height: 490px) {
-    .lane-dense {
-      zoom: 0.74;
-    }
-
     .lane-dense .summary-problem {
       display: none;
-    }
-  }
-
-  @container lane (max-height: 420px) {
-    .lane-dense {
-      zoom: 0.68;
     }
   }
 }

@@ -28,13 +28,13 @@ function SummaryCard({ summary, complete, fresh }: { summary: ChecklistSummary; 
         fresh && "enter",
       )}
     >
-      <p className="flex items-center gap-2 text-[16px] leading-snug font-semibold">
+      <p className="flex items-center gap-2 text-body leading-snug font-semibold">
         {complete && <Icon name="check" size={18} className="shrink-0 text-pass" />}
         {complete ? "Complete. Ready to prepare the return." : summary.headline}
       </p>
       {/* The rows above carry the same notes, so a short lane drops these lines first. */}
       {summary.problems.map((problem) => (
-        <p key={problem.itemId} className="summary-problem flex gap-2 text-[14px] leading-snug">
+        <p key={problem.itemId} className="summary-problem flex gap-2 text-body leading-snug">
           <span className="mt-[0.45em] size-1.5 shrink-0 rounded-full bg-fail" aria-hidden="true" />
           <span>
             <span className="font-medium">{problem.label}</span>
@@ -59,7 +59,7 @@ function SummaryCard({ summary, complete, fresh }: { summary: ChecklistSummary; 
 function SendRequest() {
   return (
     <section aria-label="Request" className="flex shrink-0 items-center max-md:order-first gap-3 rounded-xl bg-surface p-4 shadow-[inset_0_0_0_1px_var(--border)]">
-      <p className="min-w-0 flex-1 text-[15px] leading-snug">
+      <p className="min-w-0 flex-1 text-body leading-snug">
         <span className="font-semibold">6 documents</span> <span className="text-muted">for Daniel's tax return</span>
       </p>
       <Button variant="brand" tabIndex={-1}>
@@ -76,7 +76,7 @@ function EscalationTask({ subject, body }: { subject: string; body: string }) {
       <p className="flex items-center gap-2 text-meta font-semibold text-wait">
         <Icon name="phone" size={15} /> Task for the team
       </p>
-      <p className="text-[16px] leading-snug font-semibold">{subject}</p>
+      <p className="text-body leading-snug font-semibold">{subject}</p>
       <p className="text-meta whitespace-pre-line text-muted">{body.split("\n\n").slice(1).join("\n")}</p>
     </section>
   );

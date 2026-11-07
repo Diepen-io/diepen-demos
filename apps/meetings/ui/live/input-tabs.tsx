@@ -40,7 +40,7 @@ export function InputTabs({ value, onSelect }: { value: InputTab; onSelect: (tab
             tabIndex={selected ? 0 : -1}
             onClick={() => onSelect(tab.id)}
             className={cx(
-              "flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[8px] px-2 text-[13px] sm:h-9 font-medium whitespace-nowrap transition-[background-color,color,box-shadow] duration-150",
+              "flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[8px] px-2 text-meta sm:h-9 font-medium whitespace-nowrap transition-[background-color,color,box-shadow] duration-150",
               selected ? "bg-surface text-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_rgb(0_0_0/0.06)]" : "text-muted hover:text-foreground",
             )}
           >

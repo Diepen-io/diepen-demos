@@ -50,7 +50,7 @@ function FolderPath({ path }: { path: string[] }) {
           ))}
         </ol>
       )}
-      <p aria-current="page" className="min-w-0 truncate text-lg font-medium text-foreground">
+      <p aria-current="page" className="min-w-0 truncate text-title font-medium text-foreground">
         {path.at(-1)}
       </p>
     </nav>

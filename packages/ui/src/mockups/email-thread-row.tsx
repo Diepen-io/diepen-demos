@@ -21,7 +21,7 @@ export function EmailThreadRow({ thread, open }: { thread: EmailThread; open: bo
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
-          <span className={cx("min-w-0 flex-1 truncate text-[15px]", thread.unread ? "font-semibold" : "font-medium text-muted")}>
+          <span className={cx("min-w-0 flex-1 truncate text-body", thread.unread ? "font-semibold" : "font-medium text-muted")}>
             {thread.from}
           </span>
           {thread.hasAttachment && <Icon name="paperclip" size={14} className="shrink-0 text-faint" />}

@@ -46,12 +46,12 @@ export function EmailMessage(props: EmailMessageProps) {
   const hasExtras = Boolean(slots?.length || meta || action);
   return (
     <article className={cx("flex flex-col gap-3", isNew && "enter", className)}>
-      {subject && <h3 className="text-xl font-semibold tracking-[-0.015em] text-foreground">{subject}</h3>}
+      {subject && <h3 className="text-title font-semibold tracking-[-0.015em] text-foreground">{subject}</h3>}
       <header className="flex items-start gap-3">
         <Avatar name={from.name} size={40} />
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-            <span className="text-[15px] font-semibold text-foreground">{from.name}</span>
+            <span className="text-body font-semibold text-foreground">{from.name}</span>
             <span className="truncate text-meta text-faint">&lt;{from.email}&gt;</span>
           </p>
           <p className="truncate text-meta text-muted">to {to}</p>
@@ -84,8 +84,8 @@ export function EmailMessage(props: EmailMessageProps) {
             >
               <FileIcon kind={fileKindOf(attachment.name)} size={26} />
               <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-foreground">{attachment.name}</span>
-                {attachment.size && <span className="tabular block text-[12px] text-faint">{attachment.size}</span>}
+                <span className="block truncate text-body font-medium text-foreground">{attachment.name}</span>
+                {attachment.size && <span className="tabular block text-caption text-faint">{attachment.size}</span>}
               </span>
               <Icon name="paperclip" size={14} className="ml-1 shrink-0 text-faint" />
             </li>

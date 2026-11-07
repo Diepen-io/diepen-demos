@@ -37,7 +37,7 @@ export function inboxGuide(state: LiveState, { company, assistant, owner }: Inbo
     return { id: "waiting", number: booked ? 3 : timesOnOffer ? 2 : 1, text: `${assistant} writes an answer`, waiting: true };
   }
   if (timesOnOffer) {
-    return { id: "pick-time", number: 2, text: `${assistant} offers some times. Pick one.`, spotlightSlots: true };
+    return { id: "pick-time", number: 2, text: `${assistant} offers some times. Pick one in the answer.`, spotlightSlots: true };
   }
   if (!booked) {
     return { id: "ask-time", number: 1, text: `You play a customer. Ask ${company} for an appointment.`, action: "ask-time" };

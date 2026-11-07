@@ -17,7 +17,7 @@ export function LiveHeading({ providerName }: { providerName: string }) {
   return (
     <>
       <div className="flex min-w-0 items-center gap-3">
-        <h2 className="truncate text-[17px] font-semibold tracking-[-0.015em] md:text-[20px]">Daniel Okafor's 2025 tax return</h2>
+        <h2 className="truncate text-title font-semibold tracking-[-0.015em] md:text-heading">Daniel Okafor's 2025 tax return</h2>
       </div>
       <ProviderNote providerName={providerName} />
     </>
@@ -32,11 +32,11 @@ export function LiveControls({ now, canSkip, onSkip, onStartOver }: LiveControls
   return (
     <>
       <div role="timer" aria-label={`Story time ${weekday} ${time}`} className="flex shrink-0 items-center gap-2 md:gap-2.5">
-        <span className="inline-flex items-center gap-1.5 text-[13px] font-medium whitespace-nowrap md:text-[14px]">
+        <span className="inline-flex items-center gap-1.5 text-meta font-medium whitespace-nowrap md:text-body">
           <span>{weekday}</span>
           <span className="opacity-60">{date}</span>
         </span>
-        <span className="tabular text-[20px] leading-none font-semibold tracking-[-0.02em] md:text-[26px]">{time}</span>
+        <span className="tabular text-heading leading-none font-semibold tracking-[-0.02em] md:text-heading">{time}</span>
       </div>
       <div role="group" aria-label="Story controls" className="ml-auto flex items-center gap-1.5 md:gap-2">
         <Button variant="ghost" className="max-md:h-11 max-md:px-3" onClick={onSkip} disabled={!canSkip}>

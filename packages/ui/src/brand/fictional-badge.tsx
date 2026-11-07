@@ -10,7 +10,7 @@ export function FictionalBadge({ size, short, className }: { size?: BadgeSize; s
   if (!profile.fictional) return null;
   return (
     // Plain words, not a pill: the label informs, it does not need to stand out.
-    <span className={cx("whitespace-nowrap text-faint", size === "lg" ? "text-[17px]" : "text-[13px]", className)}>
+    <span className={cx("whitespace-nowrap text-faint", size === "lg" ? "text-title" : "text-meta", className)}>
       {short ? "Fictional" : "Fictional company"}
     </span>
   );

@@ -41,7 +41,7 @@ export function KeynoteStage({ film, liveHref = "/live", autoplay = true, classN
         <header className="flex items-center gap-3 px-6 pt-5 md:px-10 md:pt-7">
           {/* 52 px keeps even a three-letter monogram above 16 px in a phone feed. */}
           <BrandMark profile={profile} size={52} />
-          <span className="truncate text-[20px] font-semibold tracking-[-0.01em]">{profile.name}</span>
+          <span className="truncate text-heading font-semibold tracking-[-0.01em]">{profile.name}</span>
           {profile.fictional ? <FictionalBadge size="lg" /> : null}
         </header>
       ) : null}
@@ -123,12 +123,12 @@ function Finale({ film, liveHref }: { film: KeynoteFilm; liveHref: string }): Re
       {/* A plain link: it opens live mode in the same frame, so it works in an iframe on a case study page too. */}
       <a
         href={liveHref}
-        className="press mt-[clamp(24px,4vh,44px)] inline-flex h-14 items-center gap-2.5 rounded-full bg-brand px-8 text-[19px] font-semibold text-brand-foreground md:h-16 md:px-10 md:text-[21px]"
+        className="press mt-[clamp(24px,4vh,44px)] inline-flex h-14 items-center gap-2.5 rounded-full bg-brand px-8 text-title font-semibold text-brand-foreground md:h-16 md:px-10 md:text-heading"
       >
         Try it yourself
         <Icon name="arrowRight" size={20} />
       </a>
-      <p className="mt-5 max-w-[40rem] text-balance text-[16px] text-muted">{finale.note}</p>
+      <p className="mt-5 max-w-[40rem] text-balance text-body text-muted">{finale.note}</p>
     </div>
   );
 }

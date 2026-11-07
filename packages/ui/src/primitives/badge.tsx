@@ -17,8 +17,8 @@ const tones: Record<BadgeTone, string> = {
 export type BadgeSize = "md" | "lg";
 
 const sizes: Record<BadgeSize, { className: string; icon: number }> = {
-  md: { className: "h-6 gap-1 px-2.5 text-[13px]", icon: 13 },
-  lg: { className: "h-9 gap-1.5 px-3.5 text-[17px]", icon: 17 },
+  md: { className: "h-6 gap-1 px-2.5 text-meta", icon: 13 },
+  lg: { className: "h-9 gap-1.5 px-3.5 text-title", icon: 17 },
 };
 
 export type BadgeProps = {

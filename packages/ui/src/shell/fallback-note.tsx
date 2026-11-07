@@ -11,7 +11,7 @@ export type FallbackNoteProps = {
 /** Shown when a live request tripped a cost guard and the app sent the visitor to the film. */
 export function FallbackNote({ filmHref, onDismiss, className }: FallbackNoteProps) {
   return (
-    <div role="status" className={cx("flex items-center gap-3 rounded-xl bg-wait-soft px-4 py-3 text-sm text-wait", className)}>
+    <div role="status" className={cx("flex items-center gap-3 rounded-xl bg-wait-soft px-4 py-3 text-body text-wait", className)}>
       <Icon name="clock" size={16} className="shrink-0" />
       <p className="min-w-0 flex-1 text-foreground">
         {filmHref ? "Live answers are paused for now. " : "Live answers are paused for now. Here is the film."}

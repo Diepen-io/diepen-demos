@@ -41,7 +41,7 @@ export function CalendarView({ days, blocks, singleDay, focus = [], className }:
   return (
     <ChannelFrame channel="Calendar" icon="calendar" accent="var(--channel-calendar)" meta={singleDay ? "Day" : "Week"} className={className}>
       <div className="flex items-center gap-2 border-b border-border py-1.5 pr-1.5 pl-4">
-        <p className="min-w-0 flex-1 truncate text-[17px] font-semibold tracking-[-0.01em]">
+        <p className="min-w-0 flex-1 truncate text-title font-semibold tracking-[-0.01em]">
           {first.month} {days[0]?.slice(0, 4)}
         </p>
         {singleDay ? <DaySwitcher days={days} day={shownDay} onPick={setPicked} /> : null}
@@ -52,8 +52,8 @@ export function CalendarView({ days, blocks, singleDay, focus = [], className }:
           const parts = wallParts(day);
           return (
             <p key={day} className="flex flex-col items-center leading-tight">
-              <span className="text-[12px] font-semibold tracking-[0.06em] text-faint uppercase">{parts.weekday.slice(0, 3)}</span>
-              <span className="tabular text-[18px] font-semibold">{parts.day}</span>
+              <span className="text-caption font-semibold tracking-[0.06em] text-faint uppercase">{parts.weekday.slice(0, 3)}</span>
+              <span className="tabular text-title font-semibold">{parts.day}</span>
             </p>
           );
         })}
@@ -62,7 +62,7 @@ export function CalendarView({ days, blocks, singleDay, focus = [], className }:
         <div className="relative grid" style={{ ...columns, height: contentHeight }}>
           <div className="relative">
             {hourLines.map((hour) => (
-              <span key={hour} className="tabular absolute right-2 -translate-y-1/2 text-[12px] text-faint" style={{ top: top(hour * 60) }}>
+              <span key={hour} className="tabular absolute right-2 -translate-y-1/2 text-caption text-faint" style={{ top: top(hour * 60) }}>
                 {String(hour).padStart(2, "0")}:00
               </span>
             ))}
@@ -109,7 +109,7 @@ function Block({ block, top, height }: BlockProps) {
       )}
       style={{ top: top + 1, height: height - 2 }}
     >
-      <p className={cx("flex min-w-0 text-[12px] leading-[13px] font-semibold", stacked ? "flex-col" : "gap-1")}>
+      <p className={cx("flex min-w-0 text-caption leading-[13px] font-semibold", stacked ? "flex-col" : "gap-1")}>
         {busy ? null : <span className="tabular shrink-0">{time}</span>}
         <span className="truncate">{block.title}</span>
       </p>
@@ -127,7 +127,7 @@ function DaySwitcher({ days, day, onPick }: { days: string[]; day: string; onPic
       <button type="button" aria-label="Previous day" onClick={() => step(-1)} className={button}>
         <Icon name="chevronLeft" size={18} />
       </button>
-      <span className="tabular w-[5.5rem] text-center text-[14px] font-medium">
+      <span className="tabular w-[5.5rem] text-center text-body font-medium">
         {parts.weekday.slice(0, 3)} {parts.day} {parts.month.slice(0, 3)}
       </span>
       <button type="button" aria-label="Next day" onClick={() => step(1)} className={button}>

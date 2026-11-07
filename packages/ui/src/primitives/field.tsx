@@ -15,12 +15,12 @@ export function Field({ label, hint, error, children }: FieldProps) {
   const noteId = hint || error ? `${id}-note` : undefined;
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-medium text-foreground">
+      <label htmlFor={id} className="text-meta font-medium text-foreground">
         {label}
       </label>
       {children({ id, "aria-describedby": noteId, "aria-invalid": error ? true : undefined })}
       {(error ?? hint) && (
-        <p id={noteId} className={error ? "text-[13px] text-fail" : "text-[13px] text-faint"}>
+        <p id={noteId} className={error ? "text-meta text-fail" : "text-meta text-faint"}>
           {error ?? hint}
         </p>
       )}

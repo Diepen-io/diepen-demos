@@ -31,8 +31,8 @@ export function ChannelFrame({ channel, icon, accent, meta, className, children 
         >
           <Icon name={icon} size={14} strokeWidth={2} />
         </span>
-        <span className="text-[13px] font-semibold text-foreground">{channel}</span>
-        {meta && <span className="ml-auto flex min-w-0 items-center gap-2 truncate text-[13px] text-muted">{meta}</span>}
+        <span className="text-meta font-semibold text-foreground">{channel}</span>
+        {meta && <span className="ml-auto flex min-w-0 items-center gap-2 truncate text-meta text-muted">{meta}</span>}
       </div>
       <div className="relative flex min-h-0 flex-1 flex-col bg-surface">{children}</div>
     </section>

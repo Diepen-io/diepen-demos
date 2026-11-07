@@ -39,7 +39,7 @@ function Avatar({ name, initials: given, brand }: { name: string; initials?: str
     <span
       aria-hidden
       className={cx(
-        "grid size-12 shrink-0 place-items-center rounded-full text-[17px] font-semibold md:size-16 md:text-[22px]",
+        "grid size-12 shrink-0 place-items-center rounded-full text-title font-semibold md:size-16 md:text-heading",
         brand ? "bg-brand text-brand-foreground" : "bg-foreground/85 text-white",
       )}
     >
@@ -168,7 +168,7 @@ export function KeynoteFigures({ figures }: { figures: { value: string; label: s
       {figures.slice(0, 3).map((figure) => (
         // Value on top, label below, each card the same shape: the values share one line whatever the labels' length.
         <div key={figure.label} className={cx(surface, "grid grid-rows-[auto_1fr] justify-items-center px-2 py-6 text-center md:px-6 md:py-9")}>
-          <dt className="order-2 mt-3 text-[15px] leading-tight font-medium text-balance text-muted md:text-[clamp(18px,1.6vw,26px)]">{figure.label}</dt>
+          <dt className="order-2 mt-3 text-body leading-tight font-medium text-balance text-muted md:text-[clamp(18px,1.6vw,26px)]">{figure.label}</dt>
           <dd className="order-1 text-[clamp(40px,5.4vw,92px)] font-semibold leading-none tracking-[-0.03em]">{figure.value}</dd>
         </div>
       ))}

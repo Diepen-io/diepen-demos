@@ -45,7 +45,7 @@ export function CalendarEventBlock({ event, startHour, hourHeight, isScrollTarge
     >
       <p className="truncate text-meta leading-tight font-semibold">{event.title ?? fallbackTitle[event.kind]}</p>
       {height > 40 && (
-        <p className="tabular truncate text-[12px] opacity-80">
+        <p className="tabular truncate text-caption opacity-80">
           {wallTime(event.start)}
           <span className="hidden @2xl:inline"> to {wallTime(event.end)}</span>
         </p>

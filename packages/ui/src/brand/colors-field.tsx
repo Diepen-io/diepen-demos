@@ -70,13 +70,13 @@ export function ColorsField({ value, onChange }: { value: Colors; onChange: (val
       </div>
       <div className="flex flex-wrap items-center gap-3 rounded-xl bg-subtle p-3">
         <span
-          className="inline-flex h-9 items-center rounded-lg px-3.5 text-sm font-medium"
+          className="inline-flex h-9 items-center rounded-lg px-3.5 text-body font-medium"
           style={{ backgroundColor: value.brand, color: value.brandForeground }}
         >
           Book a call
         </span>
         {ratio !== null && grade && (
-          <span className="flex items-center gap-2 text-[13px] text-muted">
+          <span className="flex items-center gap-2 text-meta text-muted">
             <span className="tabular">{ratio.toFixed(1)}:1</span>
             <Badge tone={readable ? "pass" : "fail"} icon={readable ? "check" : "alert"}>
               {readable ? `${grade} contrast` : "Hard to read"}

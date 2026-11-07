@@ -18,10 +18,10 @@ export function OwnerRow({ row }: { row: OwnerRowData }) {
       <ChannelMark channel={row.channel} size={26} />
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline gap-2">
-          <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{row.name}</span>
-          <span className="tabular shrink-0 text-[13px] text-faint">{row.lastActivity.slice(11, 16)}</span>
+          <span className="min-w-0 flex-1 truncate text-body font-semibold">{row.name}</span>
+          <span className="tabular shrink-0 text-meta text-faint">{row.lastActivity.slice(11, 16)}</span>
         </span>
-        <span className="mt-0.5 line-clamp-2 text-[14px] leading-snug text-muted [overflow-wrap:anywhere]">{row.summary}</span>
+        <span className="mt-0.5 line-clamp-2 text-body leading-snug text-muted [overflow-wrap:anywhere]">{row.summary}</span>
         <span className="mt-2 flex">
           <StatusChip status={row.status} />
         </span>

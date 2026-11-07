@@ -44,7 +44,7 @@ export function InstagramDm({ customer, account, messages, typing, seen, classNa
       <header className="flex items-center gap-3 border-b border-border px-4 py-3">
         <RingedAvatar person={customer} size={36} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-semibold">{customer.name}</p>
+          <p className="truncate text-body font-semibold">{customer.name}</p>
           {customer.detail && <p className="truncate text-meta text-faint">{customer.detail}</p>}
         </div>
         <span className="flex items-center gap-3.5 text-foreground">
@@ -57,7 +57,7 @@ export function InstagramDm({ customer, account, messages, typing, seen, classNa
       <div ref={list} className="scroll-area flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3.5 py-4">
         <div className="mb-4 flex flex-col items-center gap-1.5 text-center">
           <RingedAvatar person={customer} size={64} />
-          <p className="mt-1 text-[15px] font-semibold">{customer.name}</p>
+          <p className="mt-1 text-body font-semibold">{customer.name}</p>
           {customer.detail && <p className="text-meta text-faint">{customer.detail} · Instagram</p>}
         </div>
         {messages.map((message, index) => {

@@ -88,7 +88,7 @@ export function EmailInbox({ account, threads, openThreadId, drafting, composeSu
               )}
               <div className="flex flex-1 flex-col gap-4 px-4 pt-3 pb-5 @lg:px-6">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <h3 className="min-w-0 text-xl font-semibold tracking-[-0.015em]">{open?.subject ?? "New message"}</h3>
+                  <h3 className="min-w-0 text-title font-semibold tracking-[-0.015em]">{open?.subject ?? "New message"}</h3>
                   {open?.status && <StatusBadge status={open.status} />}
                 </div>
                 {messages.map((message, index) => (

@@ -36,7 +36,7 @@ export function LivePartTabs({ value, onChange, changed }: LivePartTabsProps) {
             aria-selected={active}
             onClick={() => onChange(part.id)}
             className={cx(
-              "relative flex h-14 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl text-[12px] font-medium transition-colors duration-150",
+              "relative flex h-14 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl text-caption font-medium transition-colors duration-150",
               active ? "text-foreground" : "text-faint",
             )}
           >

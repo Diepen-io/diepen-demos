@@ -31,7 +31,7 @@ export function ProposalLane({ seller, client, date, proposal, email, sentAt, em
           isNew={proposal.isNew}
         />
       ) : emptyText ? (
-        <p className="px-1 py-2 text-[14px] text-faint">{emptyText}</p>
+        <p className="px-1 py-2 text-body text-faint">{emptyText}</p>
       ) : null}
       {email ? (
         <FollowUpEmail

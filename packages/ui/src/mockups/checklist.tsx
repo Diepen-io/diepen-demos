@@ -38,11 +38,11 @@ export function Checklist({ client, title, items, className }: ChecklistProps) {
         <div className="flex items-center gap-3">
           <Avatar name={client.name} size={40} />
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-[17px] font-semibold tracking-[-0.01em]">{client.name}</h3>
+            <h3 className="truncate text-title font-semibold tracking-[-0.01em]">{client.name}</h3>
             {client.detail && <p className="truncate text-meta text-muted">{client.detail}</p>}
           </div>
           <p className="tabular shrink-0 text-meta text-muted">
-            <span className="text-[17px] font-semibold text-foreground">{checked}</span> of {items.length} checked
+            <span className="text-title font-semibold text-foreground">{checked}</span> of {items.length} checked
           </p>
         </div>
         <div aria-hidden="true" className="flex gap-1">

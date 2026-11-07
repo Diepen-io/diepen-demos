@@ -77,7 +77,7 @@ export function Transcript({ title, elapsed, state = "idle", participants = [], 
   return (
     <ChannelFrame channel="Call transcript" icon="mic" accent="var(--channel-call)" meta={meta} className={className}>
       <header className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <h3 className="min-w-0 flex-1 truncate text-[15px] font-semibold">{title}</h3>
+        <h3 className="min-w-0 flex-1 truncate text-body font-semibold">{title}</h3>
         <span className="flex -space-x-2">
           {participants.map((name) => (
             <Avatar key={name} name={name} size={28} className="ring-2 ring-surface" />
@@ -90,7 +90,7 @@ export function Transcript({ title, elapsed, state = "idle", participants = [], 
             <Avatar name={line.speaker} size={32} />
             <div className="min-w-0 flex-1">
               <p className="flex items-baseline gap-2">
-                <span className="text-[15px] font-semibold">{line.speaker}</span>
+                <span className="text-body font-semibold">{line.speaker}</span>
                 <span className="tabular text-meta text-faint">{line.time}</span>
               </p>
               <p className="text-body text-foreground">
@@ -104,7 +104,7 @@ export function Transcript({ title, elapsed, state = "idle", participants = [], 
             <Avatar name={interim.speaker} size={32} className="ring-2 ring-channel-call ring-offset-2 ring-offset-surface" />
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2">
-                <span className="text-[15px] font-semibold">{interim.speaker}</span>
+                <span className="text-body font-semibold">{interim.speaker}</span>
                 <SpeakingBars />
               </p>
               <p className="caret text-body text-faint">{interim.text}</p>

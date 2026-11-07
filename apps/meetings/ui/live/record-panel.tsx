@@ -28,7 +28,7 @@ export function RecordPanel({ supported, recording, sellerName }: RecordPanelPro
 
   if (!supported) {
     return (
-      <p className="flex gap-2.5 rounded-xl bg-subtle px-3.5 py-3 text-[14px] leading-snug text-muted">
+      <p className="flex gap-2.5 rounded-xl bg-subtle px-3.5 py-3 text-body leading-snug text-muted">
         <Icon name="info" size={17} className="mt-px shrink-0" />
         Recording needs Chrome, Edge or Safari. Paste a transcript or load the sample call.
       </p>
@@ -40,7 +40,7 @@ export function RecordPanel({ supported, recording, sellerName }: RecordPanelPro
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="text-[13px] font-medium text-muted">Speaking now</span>
+        <span className="text-meta font-medium text-muted">Speaking now</span>
         <Segmented
           className="max-sm:*:h-11"
           label="Speaking now"
@@ -66,7 +66,7 @@ export function RecordPanel({ supported, recording, sellerName }: RecordPanelPro
           </Button>
         )}
         {isRecording && (
-          <span className="flex items-center gap-2 text-[14px] font-medium text-channel-call" role="status">
+          <span className="flex items-center gap-2 text-body font-medium text-channel-call" role="status">
             <span aria-hidden="true" className="size-2 animate-pulse rounded-full bg-channel-call" />
             Recording <span className="tabular text-muted">{formatCallTime(recording.elapsed)}</span>
           </span>
@@ -74,7 +74,7 @@ export function RecordPanel({ supported, recording, sellerName }: RecordPanelPro
       </div>
 
       {isRecording && (recording.interim || recording.noSpeech) ? (
-        <p className="rounded-xl bg-subtle px-3.5 py-2.5 text-[14px] leading-snug">
+        <p className="rounded-xl bg-subtle px-3.5 py-2.5 text-body leading-snug">
           {recording.interim ? (
             <>
               <span className="font-medium">{speakerName}: </span>
@@ -86,8 +86,8 @@ export function RecordPanel({ supported, recording, sellerName }: RecordPanelPro
         </p>
       ) : null}
 
-      {note ? <p className="text-[14px] leading-snug text-foreground">{note}</p> : null}
-      <p className="text-[13px] leading-snug text-faint">Your browser&apos;s speech service turns your voice into text.</p>
+      {note ? <p className="text-body leading-snug text-foreground">{note}</p> : null}
+      <p className="text-meta leading-snug text-faint">Your browser&apos;s speech service turns your voice into text.</p>
     </div>
   );
 }

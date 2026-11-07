@@ -34,8 +34,8 @@ export function Lane({ lane, id, focused, className, children }: LaneProps) {
       <header className="flex items-center gap-3 px-5 pt-4 pb-2">
         <Icon name={lane.icon ?? "user"} size={20} className={cx("shrink-0", lane.brand ? "text-brand" : "text-faint")} />
         <span className="min-w-0 flex-1">
-          <span className="line-clamp-2 text-[17px] leading-tight font-semibold tracking-[-0.01em] text-balance">{lane.label}</span>
-          <span className="block truncate text-[14px] leading-snug text-muted">{lane.role}</span>
+          <span className="line-clamp-2 text-title leading-tight font-semibold tracking-[-0.01em] text-balance">{lane.label}</span>
+          <span className="block truncate text-body leading-snug text-muted">{lane.role}</span>
         </span>
       </header>
       <div

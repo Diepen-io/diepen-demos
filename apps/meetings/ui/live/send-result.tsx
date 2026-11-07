@@ -17,7 +17,7 @@ export function SendResult({ afterMs }: { afterMs: number }) {
       <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white/15">
         <Icon name="check" size={17} strokeWidth={2.25} />
       </span>
-      <p className="text-[15px] font-medium sm:text-[17px]">
+      <p className="text-body font-medium sm:text-title">
         Transcript to proposal sent: <span className="tabular font-semibold">{formatDuration(afterMs)}</span>
       </p>
     </div>

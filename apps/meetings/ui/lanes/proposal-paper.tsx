@@ -39,32 +39,32 @@ export function ProposalPaper({ seller, proposal, client, date, sent, isNew }: P
       <header className="flex flex-col gap-2.5">
         <div className="flex items-start gap-2.5">
           <BrandMark profile={seller} size={26} />
-          <span className="min-w-0 flex-1 pt-1 text-[13px] leading-snug font-semibold">{seller.name}</span>
+          <span className="min-w-0 flex-1 pt-1 text-meta leading-snug font-semibold">{seller.name}</span>
           <Status sent={sent} />
         </div>
-        <h3 className="text-[20px] leading-tight font-semibold tracking-[-0.02em] 2xl:text-[24px]">
+        <h3 className="text-heading leading-tight font-semibold tracking-[-0.02em] 2xl:text-heading">
           {proposal.title}
         </h3>
-        <p className="text-[13px] text-muted">
+        <p className="text-meta text-muted">
           {client ? <>For {client}, </> : null}
           <span className="whitespace-nowrap">{date}</span>
         </p>
       </header>
       <ul className="flex flex-col gap-2">
         {proposal.scope.map((item) => (
-          <li key={item} className="flex gap-2.5 text-[14px] leading-snug 2xl:text-[16px]">
+          <li key={item} className="flex gap-2.5 text-body leading-snug 2xl:text-body">
             <Icon name="check" size={16} strokeWidth={2.25} className="mt-0.5 shrink-0 text-brand" />
             {item}
           </li>
         ))}
       </ul>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-brand-soft px-3.5 py-3">
-        <span className="text-[13px] font-semibold text-muted">Price</span>
-        <span className="tabular text-[18px] font-semibold tracking-[-0.015em] 2xl:text-[21px]">
+        <span className="text-meta font-semibold text-muted">Price</span>
+        <span className="tabular text-title font-semibold tracking-[-0.015em] 2xl:text-heading">
           {proposal.price}
         </span>
       </div>
-      <dl className="grid gap-1.5 text-[13px] leading-snug 2xl:text-[14px]">
+      <dl className="grid gap-1.5 text-meta leading-snug 2xl:text-body">
         <div className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2">
           <dt className="text-faint">Timeline</dt>
           <dd>{proposal.timeline}</dd>

@@ -26,7 +26,7 @@ export function SlotChips({ slots, onPick, disabled, spotlight, className }: Slo
     >
       {slots.map((slot) => {
         const chipClass = cx(
-          "inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium tabular transition-[background-color,box-shadow,opacity,filter] duration-200",
+          "inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-body font-medium tabular transition-[background-color,box-shadow,opacity,filter] duration-200",
           slot.picked
             ? "bg-brand text-brand-foreground"
             : "bg-surface text-foreground shadow-[inset_0_0_0_1px_var(--brand-line)]",

@@ -364,7 +364,7 @@ Live mode uses four lanes.
 | Viewport | Live |
 | --- | --- |
 | 1920x1080 | Four lanes side by side in one row: Firm 30%, Client 21% (phone frame), System 22%, Drive 27%. The clock bar carries "Skip 3 days" and "Start over" |
-| 1440x900, and 1280x720 | Same four lanes. Firm and Drive zoom their content out a step as the lane gets shorter (to 0.9, 0.8, 0.74 and 0.68 of full size), so all 6 checklist rows and the summary read whole and Drive names wrap on two or three lines. The phone content zooms out a step on a phone narrower than 260 px. The upload page scrolls inside the phone frame |
+| 1440x900, and 1280x720 | Same four lanes. Nothing zooms out: every line keeps the shared type scale (decision G4), Firm and Drive scroll inside their lane, and below 490 px of lane height the firm summary hides its problem notes. The upload page scrolls inside the phone frame |
 | 375 px wide | One lane at a time with `ui/lane-tabs.tsx` (Firm, Client, System, Drive). The client lane is full width without the phone frame. Each lane is as long as its content and the page scrolls; the clock, "Skip 3 days" and the tabs stick to the top. Tabs show a dot when another lane changed |
 
 The phone frame keeps a 9:19 shape at a size set by the lane alone: as tall as the lane allows, never wider than the lane, at most 820 px tall. Its status bar, island and corners scale with its width, so the clock never meets the island.

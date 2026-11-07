@@ -96,11 +96,11 @@ export function Sheet({ open, onClose, title, description, children, footer }: S
         {/* Plain divs: a header or footer here would add a second banner and contentinfo to the page. */}
         <div className="flex items-start gap-4 px-5 pt-5 pb-4 sm:px-6">
           <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-lg font-semibold tracking-[-0.01em]">
+            <h2 id={titleId} className="text-title font-semibold tracking-[-0.01em]">
               {title}
             </h2>
             {description && (
-              <p id={descriptionId} className="mt-1 text-sm text-muted">
+              <p id={descriptionId} className="mt-1 text-body text-muted">
                 {description}
               </p>
             )}

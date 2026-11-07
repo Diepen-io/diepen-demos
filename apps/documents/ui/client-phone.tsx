@@ -42,7 +42,7 @@ export function ClientPhone({ framed, flow, time, screenKey, children }: ClientP
       key={screenKey}
       className={cx("screen-in", !flow && "scroll-area min-h-0 flex-1 overflow-y-auto overscroll-contain")}
     >
-      <div className="phone-content">{children}</div>
+      {children}
     </div>
   );
   if (!framed) {

@@ -27,8 +27,8 @@ export function PresetPicker({ presets, activeId, onPick }: PresetPickerProps) {
             >
               <BrandMark profile={preset} size={34} />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[15px] font-medium text-foreground">{preset.name}</span>
-                <span className="block truncate text-[13px] text-muted">
+                <span className="block truncate text-body font-medium text-foreground">{preset.name}</span>
+                <span className="block truncate text-meta text-muted">
                   {preset.industry}
                   {preset.fictional && " · Fictional"}
                 </span>

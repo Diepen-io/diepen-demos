@@ -28,7 +28,7 @@ export function LinkedinDm({ customer, business, messages, typing, className, ..
       <header className="flex items-center gap-3 border-b border-border px-4 py-3">
         <Avatar name={customer.name} src={customer.avatarUrl} size={40} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-semibold">{customer.name}</p>
+          <p className="truncate text-body font-semibold">{customer.name}</p>
           {customer.detail && <p className="truncate text-meta text-muted">{customer.detail}</p>}
         </div>
         <span className="flex items-center gap-3 text-muted">
@@ -55,7 +55,7 @@ export function LinkedinDm({ customer, business, messages, typing, className, ..
               <div className={cx("flex gap-3", startsGroup ? "mt-3" : "mt-1")}>
                 <span className="w-10 shrink-0">{startsGroup && <Avatar name={author.name} src={author.avatarUrl} size={40} />}</span>
                 <div className="min-w-0 flex-1">
-                  {startsGroup && <p className="text-[15px] font-semibold">{author.name}</p>}
+                  {startsGroup && <p className="text-body font-semibold">{author.name}</p>}
                   <p className="text-body whitespace-pre-line text-foreground">{message.text}</p>
                   <MessageExtras message={message} controls={controls} align="start" />
                 </div>
@@ -81,7 +81,7 @@ export function LinkedinDm({ customer, business, messages, typing, className, ..
           <div className="flex items-center gap-3 px-3 pb-3 text-muted">
             <Icon name="image" size={20} />
             <Icon name="paperclip" size={20} />
-            <span className="ml-auto inline-flex h-8 items-center rounded-full bg-channel-linkedin px-4 text-sm font-semibold text-white">
+            <span className="ml-auto inline-flex h-8 items-center rounded-full bg-channel-linkedin px-4 text-body font-semibold text-white">
               Send
             </span>
           </div>

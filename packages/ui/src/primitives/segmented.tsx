@@ -19,7 +19,7 @@ export type SegmentedProps<T extends string> = {
 };
 
 const itemClass =
-  "relative inline-flex h-8 min-w-14 max-sm:h-11 cursor-pointer items-center justify-center rounded-[8px] px-3 text-[13px] font-medium transition-[color,background-color,box-shadow] duration-150";
+  "relative inline-flex h-8 min-w-14 max-sm:h-11 cursor-pointer items-center justify-center rounded-[8px] px-3 text-meta font-medium transition-[color,background-color,box-shadow] duration-150";
 const activeClass = "bg-surface text-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_rgb(0_0_0/0.06)]";
 const idleClass = "text-muted hover:text-foreground";
 

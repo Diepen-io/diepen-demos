@@ -45,8 +45,8 @@ export function SampleMenu({ itemId, onPick, onClose }: SampleMenuProps) {
         >
           <FileIcon kind={fileKindOf(sample.fileName)} size={20} />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[14px] font-medium">{sample.menuLabel}</span>
-            <span className="block truncate text-[12px] text-faint">{sample.fileName}</span>
+            <span className="block truncate text-body font-medium">{sample.menuLabel}</span>
+            <span className="block truncate text-caption text-faint">{sample.fileName}</span>
           </span>
         </button>
       ))}

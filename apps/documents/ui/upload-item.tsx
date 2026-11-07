@@ -67,7 +67,7 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
     >
       <div className="flex flex-wrap items-start gap-x-3 gap-y-1.5">
         <div className="min-w-[9rem] flex-1">
-          <p className="text-[15px] leading-snug font-medium">{item.label}</p>
+          <p className="text-body leading-snug font-medium">{item.label}</p>
           <p className="text-meta text-muted">{item.detail}</p>
         </div>
         <StatusBadge status={state} className="mt-0.5" />
@@ -76,8 +76,8 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
       {file && (
         <div className="flex items-center gap-2 rounded-lg bg-subtle px-2.5 py-2">
           <FileIcon kind={fileKindOf(file.name)} size={18} />
-          <MiddleTruncate text={file.name} className="flex-1 text-[13px]" />
-          {file.uploading && <span className="shrink-0 text-[12px] text-muted">Uploading</span>}
+          <MiddleTruncate text={file.name} className="flex-1 text-meta" />
+          {file.uploading && <span className="shrink-0 text-caption text-muted">Uploading</span>}
         </div>
       )}
       {file?.uploading && (
@@ -86,12 +86,12 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
         </div>
       )}
       {state === "problem" && reason && (
-        <p className="flex gap-1.5 text-[14px] leading-snug text-fail">
+        <p className="flex gap-1.5 text-body leading-snug text-fail">
           <Icon name="alert" size={15} className="mt-0.5 shrink-0" />
           {reason}
         </p>
       )}
-      {error && <p className="text-[14px] leading-snug text-fail">{error}</p>}
+      {error && <p className="text-body leading-snug text-fail">{error}</p>}
 
       {item.kind === "signature" && state === "missing" && (
         <Button variant="brand" size="sm" className={cx("self-start", touchTarget)} onClick={actions?.onReviewSign}>
@@ -107,7 +107,7 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
               <Icon name="paperclip" size={14} />
               {state === "problem" ? "Upload again" : "Upload"}
             </Button>
-            <Button variant="ghost" size="sm" className="px-2 max-md:h-11 max-md:text-[14px]" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)} {...spotlight(row.spotlightSample && !menuOpen)}>
+            <Button variant="ghost" size="sm" className="px-2 max-md:h-11 max-md:text-body" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)} {...spotlight(row.spotlightSample && !menuOpen)}>
               Use a sample
               <Icon name="chevronRight" size={14} className={cx("transition-transform duration-200", menuOpen && "rotate-90")} />
             </Button>

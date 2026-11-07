@@ -18,7 +18,7 @@ export function AiLane({ status, waitingFor, turns, seconds, summary, insights }
   return (
     <div data-lane="ai" className="flex flex-col gap-3">
       {status === "waiting" ? (
-        <p className="flex items-center gap-2.5 px-1 py-2 text-[14px] text-faint 2xl:text-[16px]">
+        <p className="flex items-center gap-2.5 px-1 py-2 text-body text-faint 2xl:text-body">
           <Icon name="clock" size={17} className="shrink-0" />
           {waitingFor}
         </p>
@@ -27,8 +27,8 @@ export function AiLane({ status, waitingFor, turns, seconds, summary, insights }
       )}
       {summary && (
         <section data-output="summary" className={cx("rounded-xl bg-surface px-3.5 py-3 shadow-[inset_0_0_0_1px_var(--border)]", summary.isNew && "enter")}>
-          <h3 className="mb-1.5 text-[13px] font-semibold text-muted">Summary</h3>
-          <p className="text-[14px] leading-[1.5] 2xl:text-[16px]">{summary.text}</p>
+          <h3 className="mb-1.5 text-meta font-semibold text-muted">Summary</h3>
+          <p className="text-body leading-[1.5] 2xl:text-body">{summary.text}</p>
         </section>
       )}
       {insights && (
@@ -37,14 +37,14 @@ export function AiLane({ status, waitingFor, turns, seconds, summary, insights }
           <ul className="grid grid-cols-2 gap-1.5">
             {insights.numbers.map((figure) => (
               <li key={`${figure.label}-${figure.value}`} className="rounded-lg bg-brand-soft px-3 py-2">
-                <span className="tabular block text-[17px] leading-tight font-semibold tracking-[-0.02em] 2xl:text-[21px]">{figure.value}</span>
-                <span className="block text-[12px] leading-snug text-muted 2xl:text-[13px]">{figure.label}</span>
+                <span className="tabular block text-title leading-tight font-semibold tracking-[-0.02em] 2xl:text-heading">{figure.value}</span>
+                <span className="block text-caption leading-snug text-muted 2xl:text-meta">{figure.label}</span>
               </li>
             ))}
           </ul>
           <ul className="flex flex-col gap-2">
             {insights.painPoints.map((point) => (
-              <li key={point} className="flex gap-2.5 text-[14px] leading-snug 2xl:text-[15px]">
+              <li key={point} className="flex gap-2.5 text-body leading-snug 2xl:text-body">
                 <Icon name="alert" size={16} className="mt-0.5 shrink-0 text-wait" />
                 {point}
               </li>
@@ -59,7 +59,7 @@ export function AiLane({ status, waitingFor, turns, seconds, summary, insights }
 function ReadingRow({ turns, seconds, done }: { turns: number; seconds?: number; done: boolean }) {
   return (
     <div
-      className="relative flex items-center gap-2.5 overflow-hidden rounded-xl bg-subtle px-3.5 py-3 text-[14px] 2xl:text-[16px]"
+      className="relative flex items-center gap-2.5 overflow-hidden rounded-xl bg-subtle px-3.5 py-3 text-body 2xl:text-body"
       role={done ? undefined : "status"}
     >
       <span className={cx("grid size-6 shrink-0 place-items-center rounded-full", done ? "bg-brand text-brand-foreground" : "bg-surface")}>

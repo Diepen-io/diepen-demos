@@ -52,7 +52,7 @@ export function ChannelTabs({ value, onChange, unread = {}, channels = channelOr
             tabIndex={active ? 0 : -1}
             onClick={() => onChange?.(channel)}
             className={cx(
-              "relative inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium whitespace-nowrap transition-[color,background-color,box-shadow] duration-200",
+              "relative inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-body font-medium whitespace-nowrap transition-[color,background-color,box-shadow] duration-200",
               onChange ? "cursor-pointer" : "cursor-default",
               active ? "bg-surface text-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_rgb(0_0_0/0.06)]" : "text-muted hover:text-foreground",
             )}

@@ -32,11 +32,11 @@ export function CalendarLane({ weekStart, meeting }: CalendarLaneProps) {
             key={day}
             className="grid grid-cols-[3.25rem_minmax(0,1fr)] items-start gap-2 px-3 py-1.5 2xl:grid-cols-[3.75rem_minmax(0,1fr)] 2xl:py-2"
           >
-            <span className="tabular pt-px text-[13px] leading-5 font-semibold whitespace-nowrap text-foreground 2xl:text-[14px]">
+            <span className="tabular pt-px text-meta leading-5 font-semibold whitespace-nowrap text-foreground 2xl:text-body">
               <span className="font-medium text-faint uppercase">{date.weekday}</span> {date.day}
             </span>
             <div className="flex min-w-0 flex-col gap-1">
-              {booked ? <BookedMeeting {...booked} /> : <p className="py-0.5 text-[13px] leading-5 text-faint">Free</p>}
+              {booked ? <BookedMeeting {...booked} /> : <p className="py-0.5 text-meta leading-5 text-faint">Free</p>}
             </div>
           </li>
         );
@@ -51,11 +51,11 @@ function BookedMeeting({ event, agenda, isNew }: NonNullable<CalendarLaneProps["
         "rounded-lg bg-brand px-2.5 py-1.5 text-brand-foreground shadow-[0_1px_2px_rgb(0_0_0/0.12)]",
         isNew && "enter pulse-once",
       )}>
-      <p className="text-[14px] leading-tight font-semibold 2xl:text-[15px]">{event.title}</p>
-      <p className="tabular mt-0.5 text-[13px] opacity-85">
+      <p className="text-body leading-tight font-semibold 2xl:text-body">{event.title}</p>
+      <p className="tabular mt-0.5 text-meta opacity-85">
         {wallTime(event.start)} to {endTime(event)}, {event.durationMinutes} minutes
       </p>
-      {agenda.length > 0 && <p className="mt-1 text-[12px] leading-snug opacity-85">{agenda.join(" · ")}</p>}
+      {agenda.length > 0 && <p className="mt-1 text-caption leading-snug opacity-85">{agenda.join(" · ")}</p>}
     </div>
   );
 }

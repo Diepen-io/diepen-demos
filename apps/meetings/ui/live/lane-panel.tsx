@@ -22,8 +22,8 @@ export function LanePanel({ id, brand, role, className, children }: LanePanelPro
       <header className="flex items-center gap-3 px-4 pt-3.5 pb-1">
         <Icon name={icons[id]} size={18} className={cx("shrink-0", brand ? "text-brand" : "text-faint")} />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[15px] leading-tight font-semibold">{lane.label}</span>
-          <span className="block truncate text-[13px] text-muted">{role ?? lane.role}</span>
+          <span className="block truncate text-body leading-tight font-semibold">{lane.label}</span>
+          <span className="block truncate text-meta text-muted">{role ?? lane.role}</span>
         </span>
       </header>
       <div className="p-3.5">{children}</div>

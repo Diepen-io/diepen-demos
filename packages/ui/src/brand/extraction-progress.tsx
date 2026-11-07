@@ -30,8 +30,8 @@ export function ExtractionProgress({ host }: { host: string }) {
           />
         ))}
       </span>
-      <span className="min-w-0 flex-1 text-sm text-foreground">{step?.text(host)}</span>
-      <span className="tabular text-[13px] text-faint">{seconds} s</span>
+      <span className="min-w-0 flex-1 text-body text-foreground">{step?.text(host)}</span>
+      <span className="tabular text-meta text-faint">{seconds} s</span>
     </div>
   );
 }

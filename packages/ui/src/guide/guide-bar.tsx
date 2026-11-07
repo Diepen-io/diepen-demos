@@ -29,7 +29,7 @@ export type GuideStep = {
   action?: GuideAction;
   /** Marks the end of the path: the bar offers "Start over", and "Watch the film" as a quieter second choice. */
   onStartOver?: () => void;
-  /** The demo works and the visitor waits. The bar says so in place of a button. */
+  /** The demo works and the visitor waits. The bar says "One moment" in place of a button. */
   waiting?: boolean;
 };
 
@@ -62,25 +62,16 @@ function ActionButton({ action, primary }: { action: GuideAction; primary: boole
   );
 }
 
-/** In place of a button: where to look, or that the demo is busy. */
-function Hint({ waiting }: { waiting?: boolean }) {
+/** In place of a button while the demo works: three dots and "One moment". */
+function Waiting() {
   return (
-    <p className="flex items-center gap-2 text-[15px] text-muted">
-      {waiting ? (
-        <>
-          <span aria-hidden="true" className="inline-flex gap-1">
-            {[0, 1, 2].map((dot) => (
-              <span key={dot} className="typing-dot size-1.5 rounded-full bg-brand" style={{ animationDelay: `${dot * 150}ms` }} />
-            ))}
-          </span>
-          One moment
-        </>
-      ) : (
-        <>
-          <span aria-hidden="true" className="size-2.5 rounded-full outline-2 outline-offset-2 outline-brand" />
-          Find the ring
-        </>
-      )}
+    <p className="flex items-center gap-2 text-body text-muted">
+      <span aria-hidden="true" className="inline-flex gap-1">
+        {[0, 1, 2].map((dot) => (
+          <span key={dot} className="typing-dot size-1.5 rounded-full bg-brand" style={{ animationDelay: `${dot * 150}ms` }} />
+        ))}
+      </span>
+      One moment
     </p>
   );
 }
@@ -105,23 +96,26 @@ export function GuideBar({ step, sticky, className }: GuideBarProps) {
       aria-label="Next step"
       data-guide-step={step.id}
       className={cx(
-        "flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-2xl px-4 py-3 text-center md:px-6",
+        // The minimum height holds a button row, so a step without one does not move the page.
+        "flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-2xl px-4 py-3 text-center md:min-h-[4.5rem] md:px-6",
         // Elevated only where it floats over content that scrolls under it.
         sticky && "sticky top-2 z-30 bg-surface shadow-[0_0_0_1px_rgb(0_0_0/0.06),0_8px_24px_-12px_rgb(0_0_0/0.2)]",
         className,
       )}
     >
-      <p aria-live="polite" className="min-w-0 text-[16px] leading-snug font-semibold text-balance md:text-[18px]">
-        <span className="tabular mr-3 text-[15px] font-medium text-faint md:text-[16px]">
+      <p aria-live="polite" className="min-w-0 text-body leading-snug font-semibold text-balance md:text-title">
+        <span className="tabular mr-3 font-medium text-faint">
           {step.number ? `Step ${step.number} of ${step.total}` : "Done"}
         </span>
         {step.text}
       </p>
-      {/* On a wide screen the second row is always there, so the bar keeps its height from step to step. On a phone the ring hint gives way to the content. */}
-      <div className={cx("flex min-h-12 flex-wrap items-center justify-center gap-2", !primary && !step.waiting && "max-md:hidden")}>
-        {primary ? <ActionButton action={primary} primary /> : <Hint waiting={step.waiting} />}
-        {secondary && <ActionButton action={secondary} primary={false} />}
-      </div>
+      {/* A step that points with the ring names the spot in its text, so it needs no second row. */}
+      {(primary || step.waiting) && (
+        <div className="flex min-h-12 flex-wrap items-center justify-center gap-2">
+          {primary ? <ActionButton action={primary} primary /> : <Waiting />}
+          {secondary && <ActionButton action={secondary} primary={false} />}
+        </div>
+      )}
     </section>
   );
 }

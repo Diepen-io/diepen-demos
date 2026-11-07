@@ -24,7 +24,7 @@ const placeholders: Record<ChannelId, string> = {
 };
 
 // 16px below the sm breakpoint, so iOS Safari does not zoom into the field.
-const fieldText = "text-base text-foreground placeholder:text-faint focus:outline-none sm:text-[15px]";
+const fieldText = "text-field text-foreground placeholder:text-faint focus:outline-none sm:text-body";
 
 /** A working message field in the look of each channel, for live mode. */
 export function Composer({ channel, onSend, disabled, subject: initialSubject, maxLength }: ComposerProps) {
@@ -77,7 +77,7 @@ export function Composer({ channel, onSend, disabled, subject: initialSubject, m
           <button
             type="submit"
             disabled={empty || disabled}
-            className="cursor-pointer rounded-full px-2.5 text-[15px] font-semibold text-[var(--channel-dm-to)] disabled:cursor-default disabled:opacity-40"
+            className="cursor-pointer rounded-full px-2.5 text-body font-semibold text-[var(--channel-dm-to)] disabled:cursor-default disabled:opacity-40"
           >
             Send
           </button>
@@ -96,7 +96,7 @@ export function Composer({ channel, onSend, disabled, subject: initialSubject, m
           <button
             type="submit"
             disabled={empty || disabled}
-            className="press ml-auto inline-flex h-8 cursor-pointer items-center rounded-full bg-channel-linkedin px-4 text-sm font-semibold text-white max-sm:h-11 max-sm:px-5 disabled:cursor-default disabled:bg-[#d4d4d8] disabled:text-white"
+            className="press ml-auto inline-flex h-8 cursor-pointer items-center rounded-full bg-channel-linkedin px-4 text-body font-semibold text-white max-sm:h-11 max-sm:px-5 disabled:cursor-default disabled:bg-[#d4d4d8] disabled:text-white"
           >
             Send
           </button>
@@ -151,7 +151,7 @@ export function Composer({ channel, onSend, disabled, subject: initialSubject, m
         <button
           type="submit"
           disabled={empty || disabled}
-          className="press inline-flex h-9 cursor-pointer items-center gap-2 rounded-full bg-channel-email px-4 text-sm font-semibold text-white disabled:cursor-default disabled:opacity-40"
+          className="press inline-flex h-9 cursor-pointer items-center gap-2 rounded-full bg-channel-email px-4 text-body font-semibold text-white disabled:cursor-default disabled:opacity-40"
         >
           Send <Icon name="send" size={15} strokeWidth={2} />
         </button>

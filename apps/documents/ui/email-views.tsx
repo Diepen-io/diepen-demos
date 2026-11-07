@@ -35,7 +35,7 @@ export function PhoneInbox({ emails, onOpen, spotlightId }: PhoneInboxProps) {
   return (
     <div className="flex min-h-full flex-col bg-surface">
       <div className="flex items-baseline justify-between px-4 pt-4 pb-2">
-        <h2 className="text-[22px] font-semibold tracking-[-0.02em]">Inbox</h2>
+        <h2 className="text-heading font-semibold tracking-[-0.02em]">Inbox</h2>
         {emails.some((email) => email.unread) && (
           <span className="tabular text-meta text-muted">{emails.filter((email) => email.unread).length} unread</span>
         )}
@@ -58,12 +58,12 @@ export function PhoneInbox({ emails, onOpen, spotlightId }: PhoneInboxProps) {
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-baseline gap-2">
-                    <span className={cx("min-w-0 flex-1 truncate text-[15px]", email.unread ? "font-semibold" : "font-medium text-muted")}>
+                    <span className={cx("min-w-0 flex-1 truncate text-body", email.unread ? "font-semibold" : "font-medium text-muted")}>
                       {email.from.name}
                     </span>
                     <span className={cx("tabular shrink-0 text-meta", email.unread ? "font-semibold" : "text-faint")}>{email.time}</span>
                   </span>
-                  <span className={cx("block truncate text-[14px]", email.unread ? "font-medium" : "text-muted")}>{email.subject}</span>
+                  <span className={cx("block truncate text-body", email.unread ? "font-medium" : "text-muted")}>{email.subject}</span>
                   <span className="block truncate text-meta text-faint">{snippet(email.body)}</span>
                 </span>
               </button>
@@ -81,11 +81,11 @@ export function EmailView({ email, onBack, action }: { email: InboxEmail; onBack
       <button
         type="button"
         onClick={onBack}
-        className="flex cursor-pointer items-center gap-0.5 self-start text-[14px] font-medium text-channel-email"
+        className="flex cursor-pointer items-center gap-0.5 self-start text-body font-medium text-channel-email"
       >
         <Icon name="chevronLeft" size={16} /> Inbox
       </button>
-      <h2 className={cx("text-[19px] leading-tight font-semibold tracking-[-0.015em]", email.fresh && "enter")}>{email.subject}</h2>
+      <h2 className={cx("text-title leading-tight font-semibold tracking-[-0.015em]", email.fresh && "enter")}>{email.subject}</h2>
       <EmailMessage from={email.from} to="me" time={email.time} body={email.body} bodyAction={action} isNew={email.fresh} />
     </div>
   );

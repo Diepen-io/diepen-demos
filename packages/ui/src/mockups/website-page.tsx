@@ -21,17 +21,17 @@ export function WebsitePage({ company, tagline, links = ["Services", "Prices", "
       <div aria-hidden="true" className="flex min-h-0 flex-1 flex-col">
         <nav className="flex items-center gap-3 border-b border-border bg-surface px-5 py-3">
           <BrandMark profile={company} size={28} />
-          <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{company.name}</span>
-          <span className="hidden gap-5 text-sm text-muted @xl:flex">
+          <span className="min-w-0 flex-1 truncate text-body font-semibold">{company.name}</span>
+          <span className="hidden gap-5 text-body text-muted @xl:flex">
             {links.map((link) => (
               <span key={link}>{link}</span>
             ))}
           </span>
         </nav>
         <div className="flex flex-col gap-4 px-6 pt-10 pb-6 @xl:max-w-[60%] @xl:px-10 @xl:pt-14">
-          <h3 className="text-[28px] leading-[1.1] font-semibold tracking-[-0.025em] text-foreground @xl:text-[36px]">{company.name}</h3>
-          {tagline && <p className="text-[17px] text-muted">{tagline}</p>}
-          <span className="inline-flex h-10 w-fit items-center rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground">
+          <h3 className="text-display leading-[1.1] font-semibold tracking-[-0.025em] text-foreground @xl:text-display">{company.name}</h3>
+          {tagline && <p className="text-title text-muted">{tagline}</p>}
+          <span className="inline-flex h-10 w-fit items-center rounded-full bg-brand px-5 text-body font-semibold text-brand-foreground">
             Get in touch
           </span>
           {highlights.length > 0 && (

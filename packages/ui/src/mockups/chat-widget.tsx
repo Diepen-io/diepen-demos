@@ -57,7 +57,7 @@ function ChatWindow({ company, assistantName, messages, typing, ...controls }: O
           <BrandMark profile={company} size={32} />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-semibold">{company.name}</p>
+          <p className="truncate text-body font-semibold">{company.name}</p>
           <p className="flex items-center gap-1.5 text-meta opacity-85">
             <span className="size-2 rounded-full bg-[#4ade80]" />
             {assistantName} is online

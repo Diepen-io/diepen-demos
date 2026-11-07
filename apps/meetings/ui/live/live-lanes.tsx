@@ -86,7 +86,7 @@ export function LiveLanes({ call, profile, stale, waitingFor, spotlightSend }: L
               meeting={{ event: { id: "next-meeting", ...meeting.nextMeeting }, agenda: meeting.nextMeeting.agenda, isNew: isNew(5) }}
             />
           ) : (
-            <p className="px-1 py-2 text-[14px] text-faint">The next meeting lands here.</p>
+            <p className="px-1 py-2 text-body text-faint">The next meeting lands here.</p>
           )}
         </LanePanel>
       </div>
@@ -112,7 +112,7 @@ export function LiveLanes({ call, profile, stale, waitingFor, spotlightSend }: L
                           <Icon name="send" size={16} />
                           {sendLabel(email.crm)}
                         </Button>
-                        <span className="text-[13px] text-faint">Simulated email.</span>
+                        <span className="text-meta text-faint">Simulated email.</span>
                       </div>
                     ),
                 }

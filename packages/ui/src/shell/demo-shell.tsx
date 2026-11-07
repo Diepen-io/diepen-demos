@@ -54,12 +54,12 @@ export function DemoShell({ title, mode, fit, presets, children }: DemoShellProp
             <BrandMark profile={profile} size={34} />
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
-                <span className="text-[15px] leading-tight font-semibold tracking-[-0.01em] max-sm:line-clamp-2 sm:truncate">{profile.name}</span>
+                <span className="text-body leading-tight font-semibold tracking-[-0.01em] max-sm:line-clamp-2 sm:truncate">{profile.name}</span>
                 <FictionalBadge className="shrink-0 max-sm:hidden" />
               </div>
               {/* On a phone the name gets the whole first line, so the fictional mark sits beside the title. */}
               <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                <h1 className="text-[13px] text-muted max-sm:whitespace-nowrap sm:truncate">{title}</h1>
+                <h1 className="text-meta text-muted max-sm:whitespace-nowrap sm:truncate">{title}</h1>
                 <FictionalBadge short className="shrink-0 sm:hidden" />
               </div>
             </div>
@@ -75,7 +75,7 @@ export function DemoShell({ title, mode, fit, presets, children }: DemoShellProp
             />
             <a
               href={studioUrl}
-              className="inline-flex h-11 items-center px-2 text-[13px] font-medium text-faint transition-colors hover:text-foreground sm:order-last sm:h-auto"
+              className="inline-flex h-11 items-center px-2 text-meta font-medium text-faint transition-colors hover:text-foreground sm:order-last sm:h-auto"
             >
               diepen.ai
             </a>
@@ -100,7 +100,7 @@ export function DemoShell({ title, mode, fit, presets, children }: DemoShellProp
         <PageTitleContext value={true}>{children}</PageTitleContext>
       </main>
 
-      <footer className={cx(frame, "py-5 text-[13px] text-faint")}>
+      <footer className={cx(frame, "py-5 text-meta text-faint")}>
         {profile.fictional
           ? `A diepen.ai demo with ${profile.name}, a fictional company.`
           : `A diepen.ai demo in ${profile.name}'s brand.`}{" "}

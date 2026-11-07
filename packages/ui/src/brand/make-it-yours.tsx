@@ -103,7 +103,7 @@ export function MakeItYours({ open, onClose, presets = presetList }: MakeItYours
 
   const footer = (
     <div className="flex flex-col gap-3">
-      {applyError && <p role="alert" className="text-[13px] text-fail">{applyError}</p>}
+      {applyError && <p role="alert" className="text-meta text-fail">{applyError}</p>}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="ghost" size="sm" onClick={() => { resetProfile(); loadDraft(defaultProfile); }}>
           Reset to preset
@@ -114,7 +114,7 @@ export function MakeItYours({ open, onClose, presets = presetList }: MakeItYours
         </Button>
         <Button size="sm" onClick={onApply}>Apply</Button>
       </div>
-      <p className="text-[13px] text-faint">
+      <p className="text-meta text-faint">
         {fixed ? "Apply opens live mode in your brand. " : ""}Your profile lives in this browser and in the link you copy.
       </p>
     </div>
@@ -123,7 +123,7 @@ export function MakeItYours({ open, onClose, presets = presetList }: MakeItYours
   return (
     <Sheet open={open} onClose={onClose} title="Make it yours" description={fixed ? "Run live mode with your company's name, colours and voice." : "Run this demo with your company's name, colours and voice."} footer={footer}>
       <form onSubmit={onLookup} className="flex flex-col gap-2">
-        <label htmlFor="make-it-yours-website" className="text-[13px] font-medium">Your website</label>
+        <label htmlFor="make-it-yours-website" className="text-meta font-medium">Your website</label>
         <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
           <Input
             id="make-it-yours-website"
@@ -140,20 +140,20 @@ export function MakeItYours({ open, onClose, presets = presetList }: MakeItYours
       </form>
       <div className="mt-3 flex flex-col gap-2 empty:hidden">
         {lookup.state === "loading" && <ExtractionProgress host={lookup.host} />}
-        {lookup.state === "error" && <p role="alert" className="rounded-xl bg-fail-soft px-4 py-3 text-sm text-fail">{lookup.message}</p>}
+        {lookup.state === "error" && <p role="alert" className="rounded-xl bg-fail-soft px-4 py-3 text-body text-fail">{lookup.message}</p>}
         {lookup.state === "done" && (
-          <p role="status" className="rounded-xl bg-pass-soft px-4 py-3 text-sm text-pass">
+          <p role="status" className="rounded-xl bg-pass-soft px-4 py-3 text-body text-pass">
             Draft ready from {lookup.host}. Check it below, then apply.
           </p>
         )}
         {lookup.state === "done" && <ProviderNote providerName={lookup.provider} />}
       </div>
 
-      <h3 className="mt-6 mb-2 text-sm font-semibold">{presets.length === 1 ? "Example company" : "Example companies"}</h3>
+      <h3 className="mt-6 mb-2 text-body font-semibold">{presets.length === 1 ? "Example company" : "Example companies"}</h3>
       <PresetPicker presets={presets} activeId={savedProfile.id} onPick={onPreset} />
 
-      <h3 className="mt-7 text-sm font-semibold">Your profile</h3>
-      <p className="mt-1 mb-4 text-[13px] text-muted">Every reply in the demo is written from these details.</p>
+      <h3 className="mt-7 text-body font-semibold">Your profile</h3>
+      <p className="mt-1 mb-4 text-meta text-muted">Every reply in the demo is written from these details.</p>
       <ProfileForm key={draftVersion} draft={draft} onChange={setDraft} />
     </Sheet>
   );

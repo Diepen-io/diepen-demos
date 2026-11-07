@@ -37,8 +37,8 @@ export function OwnerView(props: OwnerViewProps) {
       <header className="flex items-center gap-3 border-b border-border px-4 py-3">
         <BrandMark profile={company} size={36} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[16px] font-semibold tracking-[-0.01em]">{company.name}</p>
-          <p className="mt-0.5 flex min-w-0 items-center gap-2 text-[13px] text-muted">
+          <p className="truncate text-body font-semibold tracking-[-0.01em]">{company.name}</p>
+          <p className="mt-0.5 flex min-w-0 items-center gap-2 text-meta text-muted">
             <span className="tabular truncate">{subtitle}</span>
           </p>
         </div>
@@ -55,7 +55,7 @@ export function OwnerView(props: OwnerViewProps) {
         </ul>
       ) : null}
       {rows.length === 0 ? (
-        <p className="m-auto max-w-[24ch] px-4 text-center text-[14px] text-faint">{emptyText}</p>
+        <p className="m-auto max-w-[24ch] px-4 text-center text-body text-faint">{emptyText}</p>
       ) : (
         <ol className="scroll-area flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3">
           {rows.map((row) => (

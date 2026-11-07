@@ -13,9 +13,9 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "h-8 max-sm:h-11 gap-1.5 rounded-lg px-3 text-[13px]",
-  md: "h-10 max-sm:h-11 gap-2 rounded-[10px] px-4 text-sm",
-  lg: "h-12 gap-2 rounded-xl px-5 text-base",
+  sm: "h-8 max-sm:h-11 gap-1.5 rounded-lg px-3 text-meta",
+  md: "h-10 max-sm:h-11 gap-2 rounded-[10px] px-4 text-body",
+  lg: "h-12 gap-2 rounded-xl px-5 text-title",
 };
 
 export type ButtonProps = ComponentProps<"button"> & {

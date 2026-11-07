@@ -226,7 +226,7 @@ The texts below are the defaults; tests check the step ids, never the words.
 | Step | Id | When | Instruction | Points at |
 | --- | --- | --- | --- | --- |
 | 1 | `ask-time` | No booking yet | You play a customer. Ask {company} for an appointment. | Button "Ask for a time": sends "Can I book a time this week?" in the open channel, or in the first channel that still takes messages |
-| 2 | `pick-time` | The open thread has times on offer | {assistant} offers some times. Pick one. | Ring on the offered slot chips |
+| 2 | `pick-time` | The open thread has times on offer | {assistant} offers some times. Pick one in the answer. | Ring on the offered slot chips |
 | 3 | `ask-refund` | A booking, no handover | Booked. Now ask for a refund. A person must answer that. | Button "Ask for a refund": opens the first empty channel (Instagram first) and sends the refund starter there |
 | any | `waiting` | The open thread waits for a reply | {assistant} writes an answer | "One moment" |
 | End | `end` | A booking and a handover | {assistant} booked your time. The refund went to {owner}, because a person must answer it. | "Start over" (clears every thread and booking) and "Watch the film" |

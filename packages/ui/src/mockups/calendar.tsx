@@ -60,7 +60,7 @@ export function Calendar({ days, startHour, endHour, events, today, view = "auto
   return (
     <ChannelFrame channel="Calendar" icon="calendar" accent="var(--channel-calendar)" meta={days.length === 1 || view === "day" ? "Day" : "Week"} className={className}>
       <header className="flex items-center gap-2 border-b border-border px-4 py-3">
-        <h3 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-[-0.01em]">{title ?? `${first.monthLong} ${first.year}`}</h3>
+        <h3 className="min-w-0 flex-1 truncate text-title font-semibold tracking-[-0.01em]">{title ?? `${first.monthLong} ${first.year}`}</h3>
         <span className="inline-flex h-8 items-center rounded-lg px-3 text-meta font-medium shadow-[inset_0_0_0_1px_var(--border)]">Today</span>
         <Icon name="chevronLeft" size={18} className="text-muted" />
         <Icon name="chevronRight" size={18} className="text-muted" />
@@ -73,10 +73,10 @@ export function Calendar({ days, startHour, endHour, events, today, view = "auto
           const isToday = day === today;
           return (
             <div key={day} className={cx("flex flex-col items-center gap-0.5 py-2", hideWhenNarrow(day))}>
-              <span className={cx("text-[12px] font-medium tracking-[0.04em] uppercase", isToday ? "text-foreground" : "text-faint")}>{date.weekday}</span>
+              <span className={cx("text-caption font-medium tracking-[0.04em] uppercase", isToday ? "text-foreground" : "text-faint")}>{date.weekday}</span>
               <span
                 className={cx(
-                  "tabular inline-flex size-8 items-center justify-center rounded-full text-[15px] font-semibold",
+                  "tabular inline-flex size-8 items-center justify-center rounded-full text-body font-semibold",
                   isToday ? "bg-brand text-brand-foreground" : "text-foreground",
                 )}
               >
@@ -91,7 +91,7 @@ export function Calendar({ days, startHour, endHour, events, today, view = "auto
         <div className={cx(columns, "relative")} style={{ ...style, height: hours.length * hourHeight }}>
           <div className="relative">
             {hours.map((hour, index) => (
-              <span key={hour} className="tabular absolute right-2 -translate-y-1/2 text-[12px] text-faint" style={{ top: index * hourHeight }}>
+              <span key={hour} className="tabular absolute right-2 -translate-y-1/2 text-caption text-faint" style={{ top: index * hourHeight }}>
                 {index === 0 ? "" : `${String(hour).padStart(2, "0")}:00`}
               </span>
             ))}

@@ -32,7 +32,7 @@ export function ScheduleCard({ title, dueLabel, status, fresh }: ScheduleCardMod
             <Icon name="clock" size={15} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[14px] leading-snug font-semibold">{title}</span>
+            <span className="block text-body leading-snug font-semibold">{title}</span>
             <span className="tabular block text-meta text-muted">{dueLabel}</span>
           </span>
         </span>

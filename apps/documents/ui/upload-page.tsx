@@ -50,7 +50,7 @@ export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, on
             <Icon name="chevronLeft" size={17} />
           </button>
         )}
-        <span className="flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg bg-surface px-2.5 text-[13px] text-muted shadow-[inset_0_0_0_1px_var(--border)]">
+        <span className="flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg bg-surface px-2.5 text-meta text-muted shadow-[inset_0_0_0_1px_var(--border)]">
           {/* A phone browser shows the site, not the path. */}
           <Icon name="globe" size={13} className="shrink-0 text-faint" />
           <span className="truncate text-foreground">{uploadHost(profile)}</span>
@@ -59,10 +59,10 @@ export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, on
       <header className="flex flex-col gap-3 px-4 pt-4 pb-3">
         <div className="flex items-center gap-2.5">
           <BrandMark profile={profile} size={30} />
-          <span className="min-w-0 text-[14px] leading-snug font-semibold text-balance">{profile.name}</span>
+          <span className="min-w-0 text-body leading-snug font-semibold text-balance">{profile.name}</span>
         </div>
         <div>
-          <h2 className="text-[19px] leading-tight font-semibold tracking-[-0.015em]">Your 2025 tax return</h2>
+          <h2 className="text-title leading-tight font-semibold tracking-[-0.015em]">Your 2025 tax return</h2>
           <p className="tabular text-meta text-muted">
             {done} of {rows.length} done. Due 31 Mar 2026.
           </p>
@@ -74,7 +74,7 @@ export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, on
         ))}
       </ul>
       <div className="mt-auto flex flex-col gap-3 px-4 pt-4 pb-5">
-        <p className="text-[12px] leading-snug text-faint">
+        <p className="text-caption leading-snug text-faint">
           PDF, PNG or JPEG, up to 4 MB.{claudeReadsFiles ? " Your file goes to Claude for this one check." : ""} This demo keeps no copy.
         </p>
         <Button variant="brand" className={cx("w-full", touchTarget)} onClick={onDone} disabled={doneDisabled} {...spotlight(spotlightDone)}>

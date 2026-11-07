@@ -26,7 +26,7 @@ const danielSignature =
 
 function Signature({ signature }: { signature: LetterSignature }) {
   if (signature.kind === "typed") {
-    return <span className="text-[26px] leading-none font-medium tracking-[-0.02em] text-foreground italic">{signature.name}</span>;
+    return <span className="text-heading leading-none font-medium tracking-[-0.02em] text-foreground italic">{signature.name}</span>;
   }
   const own = signature.path;
   return (
@@ -50,20 +50,20 @@ function Signature({ signature }: { signature: LetterSignature }) {
 export function EngagementLetter({ profile, signature, children }: EngagementLetterProps) {
   const service = engagementService(profile);
   return (
-    <article aria-label="Engagement letter" className="flex flex-col gap-4 text-[14px] leading-relaxed">
+    <article aria-label="Engagement letter" className="flex flex-col gap-4 text-body leading-relaxed">
       <header className="flex items-center gap-2.5">
         <BrandMark profile={profile} size={30} />
-        <span className="min-w-0 text-[14px] leading-snug font-semibold text-balance">{profile.name}</span>
+        <span className="min-w-0 text-body leading-snug font-semibold text-balance">{profile.name}</span>
       </header>
       <div>
-        <h3 className="text-[19px] leading-tight font-semibold tracking-[-0.015em]">Engagement letter</h3>
+        <h3 className="text-title leading-tight font-semibold tracking-[-0.015em]">Engagement letter</h3>
         <p className="text-meta text-muted">Tax return 2025 for Daniel Okafor</p>
       </div>
       <p>
         {profile.name} prepares and files your 2025 income tax return. You send the documents on your checklist; we check each
         one and tell you at once if something is missing.
       </p>
-      <dl className="grid gap-1.5 rounded-lg bg-subtle p-3 text-[13px]">
+      <dl className="grid gap-1.5 rounded-lg bg-subtle p-3 text-meta">
         <div className="flex justify-between gap-3">
           <dt className="text-muted">Service</dt>
           <dd className="text-right font-medium">{service.name}</dd>
