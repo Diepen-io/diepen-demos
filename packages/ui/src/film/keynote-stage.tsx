@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useBrand } from "../brand/brand-provider";
 import { BrandMark } from "../brand/brand-mark";
 import { FictionalBadge } from "../brand/fictional-badge";
@@ -20,11 +20,6 @@ export type KeynoteStageProps = {
   className?: string;
 };
 
-/** A soft wash of the brand colour, so every film reads as the company's own. */
-const backdrop: CSSProperties = {
-  background:
-    "radial-gradient(120% 90% at 50% 0%, color-mix(in oklch, var(--brand) 22%, white) 0%, color-mix(in oklch, var(--brand) 7%, var(--background)) 55%, var(--background) 100%)",
-};
 
 export function KeynoteStage({ film, liveHref = "/live", autoplay = true, className }: KeynoteStageProps) {
   const { profile } = useBrand();
@@ -39,8 +34,7 @@ export function KeynoteStage({ film, liveHref = "/live", autoplay = true, classN
     <section
       aria-label={film.title}
       data-keynote-film={film.id}
-      className={cx("relative flex h-dvh w-full flex-col overflow-hidden", recording && "cursor-none", className)}
-      style={backdrop}
+      className={cx("relative flex h-dvh w-full flex-col overflow-hidden bg-background", recording && "cursor-none", className)}
     >
       {/* Outside a recording the demo shell already names the company above the stage. */}
       {recording ? (
@@ -82,7 +76,7 @@ export function KeynoteStage({ film, liveHref = "/live", autoplay = true, classN
             type="button"
             onClick={player.ended ? player.restart : player.toggle}
             aria-label={player.ended ? "Replay" : player.playing ? "Pause" : "Play"}
-            className="press grid size-11 place-items-center rounded-full bg-white/80 text-foreground shadow-sm ring-1 ring-black/5"
+            className="press grid size-11 place-items-center rounded-full text-foreground transition-[background-color] duration-150 hover:bg-subtle"
           >
             <FilmGlyph name={player.ended ? "replay" : player.playing ? "pause" : "play"} size={18} />
           </button>
@@ -100,7 +94,7 @@ export function KeynoteStage({ film, liveHref = "/live", autoplay = true, classN
               >
                 <span
                   className={cx(
-                    "block h-1.5 rounded-full transition-all duration-300 ease-out",
+                    "block h-1.5 rounded-full transition-[width,background-color] duration-300 ease-out",
                     index === step ? "w-8 bg-brand" : index < step ? "w-3 bg-foreground/40" : "w-3 bg-foreground/15",
                   )}
                 />
@@ -129,7 +123,7 @@ function Finale({ film, liveHref }: { film: KeynoteFilm; liveHref: string }): Re
       {/* A plain link: it opens live mode in the same frame, so it works in an iframe on a case study page too. */}
       <a
         href={liveHref}
-        className="press mt-[clamp(24px,4vh,44px)] inline-flex h-14 items-center gap-2.5 rounded-full bg-brand px-8 text-[19px] font-semibold text-brand-foreground shadow-[0_8px_24px_-8px_color-mix(in_oklab,var(--brand)_60%,transparent)] md:h-16 md:px-10 md:text-[21px]"
+        className="press mt-[clamp(24px,4vh,44px)] inline-flex h-14 items-center gap-2.5 rounded-full bg-brand px-8 text-[19px] font-semibold text-brand-foreground md:h-16 md:px-10 md:text-[21px]"
       >
         Try it yourself
         <Icon name="arrowRight" size={20} />

@@ -18,7 +18,7 @@ export function AiLane({ status, waitingFor, turns, seconds, summary, insights }
   return (
     <div data-lane="ai" className="flex flex-col gap-3">
       {status === "waiting" ? (
-        <p className="flex items-center gap-2.5 rounded-xl bg-subtle px-3.5 py-3 text-[14px] text-muted 2xl:text-[16px]">
+        <p className="flex items-center gap-2.5 px-1 py-2 text-[14px] text-faint 2xl:text-[16px]">
           <Icon name="clock" size={17} className="shrink-0" />
           {waitingFor}
         </p>

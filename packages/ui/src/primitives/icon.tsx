@@ -39,7 +39,7 @@ export type IconName = keyof typeof paths;
 
 export type IconProps = Omit<SVGProps<SVGSVGElement>, "name"> & { name: IconName; size?: number };
 
-export function Icon({ name, size = 18, strokeWidth = 1.75, ...props }: IconProps) {
+export function Icon({ name, size = 18, strokeWidth = 1.5, ...props }: IconProps) {
   return (
     <svg
       width={size}

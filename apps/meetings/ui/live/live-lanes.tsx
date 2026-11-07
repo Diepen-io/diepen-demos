@@ -86,7 +86,7 @@ export function LiveLanes({ call, profile, stale, waitingFor, spotlightSend }: L
               meeting={{ event: { id: "next-meeting", ...meeting.nextMeeting }, agenda: meeting.nextMeeting.agenda, isNew: isNew(5) }}
             />
           ) : (
-            <p className="rounded-xl bg-subtle px-3.5 py-3 text-[14px] text-muted">The next meeting lands here.</p>
+            <p className="px-1 py-2 text-[14px] text-faint">The next meeting lands here.</p>
           )}
         </LanePanel>
       </div>

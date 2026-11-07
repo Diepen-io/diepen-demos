@@ -47,7 +47,7 @@ export function LaneTabs({ lanes, shownLane, receiving, onSelect, className }: L
             data-lane-tab={lane.id}
             onClick={() => onSelect(lane.id)}
             className={cx(
-              "relative flex h-[52px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-[9px] px-1 text-[12px] leading-none font-medium transition-[background-color,color,box-shadow] duration-200",
+              "relative flex h-[52px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-[8px] px-1 text-[12px] leading-none font-medium transition-[background-color,color,box-shadow] duration-200",
               selected ? "bg-surface text-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_rgb(0_0_0/0.06)]" : "text-muted",
             )}
           >

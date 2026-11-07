@@ -18,9 +18,6 @@ export function LiveHeading({ providerName }: { providerName: string }) {
     <>
       <div className="flex min-w-0 items-center gap-3">
         <h2 className="truncate text-[17px] font-semibold tracking-[-0.015em] md:text-[20px]">Daniel Okafor's 2025 tax return</h2>
-        <span className="shrink-0 rounded-full bg-brand-soft px-2.5 py-1 text-[12px] font-medium shadow-[inset_0_0_0_1px_var(--brand-line)]">
-          Live
-        </span>
       </div>
       <ProviderNote providerName={providerName} />
     </>
@@ -35,7 +32,7 @@ export function LiveControls({ now, canSkip, onSkip, onStartOver }: LiveControls
   return (
     <>
       <div role="timer" aria-label={`Story time ${weekday} ${time}`} className="flex shrink-0 items-center gap-2 md:gap-2.5">
-        <span className="inline-flex h-8 items-center gap-1.5 rounded-[9px] bg-subtle px-2 text-[13px] font-medium whitespace-nowrap md:px-2.5 md:text-[14px]">
+        <span className="inline-flex items-center gap-1.5 text-[13px] font-medium whitespace-nowrap md:text-[14px]">
           <span>{weekday}</span>
           <span className="opacity-60">{date}</span>
         </span>

@@ -11,7 +11,7 @@ export type ProviderNoteProps = {
 export function ProviderNote({ providerName, className }: ProviderNoteProps) {
   if (providerName !== "mock") return null;
   return (
-    <p role="note" className={cx("inline-flex items-center gap-2 rounded-lg bg-wait-soft px-3 py-2 text-[13px] text-wait", className)}>
+    <p role="note" className={cx("inline-flex items-center gap-1.5 text-[13px] text-muted", className)}>
       <Icon name="info" size={15} />
       You see sample answers. The AI is off here.
     </p>

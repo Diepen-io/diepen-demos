@@ -32,7 +32,7 @@ export function CrmLane({ record, emptyText }: CrmLaneProps) {
   return (
     <div data-lane="crm" className="flex flex-col gap-2">
       {record ? <DealRecord {...record} /> : null}
-      {!record && emptyText ? <p className="rounded-xl bg-subtle px-3.5 py-3 text-[14px] text-muted">{emptyText}</p> : null}
+      {!record && emptyText ? <p className="px-1 py-2 text-[14px] text-faint">{emptyText}</p> : null}
     </div>
   );
 }

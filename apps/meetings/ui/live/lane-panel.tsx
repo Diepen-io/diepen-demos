@@ -19,15 +19,8 @@ export function LanePanel({ id, brand, role, className, children }: LanePanelPro
   const lane = laneById(id);
   return (
     <section aria-label={lane.label} className={cx("panel flex min-w-0 flex-col", className)}>
-      <header className="flex items-center gap-3 border-b border-border/70 px-4 py-3">
-        <span
-          className={cx(
-            "grid size-8 shrink-0 place-items-center rounded-[9px]",
-            brand ? "bg-brand text-brand-foreground" : "bg-subtle text-muted shadow-[inset_0_0_0_1px_var(--border)]",
-          )}
-        >
-          <Icon name={icons[id]} size={17} />
-        </span>
+      <header className="flex items-center gap-3 px-4 pt-3.5 pb-1">
+        <Icon name={icons[id]} size={18} className={cx("shrink-0", brand ? "text-brand" : "text-faint")} />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] leading-tight font-semibold">{lane.label}</span>
           <span className="block truncate text-[13px] text-muted">{role ?? lane.role}</span>

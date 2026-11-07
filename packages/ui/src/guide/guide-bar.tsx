@@ -77,7 +77,7 @@ function Hint({ waiting }: { waiting?: boolean }) {
         </>
       ) : (
         <>
-          <span aria-hidden="true" className="size-3 rounded-full outline-2 outline-offset-2 outline-brand" />
+          <span aria-hidden="true" className="size-2.5 rounded-full outline-2 outline-offset-2 outline-brand" />
           Find the ring
         </>
       )}
@@ -105,13 +105,14 @@ export function GuideBar({ step, sticky, className }: GuideBarProps) {
       aria-label="Next step"
       data-guide-step={step.id}
       className={cx(
-        "flex flex-wrap items-center justify-center gap-x-5 gap-y-3 rounded-2xl bg-brand-soft px-4 py-3 text-center shadow-[inset_0_0_0_1px_var(--brand-line)] md:px-6",
-        sticky && "sticky top-2 z-30 shadow-[inset_0_0_0_1px_var(--brand-line),0_8px_24px_-12px_rgb(0_0_0/0.25)]",
+        "flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-2xl px-4 py-3 text-center md:px-6",
+        // Elevated only where it floats over content that scrolls under it.
+        sticky && "sticky top-2 z-30 bg-surface shadow-[0_0_0_1px_rgb(0_0_0/0.06),0_8px_24px_-12px_rgb(0_0_0/0.2)]",
         className,
       )}
     >
       <p aria-live="polite" className="min-w-0 text-[16px] leading-snug font-semibold text-balance md:text-[18px]">
-        <span className="tabular mr-2.5 inline-block rounded-full bg-brand px-2.5 py-1 align-[0.15em] text-[12px] leading-none font-semibold text-brand-foreground">
+        <span className="tabular mr-3 text-[15px] font-medium text-faint md:text-[16px]">
           {step.number ? `Step ${step.number} of ${step.total}` : "Done"}
         </span>
         {step.text}
