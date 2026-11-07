@@ -7,7 +7,7 @@ test.describe.configure({ timeout: 90_000 });
 // F5
 test("turns the sample call into six outputs in sequence @meetings.live-sample", async ({ page }) => {
   await page.goto("/live");
-  await expect(page.getByText("Demo answers. No API key is set.")).toBeVisible();
+  await expect(page.getByRole("note").filter({ hasText: /sample answers/i })).toBeVisible();
 
   await inputTab(page, "Sample call").click();
   await expect(transcriptBox(page)).toHaveValue(/Tom Becker:/);

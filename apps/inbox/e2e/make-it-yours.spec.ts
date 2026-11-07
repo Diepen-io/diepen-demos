@@ -46,11 +46,11 @@ test("F11: picking the property manager preset makes live replies name that comp
   await expect(page.getByText(body.reply.reply).filter({ visible: true }).first()).toBeVisible();
 });
 
-test("F12: a ?brand= link to the film keeps the fictional finale and Try it live carries the profile to live mode @inbox.make-it-yours", async ({ page }) => {
+test("F12: a ?brand= link to the film keeps the fictional finale and Try it yourself carries the profile to live mode @inbox.make-it-yours", async ({ page }) => {
   await gotoApp(page, `/?t=${finaleAt}&brand=${encodeProfile(testProfile)}`);
 
   await expect(keynoteFinale(page)).toContainText(preset.name);
-  await expect(keynoteFinale(page).getByRole("link", { name: "Try it live" })).toHaveAttribute(
+  await expect(keynoteFinale(page).getByRole("link", { name: "Try it yourself" })).toHaveAttribute(
     "href",
     `/live?brand=${encodeProfile(testProfile)}`,
   );

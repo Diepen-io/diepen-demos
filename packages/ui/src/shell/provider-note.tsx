@@ -7,13 +7,13 @@ export type ProviderNoteProps = {
   className?: string;
 };
 
-/** Says the answers are canned when no API key is set. Safe to render from a server component. */
+/** Says the answers are samples when no API key is set. Safe to render from a server component. */
 export function ProviderNote({ providerName, className }: ProviderNoteProps) {
   if (providerName !== "mock") return null;
   return (
     <p role="note" className={cx("inline-flex items-center gap-2 rounded-lg bg-wait-soft px-3 py-2 text-[13px] text-wait", className)}>
       <Icon name="info" size={15} />
-      Demo answers. No API key is set.
+      You see sample answers. The AI is off here.
     </p>
   );
 }

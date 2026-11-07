@@ -60,7 +60,7 @@ describe("MakeItYours", () => {
     );
     await screen.findByText("Draft ready from harbour-bakery.de. Check it below, then apply.");
     expect(screen.getByLabelText<HTMLInputElement>("Name").value).toBe("Harbour Bakery");
-    expect(screen.queryByText("Demo answers. No API key is set.")).toBeNull();
+    expect(screen.queryByText(/sample answers/i)).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(screen.getByTestId("active").textContent).toBe("Harbour Bakery");
@@ -71,7 +71,7 @@ describe("MakeItYours", () => {
     mockFetch(200, { profile: extracted, provider: "mock" });
     render(<Harness />);
     await submitWebsite("harbour-bakery.de");
-    await screen.findByText("Demo answers. No API key is set.");
+    await screen.findByText(/sample answers/i);
   });
 
   it("shows the server's message on an error", async () => {

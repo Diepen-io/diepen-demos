@@ -126,12 +126,13 @@ function Finale({ film, liveHref }: { film: KeynoteFilm; liveHref: string }): Re
         </span>
         <span>{finale.after}</span>
       </p>
+      {/* A plain link: it opens live mode in the same frame, so it works in an iframe on a case study page too. */}
       <a
         href={liveHref}
-        className="press mt-[clamp(24px,4vh,44px)] inline-flex h-12 items-center gap-2 rounded-full bg-brand px-6 text-[17px] font-semibold text-brand-foreground shadow-sm"
+        className="press mt-[clamp(24px,4vh,44px)] inline-flex h-14 items-center gap-2.5 rounded-full bg-brand px-8 text-[19px] font-semibold text-brand-foreground shadow-[0_8px_24px_-8px_color-mix(in_oklab,var(--brand)_60%,transparent)] md:h-16 md:px-10 md:text-[21px]"
       >
-        Try it live
-        <Icon name="arrowRight" size={18} />
+        Try it yourself
+        <Icon name="arrowRight" size={20} />
       </a>
       <p className="mt-5 max-w-[40rem] text-balance text-[16px] text-muted">{finale.note}</p>
     </div>

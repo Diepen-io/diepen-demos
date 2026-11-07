@@ -38,7 +38,8 @@ export type LiveAction =
   | { type: "send"; channel: Channel; text: string; at: string; subject?: string }
   | { type: "reply"; channel: Channel; reply: InboxReply; replyMs: number; at: string }
   | { type: "fail"; channel: Channel }
-  | { type: "startOver"; channel: Channel };
+  | { type: "startOver"; channel: Channel }
+  | { type: "reset" };
 
 const emptyThread = (): LiveThread => ({ messages: [], offeredSlots: [], sending: false, unread: false });
 
@@ -79,6 +80,8 @@ export function liveInboxReducer(state: LiveState, action: LiveAction): LiveStat
       }));
     case "reply":
       return addReply(state, action);
+    case "reset":
+      return initialLiveState();
     case "startOver":
       return {
         ...update(state, action.channel, () => emptyThread()),

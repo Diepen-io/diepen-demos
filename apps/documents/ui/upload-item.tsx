@@ -2,6 +2,7 @@
 
 import { isUploadItemId, type ItemState, type RequestItem } from "@/domain/document-request";
 import type { SampleDocument } from "@/domain/sample-documents";
+import { spotlight } from "@diepen/ui/guide/spotlight";
 import { StatusBadge } from "@diepen/ui/primitives/badge";
 import { Button } from "@diepen/ui/primitives/button";
 import { cx } from "@diepen/ui/primitives/class-names";
@@ -23,6 +24,8 @@ export type UploadRow = {
   /** A file the browser refused, or a check that did not finish. */
   error?: string;
   fresh?: boolean;
+  /** The live guide points at this row's "Use a sample". */
+  spotlightSample?: boolean;
 };
 
 export type UploadRowActions = {
@@ -104,7 +107,7 @@ export function UploadItem({ row, actions }: { row: UploadRow; actions?: UploadR
               <Icon name="paperclip" size={14} />
               {state === "problem" ? "Upload again" : "Upload"}
             </Button>
-            <Button variant="ghost" size="sm" className="px-2 max-md:h-11 max-md:text-[14px]" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
+            <Button variant="ghost" size="sm" className="px-2 max-md:h-11 max-md:text-[14px]" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)} {...spotlight(row.spotlightSample && !menuOpen)}>
               Use a sample
               <Icon name="chevronRight" size={14} className={cx("transition-transform duration-200", menuOpen && "rotate-90")} />
             </Button>

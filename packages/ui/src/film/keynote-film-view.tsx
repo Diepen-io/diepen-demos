@@ -6,7 +6,7 @@ import { KeynoteStage } from "./keynote-stage";
 
 /**
  * A film page's stage under the demo shell. The page builds the film from its own fictional
- * company (decision F1); "Try it live" carries the visitor's profile into live mode.
+ * company (decision F1); "Try it yourself" carries the visitor's profile into live mode.
  */
 export function KeynoteFilmView({ film }: { film: KeynoteFilm }) {
   const { hrefWithBrand } = useBrand();

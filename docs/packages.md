@@ -52,8 +52,9 @@ The design system. It never imports `@diepen/ai`.
 | `film/` | The keynote engine: `defineKeynoteFilm`, `KeynoteStage`, `KeynoteFilmView` and the parts in `keynote-parts`. Shared: `useFilm` and `film-playback`. `?t=<ms>` opens paused at that moment. Also `useNarrowScreen`, `usePrefersReducedMotion` and `EASE_OUT`, which live pages use. Details below |
 | `mockups/` | `EmailInbox`, `EmailMessage`, `InstagramDm`, `LinkedinDm`, `ChatWidget`, `ChannelTabs`, `Calendar`, `DriveFolder`, `Transcript`, `Checklist`, `Composer`, slot and starter chips. Details below |
 | `brand/` | `BrandProvider` and `useBrand` (details below), `BrandMark`, `FictionalBadge` ("Fictional company", or "Fictional" with `short`, for phones), `MakeItYours` (`presets` limits the example companies, decision F3), `requestBrandProfile`, and `brand-link` (`shareLink`, `pathWithBrand`) |
-| `shell/` | `DemoShell` (Film or Live switch, "Make it yours" with the `presets` the page passes, footer; one set of gutters in both modes; on phones the company name may take two lines and a short "Fictional" chip sits beside the title), `PageTitle` (an h2 under `DemoShell`, whose title is the page's h1, and an h1 on a page without the shell), `useRecordMode` (`?record=1`), `useFilmFallback` and `filmFallbackHref` in `film-fallback` (send the visitor to the film with `?fallback=limit` after a tripped cost guard), `FallbackNote` (`?fallback=limit`), `ProviderNote` |
-| `primitives/` | `Button`, `Input`, `Textarea`, `Field`, `Badge` and `StatusBadge` (`size` "md" or "lg"), `Avatar`, `Icon`, `Sheet`, `Segmented`, `cx` |
+| `guide/` | `GuideBar` in `guide-bar`: live mode's guide (decision G1). It shows "Step N of M", one short instruction, and one large brand button for the next action; with no action it says where to look ("Find the ring") or that the demo works ("One moment"). A step with `onStartOver` is the end: "Start over" and a quieter "Watch the film" link. A new step id scrolls the spotlight into view. `sticky` keeps the bar at the top of a page that scrolls. `spotlight(active, "outside" \| "inset")` in `spotlight` marks the one element to use with `data-spotlight`, which `styles.css` draws as a brand ring that breathes, still under `prefers-reduced-motion` |
+| `shell/` | `DemoShell` (Watch or Try it switch, a quiet "Make it yours" with the `presets` the page passes, footer; one set of gutters in both modes; on phones the company name may take two lines and a short "Fictional" chip sits beside the title), `PageTitle` (an h2 under `DemoShell`, whose title is the page's h1, and an h1 on a page without the shell), `useRecordMode` (`?record=1`), `useFilmFallback` and `filmFallbackHref` in `film-fallback` (send the visitor to the film with `?fallback=limit` after a tripped cost guard), `FallbackNote` (`?fallback=limit`), `ProviderNote` ("You see sample answers. The AI is off here." under the mock provider) |
+| `primitives/` | `Button` and `buttonClassName` (the button look for a link), `Input`, `Textarea`, `Field`, `Badge` and `StatusBadge` (`size` "md" or "lg"), `Avatar`, `Icon`, `Sheet`, `Segmented`, `cx` |
 
 ### Brand provider
 
@@ -72,7 +73,7 @@ The design system. It never imports `@diepen/ai`.
 | `savedProfile` | The visitor's own profile. Equal to `profile` outside fixed mode. "Make it yours" edits this one |
 | `defaultProfile`, `fixed` | The props |
 | `setProfile`, `resetProfile` | Apply or clear the visitor's profile |
-| `hrefWithBrand(path)` | A same-site link that keeps `savedProfile`, for the Film and Live switch and "Try it live". On a film page it carries the visitor's profile into live mode |
+| `hrefWithBrand(path)` | A same-site link that keeps `savedProfile`, for the Watch and Try it switch and "Try it yourself". On a film page it carries the visitor's profile into live mode |
 | `shareHref()` | The absolute "Copy link" address: always carries `savedProfile`, also when it came from local storage, and drops `t`, `fallback` and `record`. In fixed mode it points at `livePath` |
 
 ### Keynote films
@@ -84,7 +85,7 @@ The rules the engine holds a film to:
 
 1. Exactly 4 beats (`KEYNOTE_BEATS`), then the finale. Each beat and the finale stay on screen for `beatMs` (default `KEYNOTE_DEFAULT_BEAT_MS`, 3200 ms), so a four-beat film runs 16 s.
 2. One caption per beat, at most 6 words (`KEYNOTE_MAX_CAPTION_WORDS`), no em or en dash. One element under it and at most one chip.
-3. The finale shows one number, before and after, the "Try it live" link and one note that says the numbers come from a simulation with a fictional company.
+3. The finale shows one number, before and after, the large "Try it yourself" link and one note that says the numbers come from a simulation with a fictional company.
 
 `defineKeynoteFilm` throws on a broken script, so the film's unit test fails.
 
@@ -92,7 +93,7 @@ The rules the engine holds a film to:
 | --- | --- |
 | `film/keynote-script` | The types below, `defineKeynoteFilm`, `KEYNOTE_BEATS`, `keynoteBeatMs(film)`, `keynoteDurationMs(film)`, `keynoteStepAt(film, t)` (a beat index, or `beats.length` for the finale), `KEYNOTE_MAX_CAPTION_WORDS`, `KEYNOTE_DEFAULT_BEAT_MS` |
 | `film/keynote-stage` | `KeynoteStage` |
-| `film/keynote-film-view` | `KeynoteFilmView({ film })`: the stage under the demo shell, sized to the space under its header, with "Try it live" at `hrefWithBrand("/live")`. A film page builds the film on the server from its own preset (decision F1) and passes it in |
+| `film/keynote-film-view` | `KeynoteFilmView({ film })`: the stage under the demo shell, sized to the space under its header, with "Try it yourself" at `hrefWithBrand("/live")`. A film page builds the film on the server from its own preset (decision F1) and passes it in |
 | `film/keynote-parts` | The elements a beat shows. Large and chrome-free; text starts at 18 px so it reads in a phone feed |
 | `film/use-film`, `film/film-playback` | Playback. `?t=<ms>` opens paused at that moment |
 | `film/use-stage-environment` | `usePrefersReducedMotion` and `useNarrowScreen` (below 768 px): false on the server and the first client render, so hydration matches, then the real value |
@@ -120,7 +121,7 @@ type KeynoteFinale = {
 type KeynoteFilm = { id: string; title: string; beats: KeynoteBeat[]; finale: KeynoteFinale; beatMs?: number };
 ```
 
-`KeynoteStage` props: `film`, `liveHref` (the "Try it live" target, default `/live`; pass `hrefWithBrand("/live")`), `autoplay` (default true), `className` (the stage is `h-dvh`; an app sizes it to the space under the shell header).
+`KeynoteStage` props: `film`, `liveHref` (the "Try it yourself" target, default `/live`; pass `hrefWithBrand("/live")`), `autoplay` (default true), `className` (the stage is `h-dvh`; an app sizes it to the space under the shell header).
 The stage is a region named by `film.title` with `data-keynote-film`. The step on screen carries `data-keynote-step` with its index, and the finale `data-keynote-finale`.
 Under the step sit Play, Pause or Replay and one dot per step that jumps to it. `useFilm` keys work too: Space, R, and the arrows, which move one beat.
 Each step rises in over 320 ms (`keynote-rise` in `styles.css`); under reduced motion it only fades.
@@ -170,3 +171,4 @@ Compute every number a film shows from the fixtures or the decision behind it (t
 - Slot chips that can be picked are 44 px tall on phones. They take `disabled`: unpicked times turn grey and are not buttons, and the list carries `data-disabled`. Every conversation mockup sets it while `handover` is set, so after a handover no app has to dim or unhook the chips itself.
 - `Composer`: on phones (below 640 px) every field and button is at least 44 px tall. With `maxLength` (from `ConversationControls.maxLength`) the field stops there and counts down over the last 100 characters. The fields are named `message` and `subject`. The email composer is compact there: two lines and a round Send button beside them, without the attachment and shortcut row, so the thread keeps its room.
 - `DriveFolder` shows the parent folders as a small muted line that wraps and the open folder on its own line under it, and counts "1 file" in the singular. With `wrapNames`, a file name breaks only after `_` (a `<wbr>`) or `-`, never inside a word.
+- `SlotChips`: with `ConversationControls.spotlightSlots` (and `slotsSpotlight` on `EmailMessage`) the times that are still open to pick carry the live guide's spotlight.

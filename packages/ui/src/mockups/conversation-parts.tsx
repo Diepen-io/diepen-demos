@@ -9,8 +9,8 @@ import { SlotChips } from "./slot-chips";
 import { StarterChips } from "./starter-chips";
 
 /** Once a person has taken over, the times offered earlier are no longer on offer. */
-export function slotsOnOffer(controls: ConversationControls): { onPick?: (iso: string) => void; disabled: boolean } {
-  return controls.handover ? { disabled: true } : { onPick: controls.onPickSlot, disabled: false };
+export function slotsOnOffer(controls: ConversationControls): { onPick?: (iso: string) => void; disabled: boolean; spotlight?: boolean } {
+  return controls.handover ? { disabled: true } : { onPick: controls.onPickSlot, disabled: false, spotlight: controls.spotlightSlots };
 }
 
 /** The meta line and slot chips under one message, the same on every channel. */

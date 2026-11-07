@@ -41,8 +41,8 @@ export function LiveControls({ now, canSkip, onSkip, onStartOver }: LiveControls
         </span>
         <span className="tabular text-[20px] leading-none font-semibold tracking-[-0.02em] md:text-[26px]">{time}</span>
       </div>
-      <div className="ml-auto flex items-center gap-1.5 md:gap-2">
-        <Button variant="secondary" className="max-md:h-11 max-md:px-3" onClick={onSkip} disabled={!canSkip}>
+      <div role="group" aria-label="Story controls" className="ml-auto flex items-center gap-1.5 md:gap-2">
+        <Button variant="ghost" className="max-md:h-11 max-md:px-3" onClick={onSkip} disabled={!canSkip}>
           <Icon name="clock" size={16} className="max-md:hidden" />
           Skip 3 days
         </Button>

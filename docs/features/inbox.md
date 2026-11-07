@@ -29,7 +29,7 @@ The script is `buildInboxKeynote(profile)` in `film/inbox-keynote.tsx`; its text
 | 1 | 3200 | Answered in 38 seconds. (the number is Priya's reply time from the fixtures, `priyaReplySeconds()`) | `KeynoteBubble`: the assistant's reply C2-2, in the brand colour on the business side, with the logo monogram as avatar | none: the caption already says it |
 | 2 | 6400 | Booked straight into your calendar. | `KeynoteSlot`: Thu 12, 09:00, "{ServiceA}, Ana Ruiz" | none |
 | 3 | 9600 | Edge cases go to you. | `KeynoteNotification`: "{company} · Website chat", "Needs you: refund question", "Daniel Moore asked for a refund. The full thread is waiting." | none |
-| 4 | 12800 | (finale) | The one number, then "Try it live" | none |
+| 4 | 12800 | (finale) | The one number, then "Try it yourself" | none |
 
 ### Rules for the script
 
@@ -46,8 +46,8 @@ The script is `buildInboxKeynote(profile)` in `film/inbox-keynote.tsx`; its text
 | Label | Reply time |
 | Before | 9 h |
 | After | 38 s |
-| Link | "Try it live", to `/live` with the current `?brand=` |
-| Note | A simulation with {company}, a fictional company. 9 h is the average wait for the 08:00 opening. |
+| Link | "Try it yourself", to `/live` with the current `?brand=` |
+| Note | A simulation with {company}, a fictional company. Without help, a customer waits 9 h on average until you open at 08:00. |
 
 Both numbers are computed from the fixtures by `domain/metrics.ts` and `formatDurationShort`, never typed in:
 
@@ -217,9 +217,25 @@ No streaming in this demo: one structured reply per turn, so `text-stream-client
 - Same sort rule as the film's owner list.
 - Header: "{company}", logo, and "Average first reply: 1.6 s" from the measured `replyMs` of each conversation's first reply.
 
+### Guide
+
+A guide bar at the top of the customer side shows one next step at a time (decision G1): "Step N of 3", one short instruction, and one large button or a brand ring on the times on offer.
+`ui/live-guide.ts` works the step out from the live state alone, so a visitor who types their own messages still lands on a step.
+The texts below are the defaults; tests check the step ids, never the words.
+
+| Step | Id | When | Instruction | Points at |
+| --- | --- | --- | --- | --- |
+| 1 | `ask-time` | No booking yet | You play a customer. Ask {company} for an appointment. | Button "Ask for a time": sends "Can I book a time this week?" in the open channel, or in the first channel that still takes messages |
+| 2 | `pick-time` | The open thread has times on offer | {assistant} offers some times. Pick one. | Ring on the offered slot chips |
+| 3 | `ask-refund` | A booking, no handover | Booked. Now ask for a refund. A person must answer that. | Button "Ask for a refund": opens the first empty channel (Instagram first) and sends the refund starter there |
+| any | `waiting` | The open thread waits for a reply | {assistant} writes an answer | "One moment" |
+| End | `end` | A booking and a handover | {assistant} booked your time. The refund went to {owner}, because a person must answer it. | "Start over" (clears every thread and booking) and "Watch the film" |
+
+The guide replaces the line "You write as the customer"; the provider note sits under it.
+
 ### Notes on screen
 
-- Keyless mock: when `/api/health` reports `provider: "mock"`, a note above the customer side reads "Demo answers. No API key is set.". Decision D4.
+- Keyless mock: when `/api/health` reports `provider: "mock"`, a note above the customer side reads "You see sample answers. The AI is off here.". Decision D4.
 - Fictional: while a preset is active, the shell note says "{company} is a fictional company."
 - Cost guard: a 429 with `{ fallback: "film" }` sends the visitor to `/?fallback=limit`. The shell shows "Live answers are paused for now. Here is the film." above the film.
 - Any other error: the thread shows "No answer this time. Send it again.". The message stays in the thread marked "Not answered", and a typed message also goes back into the composer. The next send replaces the unanswered message, so a retry never shows it twice.
@@ -335,7 +351,9 @@ No `application/ports/`: the only port is `AiProvider` from `@diepen/ai/provider
 | `ui/channel-mark.tsx` | The small coloured channel square |
 | `ui/status-chip.tsx` | Status chip with label and semantic colour |
 | `ui/starter-prompts.ts` | The three starter texts; the shared `StarterChips` draws them |
-| `ui/live-inbox.tsx` | The live page body: layout, tabs, mobile tab bar |
+| `ui/live-inbox.tsx` | The live page body: layout, guide, tabs, mobile tab bar |
+| `ui/live-guide.ts` | `inboxGuide(state, names)`: the guide's current step from the live state, and the channels its two buttons write in |
+| `ui/inbox-guide-bar.tsx` | The guide bar: the step from `live-guide.ts` with its button on the shared `GuideBar` |
 | `ui/live-part-tabs.tsx` | The bottom tab bar below 768 px |
 | `ui/live-snapshot.ts` | Owner rows, calendar blocks and thread views from the live state |
 | `ui/use-visitor-now.ts` | The visitor's clock, read in the browser only |
@@ -422,27 +440,29 @@ Prefer roles and visible text as selectors. Test ids where text is not stable: `
 | U15 | `inbox.live-chat` | `GET /api/health` returns `provider: "mock"` under `AI_PROVIDER=mock` |
 | U16 | `inbox.film` | Fixtures: every customer email ends in `@example.com`, every phone number starts with `07700 900` |
 | U17 | `inbox.live-chat` | Mock replies: a complaint without the word "complaint" hands over; "Do you treat dogs?" hands over by the profile's knowledge rule; a FAQ question gets its answer; a booking offer spans two days; an email greets and signs off; a profile with no services, prices or hours and an owner called "the team" gets sentences that read well. Starters ask "What are your prices?" without services |
+| U18 | `inbox.guide` | `inboxGuide` returns each row of the guide table in section 4; the refund goes to Instagram first, and "Ask for a time" skips a channel that was handed over |
 
 ### Flow checks (Playwright, mock provider, desktop and phone projects)
 
 | Check | Feature | Steps and assertion |
 | --- | --- | --- |
-| F1 | `inbox.film` | Open `/?t=14400`. The finale shows "Reply time", "9 h", "38 s" and the "Try it live" link |
+| F1 | `inbox.film` | Open `/?t=14400`. The finale shows "Reply time", "9 h", "38 s" and the "Try it yourself" link |
 | F3 | `inbox.film-controls` | Open `/?t=` at the middle of each step (1600, 4800, 8000, 11200, 14400 ms). `[data-keynote-step]` reads 0 to 4 in order, and each beat shows its caption from section 2 |
 | F5 | `inbox.owner-view` | Covered by F9: after a refund request on Instagram and a newer question on Email, the live owner view lists the Instagram row, "Needs a human", first |
 | F6 | `inbox.live-chat` | On `/live`, on each of the four channel tabs, send "What are your opening hours?". An assistant message appears in that tab's thread and the owner view has a row for that channel with "Answered" |
-| F7 | `inbox.live-chat` | On `/live` the provider note reads "Demo answers. No API key is set." |
+| F7 | `inbox.live-chat` | On `/live` the provider note reads "You see sample answers. The AI is off here." |
 | F8 | `inbox.live-booking` | On `/live`, Website chat: send "Can I book an appointment?". Two slot chips appear, Wed 11 Nov 12:30 and Thu 12 Nov 09:00. Click the first. The reply says the booking, a calendar block with that time appears, and the owner row shows "Booked" |
 | F9 | `inbox.live-handover` | On `/live`, Instagram: send "I'm not happy with how it went and I'd like a refund." The reply contains the preset's handover message, the owner row shows "Needs a human" at the top, the composer is replaced by "Start over", and no further request to `/api/reply` is made. "Start over" clears the thread |
 | F10 | `inbox.limit-fallback` | On `/live`, route `/api/reply` to answer 429 `{ fallback: "film" }`. After sending a message the page is `/` with the note "Live answers are paused for now. Here is the film." and the film stage visible |
 | F11 | `inbox.make-it-yours` | On `/`, open "Make it yours" and pick the property manager preset: live mode opens in that company and the brand CSS variable changes. With that preset saved, the film finale keeps its own company and colour (decision F1). On `/live` after the same step, a reply mentions the new company name |
-| F12 | `inbox.make-it-yours` | Open `/?t=14400&brand=<encoded test profile>` (a fictional plumbing company in `e2e/fixtures/test-profile.ts`, `fictional: false`). The finale keeps the default preset's name, and "Try it live" links to `/live?brand=<same>`. `/live?brand=<same>` shows the name in the owner view header and in a mock reply |
+| F12 | `inbox.make-it-yours` | Open `/?t=14400&brand=<encoded test profile>` (a fictional plumbing company in `e2e/fixtures/test-profile.ts`, `fictional: false`). The finale keeps the default preset's name, and "Try it yourself" links to `/live?brand=<same>`. `/live?brand=<same>` shows the name in the owner view header and in a mock reply |
 | F13 | `inbox.make-it-yours` | In the panel, enter `https://example.com`, apply. The mock profile from `/api/brand` is applied (its name shows in the owner view header); under the mock provider the container's fixture page fetcher answers, so no request leaves the server |
 | F14 | `inbox.film`, `inbox.live-chat` | At 375 px wide, on `/?t=1600` (the first beat), `/?t=14400` (the finale), and `/live` on each bottom tab and each channel tab, `document.documentElement.scrollWidth` is at most 375 |
 | F15 | `inbox.film`, `inbox.live-chat` | No console errors and no failed requests on `/` while it plays to the second beat, and on `/live` after one sent message |
 | F17 | `inbox.live-handover` | On `/live`, Website chat: ask to book, then complain without the word "complaint". The thread hands over and the earlier slot chips are no longer buttons and carry the shared inactive look (`data-disabled`) |
 | F18 | `inbox.live-chat` | On `/live`, with `/api/reply` failing, click a starter. The message stays in the thread marked "Not answered"; sending it again shows it once |
 | F19 | `inbox.film` | `/?record=1` shows the company name and "Fictional company" in the stage header |
+| F20 | `inbox.guide` | On `/live` the guide starts on `ask-time`; its button, then the ring on the offered times, then its button again walk `ask-time`, `pick-time`, `ask-refund` to `end`, which links to the film; "Start over" returns to `ask-time` |
 
 ## 9. Feature rows
 
@@ -455,6 +475,7 @@ Prefer roles and visible text as selectors. Test ids where text is not stable: `
 | `inbox.live-booking` | Book a slot the AI offers and see it in the calendar | `/live`, "Can I book a time this week?", then a slot chip | anon | shipped |
 | `inbox.live-handover` | Ask for a refund, complain, or ask what the company knowledge cannot answer, and see the conversation handed to the owner as "Needs a human" | `/live`, "I'm not happy with how it went and I'd like a refund." | anon | shipped |
 | `inbox.limit-fallback` | See the film with a short note when live answers hit a limit | `/live`, then `/?fallback=limit` | anon | shipped |
+| `inbox.guide` | Follow one guided step at a time: ask for a time, pick one, ask for a refund, then start over or watch the film | `/live`, the guide bar | anon | shipped |
 | `inbox.make-it-yours` | Switch the film and live mode to a preset, a website or a `?brand=` profile | `/`, "Make it yours"; also on `/live` | anon | shipped |
 
 ## 10. Open questions

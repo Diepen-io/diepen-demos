@@ -73,7 +73,7 @@ export function buildMeetingsKeynote(profile: CompanyProfile): KeynoteFilm {
       label: "Call end to proposal sent",
       before: "2 days",
       after: `${minutes} min`,
-      note: `A simulation with ${company}, a fictional company. 2 days is this scenario's manual routine: notes typed up that evening, proposal sent on Thursday.`,
+      note: `A simulation with ${company}, a fictional company. Without help, this takes 2 days. You type the notes that evening and send the proposal on Thursday.`,
     },
   });
 }

@@ -51,7 +51,7 @@ test("Skip 3 days sends the reminder, and a second skip escalates to the firm @d
   await pressDoneForNow(page);
   await openEmail(page, /3 documents still needed/);
 
-  const skip = page.getByRole("button", { name: "Skip 3 days" });
+  const skip = page.getByRole("group", { name: "Story controls" }).getByRole("button", { name: "Skip 3 days" });
   await skip.click();
   await expect(page.getByRole("timer")).toContainText(/Thu/);
   await expect(page.getByRole("timer")).toContainText(/12 Mar/);

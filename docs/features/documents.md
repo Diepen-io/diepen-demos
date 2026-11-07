@@ -25,11 +25,11 @@ Film mode reads no fixture file, needs no key and makes no call to `/api/check` 
 | 1 | 3200 | Each one checked automatically. | `KeynoteRow` "Payslip summary", status pass | |
 | 2 | 6400 | Problems caught instantly. | `KeynoteRow` "Home office form", status fail | "Signature missing", tone fail |
 | 3 | 9600 | Reminders go out on their own. | `KeynoteNotification`, icon mail, app "{firm} · Email", title "3 documents still open", body "Daniel Okafor gets a reminder on day 3." | |
-| 4 | 12800 | Finale | "Hours a month chasing documents", 12 h to 1 h, and "Try it live" | |
+| 4 | 12800 | Finale | "Hours a month chasing documents", 12 h to 1 h, and "Try it yourself" | |
 
-The finale note reads "A simulation with {firm}, a fictional firm. Example month: 40 tax returns with 3 chases of 6 minutes each, against 1.5 minutes per return to read the summary."
+The finale note reads "A simulation with {firm}, a fictional firm. Example month: 40 tax returns. Without help, each return needs 3 chases of 6 minutes. With help, you read one summary in 1.5 minutes."
 It states where both numbers come from and makes no claim about a real firm.
-"Try it live" goes to `/live` with the active brand kept.
+"Try it yourself" goes to `/live` with the active brand kept.
 
 ## 3. Fixtures
 
@@ -120,6 +120,31 @@ The live session keeps facts only: which email went out when, which items it lis
 Emails, the letter and the lanes are written from the active profile on every render, so a profile from local storage, or one applied mid-session, shows in every email already in the inbox.
 A check card whose item later passed shrinks to its file name with the badge "Replaced".
 
+### Guide
+
+A guide bar under the clock bar shows one next step at a time (decision G1): "Step N of 6", one short instruction, and one large button or a brand ring on the one element to use.
+`ui/live-guide.ts` works the step out from the live state alone, so a visitor who leaves the path still lands on a step.
+The texts below are the defaults; tests check the step ids, never the words.
+
+| Step | Id | When | Instruction | Points at |
+| --- | --- | --- | --- | --- |
+| 1 | `open-email` | Nothing sent, inbox open | You play Daniel, a client. Open the new email on his phone. | Ring on the request email |
+| 2 | `open-upload` | Nothing sent, email open | The firm needs 6 files from Daniel. Tap Upload and sign. | Ring on "Upload and sign" |
+| 3 | `send-file` | Nothing sent, upload page open | Send one file. Tap Use a sample and pick a file. | Ring on "Use a sample" of the first open item |
+| 3 | `sign` | Letter open, not signed | Draw or type your name. Then tap Sign. | |
+| 3 | `reading` | A check is running | The chaser reads and checks your file | "One moment" |
+| 4 | `done` | A file sent or the letter signed, upload page open | The chaser checked it. Now tap Done for now. | Ring on "Done for now" |
+| 4 | `done-elsewhere` | The same on another screen | Open the upload page again. Then tap Done for now. | Button "Open the upload page" |
+| 5 | `skip-1` | One chase sent | The chaser emailed Daniel a list of the missing files. What if he does nothing? | Button "Skip 3 days" |
+| 6 | `skip-2` | Two chases sent | Daniel got a reminder. He still does nothing. Skip 3 more days. | Button "Skip 3 more days" |
+| End | `end-escalated` | Escalated | Daniel did not answer 2 reminders. So the chaser gave the firm a task: call Daniel. | "Start over" and "Watch the film" |
+| End | `end-complete` | All 6 checked and a chase or "Done for now" happened | All 6 files are in and correct. The firm can start the tax return. | "Start over" and "Watch the film" |
+
+Below 768 px the guide sits in the sticky block above the clock and the tabs.
+When it points at Daniel's phone while another lane tab is open, its button reads "Show Daniel's phone" and opens the Client tab.
+The clock bar's own "Skip 3 days" and "Start over" stay as quiet ghost buttons in a group named "Story controls".
+The lane roles read "You play this client", "Works on its own" and "Files land here".
+
 ### Upload limits
 
 | Rule | Value | Where it is enforced |
@@ -134,7 +159,7 @@ The route reads the file into memory, passes it to the OCR port and the AI provi
 
 ### Keyless and cost guards
 
-- With no `ANTHROPIC_API_KEY`, `/api/check` answers with the mock provider and the page shows the shell's `ProviderNote` ("Demo answers. No API key is set.").
+- With no `ANTHROPIC_API_KEY`, `/api/check` answers with the mock provider and the page shows the shell's `ProviderNote` ("You see sample answers. The AI is off here.").
 - The mock answer is keyed on the uploaded file name: each of the 9 sample names returns its recorded result from `domain/sample-documents.ts`, then runs through `domain/check-rules.ts` like a real answer.
   Any other name returns `status: "problem"`, `documentType: "Unknown document"`, person and year `null`, one issue `{ kind: "other", detail: "Demo answers only cover the sample files. Pick a sample to see a full check." }`, and the item turns Problem found.
 - `/api/check` runs `guards.check` after validation and caps output tokens with `guards.clampMaxTokens(1200)`. A trip answers with `fallbackResponse` (429 `{ fallback: "film" }`), and the live page sends the visitor to the film with the shell's `FallbackNote` (`useFilmFallback`). A 503 leaves the visitor on the live page to try again.
@@ -257,6 +282,8 @@ Model role `analysis` (`claude-sonnet-5-5`) for the check, maximum 1,200 output 
 | `ui/live-state.ts` | The live page's state and `sessionOf`, the serialisable session `/api/chase` reads |
 | `ui/live-session-reducer.ts` | Browser state changes: uploads, check answers, signing, chases. Uses the domain transitions |
 | `ui/use-live-demo.ts` | The live page's actions, wired to the two routes, and the story clock |
+| `ui/live-guide.ts` | `documentsGuide(state)`: the guide's current step, from the live state alone |
+| `ui/documents-guide-bar.tsx` | The guide bar: the step from `live-guide.ts` with its button ("Skip 3 days", "Open the upload page", "Show Daniel's phone") on the shared `GuideBar` |
 | `ui/live-toolbar.tsx`, `ui/live-client-lane.tsx`, `ui/live-side-lanes.tsx` | The heading, the clock and its two buttons, and the four live lanes |
 | `ui/inbox-emails.ts` | `EmailRecord`, the facts of one email, and `composeInboxEmail`, which writes it with the active profile |
 | `ui/replaced-checks.ts` | Which check cards a later passing upload replaced |
@@ -374,7 +401,7 @@ Unit checks run in Vitest with `AI_PROVIDER=mock`. Flow checks run in Playwright
 
 ### Flow
 
-21. `@documents.film` `/?t=1600`, `4800`, `8000`, `11200` and `14400` show steps 0 to 4 in order in `[data-keynote-step]`, each beat with its caption; the finale shows "12 h", "1 h", the fictional firm and "Try it live" linking to `/live`; `?record=1` shows the firm's name and "Fictional company" and no play button. The film makes no request to `/api/check` or `/api/chase`.
+21. `@documents.film` `/?t=1600`, `4800`, `8000`, `11200` and `14400` show steps 0 to 4 in order in `[data-keynote-step]`, each beat with its caption; the finale shows "12 h", "1 h", the fictional firm and "Try it yourself" linking to `/live`; `?record=1` shows the firm's name and "Fictional company" and no play button. The film makes no request to `/api/check` or `/api/chase`.
 22. `@documents.controls` Play moves from step 0 to step 1 and pause holds it there; the progress dot "Step 3 of 5" jumps to step 2 and marks itself current.
 23. `@documents.brand` `/` with `?brand=` of another preset still shows "Ledgerwick Tax & Accounting · Email" in the reminder beat and nothing of the other preset (decision F1).
 24. `@documents.upload` On `/live`, opening the email, "Upload and sign" and "Use a sample" with `payslip-summary-2025.pdf` shows Checked on the upload page, "Gross pay" in the system lane, `2025_Okafor-Daniel_Payslip-summary.pdf` in `02 Income`, and the firm row Checked. The provider note shows.
@@ -390,6 +417,8 @@ Unit checks run in Vitest with `AI_PROVIDER=mock`. Flow checks run in Playwright
 34. `@documents.film` `@documents.upload` At 375x812, `/` at each of the five steps, and `/live` in the inbox, upload page, letter and each lane tab, have `scrollWidth` at most 375. The tabs read Firm, Client, System, Drive.
 35. `@documents.film` `@documents.upload` At 1920x1080 and 1440x900, the finale lies inside the viewport on `/`, and all four lanes on `/live`.
 36. `@documents.film` `@documents.upload` No console error or page error on `/` in any step or on `/live` through checks 24, 27 and 28.
+37. `@documents.guide` On `/live` the guide starts on `open-email` with one ring; following the ring or the guide button walks `open-email`, `open-upload`, `send-file`, `done`, `skip-1`, `skip-2` to `end-escalated`, whose "Watch the film" links to `/` and whose "Start over" returns to `open-email`. On a phone with the Firm tab open, the guide button opens the Client tab. The guide button is at least 44 px tall.
+38. `@documents.guide` `documentsGuide` returns each row of the guide table in section 4 (unit).
 
 ## 9. Feature rows
 
@@ -403,6 +432,7 @@ Unit checks run in Vitest with `AI_PROVIDER=mock`. Flow checks run in Playwright
 | `documents.chase` | Get the follow-up that names what is missing, skip 3 days for the second reminder, then see the escalation to the firm | `/live`, "Done for now", "Skip 3 days" | anon | shipped |
 | `documents.own-file` | Upload their own PDF, PNG or JPEG up to 4 MB for one check that keeps no copy | `/live`, "Upload" | anon | shipped |
 | `documents.brand` | See live mode in their own company's name, logo, colours and voice | `/live`, "Make it yours" | anon | shipped |
+| `documents.guide` | Follow one guided step at a time from the request email to the escalation, then start over or watch the film | `/live`, the guide bar | anon | shipped |
 | `documents.fallback` | See the film with a short note when the live demo hits its limit | `/live` | anon | shipped |
 
 No id is a prefix of another followed by `-` or `.`, because `verify flow` greps `@<id>\b` and would also run the longer id's tests.

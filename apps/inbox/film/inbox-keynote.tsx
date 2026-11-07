@@ -69,7 +69,7 @@ export function buildInboxKeynote(profile: CompanyProfile): KeynoteFilm {
       label: "Reply time",
       before,
       after: formatDurationShort(averageFirstReplySeconds(filmConversations)),
-      note: `A simulation with ${profile.name}, a fictional company. ${before} is the average wait for the ${openingTime} opening.`,
+      note: `A simulation with ${profile.name}, a fictional company. Without help, a customer waits ${before} on average until you open at ${openingTime}.`,
     },
   });
 }

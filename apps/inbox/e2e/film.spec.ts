@@ -19,14 +19,14 @@ test("F3: ?t= opens the four beats and the finale in order @inbox.film-controls"
   }
 });
 
-test("F1: the finale shows 9 h to 38 s and Try it live @inbox.film", async ({ page }) => {
+test("F1: the finale shows 9 h to 38 s and Try it yourself @inbox.film", async ({ page }) => {
   await gotoApp(page, `/?t=${stepMoment(4)}`);
 
   const finale = keynoteFinale(page);
   await expect(finale).toContainText("Reply time");
   await expect(finale).toContainText("9 h");
   await expect(finale).toContainText("38 s");
-  await expect(finale.getByRole("link", { name: "Try it live" })).toBeVisible();
+  await expect(finale.getByRole("link", { name: "Try it yourself" })).toBeVisible();
 });
 
 test("F19: ?record=1 names the company and marks it fictional @inbox.film", async ({ page }) => {

@@ -7,9 +7,9 @@ export type LaneDefinition = { id: LaneId; label: string; role: string };
 
 export const lanes: readonly LaneDefinition[] = [
   { id: "ai", label: "AI", role: "Reads the call" },
-  { id: "crm", label: "CRM", role: "Pipeline" },
-  { id: "proposal", label: "Proposal and email", role: "Drafts to send" },
-  { id: "calendar", label: "Calendar", role: "Week view" },
+  { id: "crm", label: "CRM", role: "Your list of deals" },
+  { id: "proposal", label: "Proposal and email", role: "Ready to send" },
+  { id: "calendar", label: "Calendar", role: "This week" },
 ];
 
 export function laneById(id: LaneId): LaneDefinition {

@@ -2,6 +2,7 @@
 
 import { clientReason } from "@/domain/client-reasons";
 import { isUploadItemId, requestItem } from "@/domain/document-request";
+import { spotlight as spotlightOn } from "@diepen/ui/guide/spotlight";
 import { Button } from "@diepen/ui/primitives/button";
 import type { CompanyProfile } from "@diepen/voice/profile";
 import { useState } from "react";
@@ -9,6 +10,7 @@ import { ClientPhone } from "./client-phone";
 import { EmailView, PhoneInbox } from "./email-views";
 import { EngagementLetter, type LetterSignature } from "./engagement-letter";
 import { composeInboxEmail } from "./inbox-emails";
+import type { DocumentsSpotlight } from "./live-guide";
 import type { LiveState } from "./live-state";
 import { SignaturePad } from "./signature-pad";
 import { touchTarget } from "./touch-target";
@@ -28,9 +30,13 @@ export type LiveClientLaneProps = {
   busy: boolean;
   /** Claude reads uploads; false under the mock provider. */
   claudeReadsFiles: boolean;
+  /** The element the live guide points at. */
+  spotlight?: DocumentsSpotlight;
 };
 
-function rowsOf(state: LiveState): UploadRow[] {
+function rowsOf(state: LiveState, spotlightSample: boolean): UploadRow[] {
+  // The guide points at the first file Daniel still has to send.
+  const firstOpen = state.items.find((item) => isUploadItemId(item.id) && (item.state === "missing" || item.state === "problem"));
   return state.items.map((item) => {
     const result = state.results[item.id];
     const fileName = isUploadItemId(item.id) ? state.lastFile[item.id] : undefined;
@@ -43,12 +49,13 @@ function rowsOf(state: LiveState): UploadRow[] {
           ? clientReason(requestItem(item.id), { state: "problem", issues: result.issues, detectedYear: result.year, detectedPerson: result.person })
           : undefined,
       error: state.rowErrors[item.id],
+      spotlightSample: spotlightSample && item.id === firstOpen?.id,
     };
   });
 }
 
 /** Daniel's phone in live mode: the visitor plays the client. Emails are written with the active profile. */
-export function LiveClientLane({ state, profile, actions, framed, onDone, busy, claudeReadsFiles }: LiveClientLaneProps) {
+export function LiveClientLane({ state, profile, actions, framed, onDone, busy, claudeReadsFiles, spotlight }: LiveClientLaneProps) {
   const [draft, setDraft] = useState<LetterSignature>();
   const emails = state.emails.map((record) => composeInboxEmail(profile, record));
   const open = emails.find((email) => email.id === state.openEmailId);
@@ -60,7 +67,7 @@ export function LiveClientLane({ state, profile, actions, framed, onDone, busy, 
         email={open}
         onBack={() => actions.show("inbox")}
         action={
-          <Button variant="brand" size="sm" className={touchTarget} onClick={() => actions.show("upload")}>
+          <Button variant="brand" size="sm" className={touchTarget} onClick={() => actions.show("upload")} {...spotlightOn(spotlight === "upload-and-sign")}>
             {label}
           </Button>
         }
@@ -71,7 +78,8 @@ export function LiveClientLane({ state, profile, actions, framed, onDone, busy, 
       <UploadPage
         profile={profile}
         claudeReadsFiles={claudeReadsFiles}
-        rows={rowsOf(state)}
+        rows={rowsOf(state, spotlight === "use-a-sample")}
+        spotlightDone={spotlight === "done-for-now"}
         onBack={() => actions.show("inbox")}
         onDone={onDone}
         doneDisabled={busy}
@@ -103,7 +111,7 @@ export function LiveClientLane({ state, profile, actions, framed, onDone, busy, 
       </div>
     );
   } else {
-    content = <PhoneInbox emails={emails} onOpen={actions.openEmail} />;
+    content = <PhoneInbox emails={emails} onOpen={actions.openEmail} spotlightId={spotlight === "request-email" ? "request" : undefined} />;
   }
   return (
     <ClientPhone framed={framed} flow={!framed} time={state.now.slice(11, 16)} screenKey={`${state.screen}-${state.openEmailId ?? ""}`}>

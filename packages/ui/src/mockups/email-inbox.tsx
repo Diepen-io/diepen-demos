@@ -98,6 +98,7 @@ export function EmailInbox({ account, threads, openThreadId, drafting, composeSu
                       subject={undefined}
                       onPickSlot={message.onPickSlot ?? offer.onPick}
                       slotsDisabled={offer.disabled}
+                      slotsSpotlight={offer.spotlight}
                     />
                   </div>
                 ))}

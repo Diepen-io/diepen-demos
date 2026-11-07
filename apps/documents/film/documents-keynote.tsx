@@ -53,7 +53,7 @@ export function buildDocumentsKeynote(profile: CompanyProfile): KeynoteFilm {
       label: "Hours a month chasing documents",
       before: formatHours(chasingHoursBefore()),
       after: formatHours(chasingHoursAfter()),
-      note: `A simulation with ${profile.name}, a fictional firm. Example month: ${exampleMonth.returns}\u00a0tax returns with ${exampleMonth.chasesPerReturn} chases of ${exampleMonth.minutesPerChase} minutes each, against ${exampleMonth.minutesPerSummary} minutes per return to read the summary.`,
+      note: `A simulation with ${profile.name}, a fictional firm. Example month: ${exampleMonth.returns}\u00a0tax returns. Without help, each return needs ${exampleMonth.chasesPerReturn} chases of ${exampleMonth.minutesPerChase} minutes. With help, you read one summary in ${exampleMonth.minutesPerSummary} minutes.`,
     },
   });
 }

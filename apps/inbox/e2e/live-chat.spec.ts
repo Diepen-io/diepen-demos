@@ -44,7 +44,7 @@ test("F6: every channel answers an opening hours question and the owner view sho
 test("F7: the provider note says the answers are canned @inbox.live-chat", async ({ page }) => {
   await openLive(page);
 
-  await expect(page.getByRole("note").filter({ hasText: "No API key" })).toHaveText("Demo answers. No API key is set.");
+  await expect(page.getByRole("note").filter({ hasText: /sample answers/i })).toBeVisible();
 });
 
 test("F14: /live fits a 375 px screen on every bottom tab and every channel tab @inbox.live-chat", async ({ page }, testInfo) => {

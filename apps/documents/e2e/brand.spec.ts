@@ -7,7 +7,7 @@ import { action, openLive, openRequestEmail, uploadRow, useSample } from "./supp
 import { samples } from "./support/samples";
 
 const brickfern = presets["brickfern-property"];
-const firm: Firm = { name: brickfern.name, industry: brickfern.industry };
+const firm: Firm = { name: brickfern.name };
 const brandQuery = `?brand=${encodeProfile(brickfern)}`;
 
 test("live mode speaks in the applied profile's name, colours and Drive @documents.brand", async ({ page }) => {

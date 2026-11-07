@@ -1,6 +1,7 @@
 "use client";
 
 import type { CompanyProfile } from "@diepen/voice/profile";
+import { spotlight } from "@diepen/ui/guide/spotlight";
 import { Button } from "@diepen/ui/primitives/button";
 import { cx } from "@diepen/ui/primitives/class-names";
 import { Icon } from "@diepen/ui/primitives/icon";
@@ -22,6 +23,8 @@ export type LiveLanesProps = {
   stale: boolean;
   /** What the AI lane says before the visitor presses the button. */
   waitingFor: string;
+  /** The live guide points at the send button. */
+  spotlightSend?: boolean;
 };
 
 const clock = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
@@ -38,7 +41,7 @@ function sendLabel(crm: MeetingOutputs["crm"]): string {
 }
 
 /** The tools the outputs land in: AI notes, CRM over calendar, then proposal and email. */
-export function LiveLanes({ call, profile, stale, waitingFor }: LiveLanesProps) {
+export function LiveLanes({ call, profile, stale, waitingFor, spotlightSend }: LiveLanesProps) {
   const { outputs, revealed, status } = call;
   const shows = (index: number) => (outputs && revealed > index ? outputs : null);
   const isNew = (index: number) => revealed === index + 1 && status === "revealing";
@@ -105,7 +108,7 @@ export function LiveLanes({ call, profile, stale, waitingFor }: LiveLanesProps) 
                   action:
                     status === "sent" ? undefined : (
                       <div className="flex flex-wrap items-center gap-3">
-                        <Button variant="brand" className="max-sm:h-11" onClick={call.send} disabled={status !== "revealed" || stale}>
+                        <Button variant="brand" className="max-sm:h-11" onClick={call.send} disabled={status !== "revealed" || stale} {...spotlight(spotlightSend)}>
                           <Icon name="send" size={16} />
                           {sendLabel(email.crm)}
                         </Button>

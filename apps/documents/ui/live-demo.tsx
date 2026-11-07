@@ -5,9 +5,11 @@ import { useNarrowScreen } from "@diepen/ui/film/use-stage-environment";
 import { cx } from "@diepen/ui/primitives/class-names";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { documentsGridColumns, documentsLanes, type DocumentsLaneId } from "./documents-lanes";
+import { DocumentsGuideBar } from "./documents-guide-bar";
 import { Lane } from "./lane";
 import { LaneTabs } from "./lane-tabs";
 import { LiveClientLane } from "./live-client-lane";
+import { documentsGuide } from "./live-guide";
 import { LiveDriveLane, LiveFirmLane, LiveSystemLane } from "./live-side-lanes";
 import { LiveControls, LiveHeading } from "./live-toolbar";
 import { useLiveDemo } from "./use-live-demo";
@@ -28,6 +30,7 @@ export function LiveDemo({ providerName }: { providerName: string }) {
   const [busy, setBusy] = useState(false);
   const lanes = documentsLanes(profile);
   const done = isComplete(state.items);
+  const guide = documentsGuide(state);
 
   async function run(event: "submitted" | "skip-days") {
     setBusy(true);
@@ -52,6 +55,7 @@ export function LiveDemo({ providerName }: { providerName: string }) {
           busy={busy}
           claudeReadsFiles={providerName === "claude"}
           onDone={() => void run("submitted")}
+          spotlight={guide.spotlight}
         />
       </Fill>
     ),
@@ -59,15 +63,27 @@ export function LiveDemo({ providerName }: { providerName: string }) {
     drive: <Fill narrow={narrow}><LiveDriveLane state={state} firmName={profile.name} /></Fill>,
   };
 
+  function startOver() {
+    actions.startOver();
+    setShown("client");
+  }
+
   const controls = (
-    <LiveControls
-      now={state.now}
-      canSkip={!busy && !done && !state.session.escalated}
+    <LiveControls now={state.now} canSkip={!busy && !done && !state.session.escalated} onSkip={() => void run("skip-days")} onStartOver={startOver} />
+  );
+
+  const guideBar = (
+    <DocumentsGuideBar
+      guide={guide}
+      busy={busy}
       onSkip={() => void run("skip-days")}
-      onStartOver={() => {
-        actions.startOver();
-        setShown("client");
+      onShowUpload={() => {
+        actions.show("upload");
+        select("client");
       }}
+      onStartOver={startOver}
+      clientHidden={narrow && shown !== "client"}
+      onShowClient={() => select("client")}
     />
   );
 
@@ -78,8 +94,9 @@ export function LiveDemo({ providerName }: { providerName: string }) {
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <LiveHeading providerName={providerName} />
           </div>
-          {/* The clock, "Skip 3 days" and the tabs stay in reach while the page scrolls. */}
+          {/* The guide, the clock, "Skip 3 days" and the tabs stay in reach while the page scrolls. */}
           <div className="sticky top-0 z-20 -mx-4 flex flex-col gap-2 bg-background/95 px-4 py-2 backdrop-blur-sm">
+            {guideBar}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">{controls}</div>
             <LaneTabs
               lanes={lanes}
@@ -90,10 +107,13 @@ export function LiveDemo({ providerName }: { providerName: string }) {
           </div>
         </>
       ) : (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-          <LiveHeading providerName={providerName} />
-          {controls}
-        </div>
+        <>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <LiveHeading providerName={providerName} />
+            {controls}
+          </div>
+          {guideBar}
+        </>
       )}
       <div
         className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-[var(--live-columns)] 2xl:gap-6"

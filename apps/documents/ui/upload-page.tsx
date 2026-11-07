@@ -1,6 +1,7 @@
 "use client";
 
 import { BrandMark } from "@diepen/ui/brand/brand-mark";
+import { spotlight } from "@diepen/ui/guide/spotlight";
 import { Button } from "@diepen/ui/primitives/button";
 import { cx } from "@diepen/ui/primitives/class-names";
 import { Icon } from "@diepen/ui/primitives/icon";
@@ -19,6 +20,8 @@ export type UploadPageProps = {
   onBack?: () => void;
   /** Claude reads each file. False under the mock provider, where no file leaves the server. */
   claudeReadsFiles?: boolean;
+  /** The live guide points at "Done for now". */
+  spotlightDone?: boolean;
 };
 
 /** The host the client sees in the address bar: the firm's own site, or a neutral one. */
@@ -32,7 +35,7 @@ export function uploadHost(profile: CompanyProfile): string {
 }
 
 /** The page behind "Upload and sign": the firm's brand, the six items, one button to finish. */
-export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, onBack, claudeReadsFiles }: UploadPageProps) {
+export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, onBack, claudeReadsFiles, spotlightDone }: UploadPageProps) {
   const done = rows.filter((row) => row.state === "checked").length;
   return (
     <div className="flex min-h-full flex-col bg-surface">
@@ -74,7 +77,7 @@ export function UploadPage({ profile, rows, actionsFor, onDone, doneDisabled, on
         <p className="text-[12px] leading-snug text-faint">
           PDF, PNG or JPEG, up to 4 MB.{claudeReadsFiles ? " Your file goes to Claude for this one check." : ""} This demo keeps no copy.
         </p>
-        <Button variant="brand" className={cx("w-full", touchTarget)} onClick={onDone} disabled={doneDisabled}>
+        <Button variant="brand" className={cx("w-full", touchTarget)} onClick={onDone} disabled={doneDisabled} {...spotlight(spotlightDone)}>
           Done for now
         </Button>
       </div>

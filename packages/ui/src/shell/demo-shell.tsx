@@ -43,7 +43,7 @@ export function DemoShell({ title, mode, fit, presets, children }: DemoShellProp
 
   if (recording) return <main className="flex h-dvh flex-col overflow-hidden">{children}</main>;
 
-  // One set of gutters in both modes, so the header does not shift on the Film or Live switch.
+  // One set of gutters in both modes, so the header does not shift on the Watch or Try it switch.
   const frame = "w-full px-4 md:px-8 2xl:px-12";
 
   return (
@@ -69,8 +69,8 @@ export function DemoShell({ title, mode, fit, presets, children }: DemoShellProp
               label="Demo mode"
               value={mode}
               options={[
-                { value: "film", label: "Film", href: hrefWithBrand("/") },
-                { value: "live", label: "Live", href: hrefWithBrand("/live") },
+                { value: "film", label: "Watch", href: hrefWithBrand("/") },
+                { value: "live", label: "Try it", href: hrefWithBrand("/live") },
               ]}
             />
             <a
@@ -80,8 +80,9 @@ export function DemoShell({ title, mode, fit, presets, children }: DemoShellProp
               diepen.ai
             </a>
           </div>
-          <Button variant="secondary" onClick={() => setPanelOpen(true)}>
-            <Icon name="sparkle" size={16} />
+          {/* A quiet tool for sales calls: the mode switch and the live guide carry the visitor. */}
+          <Button variant="ghost" size="sm" className="text-muted hover:text-foreground" onClick={() => setPanelOpen(true)}>
+            <Icon name="sparkle" size={15} />
             Make it yours
           </Button>
         </div>

@@ -5,7 +5,7 @@ import { fixturePath, samples } from "./support/samples";
 
 test("a sample payslip is checked, filed and ticked off for the firm @documents.upload", async ({ page }) => {
   await openLive(page);
-  await expect(page.getByRole("note").filter({ hasText: "Demo answers. No API key is set." })).toBeVisible();
+  await expect(page.getByRole("note").filter({ hasText: /sample answers/i })).toBeVisible();
 
   await openUploadPage(page);
   await useSample(page, samples.payslip);

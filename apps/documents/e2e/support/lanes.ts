@@ -9,30 +9,23 @@ import { expect } from "./documents-test";
 
 export type LaneId = "firm" | "client" | "system" | "drive";
 
-/** The firm lane takes its label and role from the active profile. */
-export type Firm = { name: string; industry: string };
+/** The firm lane takes its label from the active profile. */
+export type Firm = { name: string };
 
-export const defaultFirm: Firm = { name: "Ledgerwick Tax & Accounting", industry: "Tax and accounting firm" };
+export const defaultFirm: Firm = { name: "Ledgerwick Tax & Accounting" };
 
 export const tabLabels: Record<LaneId, string> = { firm: "Firm", client: "Client", system: "System", drive: "Drive" };
 
-const fixedLanes: Record<Exclude<LaneId, "firm">, { label: string; role: string }> = {
-  client: { label: "Daniel Okafor", role: "Client" },
-  system: { label: "Document chaser", role: "Automation" },
-  drive: { label: "Drive", role: "Client folder" },
-};
+const fixedLabels: Record<Exclude<LaneId, "firm">, string> = { client: "Daniel Okafor", system: "Document chaser", drive: "Drive" };
 
 export function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function laneLabel(id: LaneId, firm: Firm) {
-  return id === "firm" ? { label: firm.name, role: firm.industry } : fixedLanes[id];
-}
-
+/** Finds a lane by its party. The role line after the comma is copy, so the match leaves it out. */
 export function lane(page: Page, id: LaneId, firm: Firm = defaultFirm): Locator {
-  const { label, role } = laneLabel(id, firm);
-  return page.getByRole("region", { name: `${label}, ${role}`, exact: true });
+  const label = id === "firm" ? firm.name : fixedLabels[id];
+  return page.getByRole("region", { name: new RegExp(`^${escapeRegExp(label)}, `) });
 }
 
 export function laneTabs(page: Page): Locator {

@@ -14,12 +14,14 @@ import { clipAssistantText, maxCustomerMessageChars } from "@/domain/message-lim
 import { CalendarView } from "./calendar-view";
 import { ChannelTabStrip } from "./channel-tab-strip";
 import { ChannelThread } from "./channel-thread";
+import { InboxGuideBar } from "./inbox-guide-bar";
 import { initialLiveState, liveInboxReducer, type LiveMessage, type LiveState } from "./live-inbox-state";
+import { channelForRefund, channelForTime, inboxGuide } from "./live-guide";
 import { LivePartTabs, livePartsLabel, type LivePart } from "./live-part-tabs";
 import { averageFirstReply, liveCalendarBlocks, liveOwnerRows, threadView } from "./live-snapshot";
 import { OwnerView } from "./owner-view";
 import { localNow, requestReply } from "./reply-client";
-import { starterPrompts } from "./starter-prompts";
+import { askRefundText, askTimeText, starterPrompts } from "./starter-prompts";
 import { usePhoneFit } from "./use-phone-fit";
 import { useVisitorNow } from "./use-visitor-now";
 
@@ -80,21 +82,29 @@ function LiveInboxBody({ profile, providerName }: BodyProps) {
   const active = state.active;
   const thread = state.threads[active];
   const handedOver = thread.status === "needs_human";
+  const guide = inboxGuide(state, { company: profile.name, assistant: profile.people.assistantName, owner: profile.people.owner.name });
+
+  /** A guide button: open the channel and send the message there, as the visitor would. */
+  function sendFromGuide(channel: Channel, text: string) {
+    if (channel !== state.active) dispatch({ type: "select", channel });
+    void send(channel, text);
+  }
   const hiddenOnPhone = (id: LivePart) => part !== id && "max-md:hidden";
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 pb-24 md:px-8 md:pb-6">
       <div className="grid gap-4 md:h-[calc(100dvh-10rem)] md:min-h-[40rem] md:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] md:grid-rows-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-5">
         <section ref={customerPart} aria-label="Customer" className={cx("flex min-h-0 min-w-0 flex-col gap-3 md:row-span-2", hiddenOnPhone("customer"))}>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-            <p className="min-w-0 flex-1 text-[15px] text-muted">
-              You write as the customer.{" "}
-              <span className="max-sm:hidden">
-                <span className="text-foreground">{profile.people.assistantName}</span> answers for {profile.name}.
-              </span>
-            </p>
-            <ProviderNote providerName={providerName} className="self-start sm:self-auto" />
-          </div>
+          <InboxGuideBar
+            guide={guide}
+            onAskTime={() => sendFromGuide(channelForTime(state), askTimeText)}
+            onAskRefund={() => sendFromGuide(channelForRefund(state), askRefundText)}
+            onStartOver={() => {
+              dispatch({ type: "reset" });
+              setPart("customer");
+            }}
+          />
+          <ProviderNote providerName={providerName} className="self-start" />
           <ChannelTabStrip
             value={active}
             onChange={(channel) => dispatch({ type: "select", channel })}
@@ -112,6 +122,7 @@ function LiveInboxBody({ profile, providerName }: BodyProps) {
               // The mockups grey these out and stop picks once the thread is handed over.
               onPickSlot: (iso) => void send(active, `${formatSlot(iso)} works for me.`),
               sending: thread.sending,
+              spotlightSlots: guide.spotlightSlots,
               maxLength: maxCustomerMessageChars,
               notice: thread.notice,
               handover: handedOver
@@ -126,7 +137,7 @@ function LiveInboxBody({ profile, providerName }: BodyProps) {
             rows={rows}
             subtitle={average ? `Average first reply: ${average}` : "Every conversation lands here"}
             showFilters={rows.length > 0}
-            emptyText="Send a message as the customer. The conversation shows up here."
+            emptyText="Send a message as the customer. You see the conversation here."
           />
         </div>
         <div className={cx("min-h-0 min-w-0 max-md:h-[calc(100dvh-14rem)] max-md:min-h-[30rem]", hiddenOnPhone("calendar"))}>

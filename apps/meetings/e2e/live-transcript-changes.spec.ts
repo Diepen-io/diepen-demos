@@ -23,14 +23,14 @@ test("marks the drafts out of date when the transcript changes, and drafts again
 
   await inputTab(page, "Paste").click();
   await transcriptBox(page).fill(rosaCall);
-  await expect(page.getByText("The transcript changed.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Draft again" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Send to Tom" })).toBeDisabled();
 
   await page.getByRole("button", { name: "Draft again" }).click();
   await expectAllOutputs(page);
   await expect(output(page, "crm")).toContainText("Rosa Lindqvist");
   await expect(page.getByText("Read 6 turns")).toBeVisible();
-  await expect(page.getByText("The transcript changed.")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Draft again" })).toHaveCount(0);
 });
 
 // F20

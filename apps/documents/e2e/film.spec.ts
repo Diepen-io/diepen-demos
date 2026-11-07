@@ -25,7 +25,7 @@ test("the finale shows 12 h to 1 h and links to live mode @documents.film", asyn
   await expect(finale.getByText("12 h", { exact: true })).toBeVisible();
   await expect(finale.getByText("1 h", { exact: true })).toBeVisible();
   await expect(finale).toContainText(`${firm.name}, a fictional firm`);
-  await expect(finale.getByRole("link", { name: "Try it live" })).toHaveAttribute("href", /^\/live/);
+  await expect(finale.getByRole("link", { name: "Try it yourself" })).toHaveAttribute("href", /^\/live/);
 });
 
 test("?record=1 names the fictional firm and hides the play button @documents.film", async ({ page }) => {

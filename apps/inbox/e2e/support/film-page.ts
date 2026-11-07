@@ -18,7 +18,7 @@ export function keynoteStep(page: Page): Locator {
   return page.locator("[data-keynote-step]");
 }
 
-/** The finale: the one number, before and after, and "Try it live". */
+/** The finale: the one number, before and after, and "Try it yourself". */
 export function keynoteFinale(page: Page): Locator {
   return page.locator("[data-keynote-finale]");
 }

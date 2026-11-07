@@ -41,7 +41,7 @@ for (const viewport of [
     test.skip(testInfo.project.name !== "desktop", "Runs once, at the desktop sizes of the plan");
     await page.setViewportSize(viewport);
 
-    // The finale is the tallest step: the numbers, "Try it live" and the note.
+    // The finale is the tallest step: the numbers, "Try it yourself" and the note.
     await openFilm(page, `?t=${stepMoments[4]}`);
     const finale = page.locator("[data-keynote-finale]");
     await expect(finale).toBeVisible();

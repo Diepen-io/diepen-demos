@@ -6,7 +6,7 @@ export type LiveLane = {
   id: DocumentsLaneId;
   /** The party, for example "Daniel Okafor" or "Ledgerwick Tax & Accounting". */
   label: string;
-  /** What the party is in the story, for example "Client" or "Automation". */
+  /** What the party is in the story, for example "You play this client" or "Works on its own". */
   role: string;
   /** A short name for the narrow layout's tabs. */
   tabLabel: string;
@@ -19,9 +19,9 @@ export type LiveLane = {
 export function documentsLanes(profile: CompanyProfile): LiveLane[] {
   return [
     { id: "firm", label: profile.name, role: profile.industry, tabLabel: "Firm", icon: "briefcase", brand: true },
-    { id: "client", label: "Daniel Okafor", role: "Client", tabLabel: "Client", icon: "user" },
-    { id: "system", label: "Document chaser", role: "Automation", tabLabel: "System", icon: "sparkle" },
-    { id: "drive", label: "Drive", role: "Client folder", tabLabel: "Drive", icon: "folder" },
+    { id: "client", label: "Daniel Okafor", role: "You play this client", tabLabel: "Client", icon: "user" },
+    { id: "system", label: "Document chaser", role: "Works on its own", tabLabel: "System", icon: "sparkle" },
+    { id: "drive", label: "Drive", role: "Files land here", tabLabel: "Drive", icon: "folder" },
   ];
 }
 

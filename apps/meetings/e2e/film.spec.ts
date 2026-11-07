@@ -11,7 +11,7 @@ const steps = [
   ["The numbers, pulled from the call.", "Days empty"],
   ["Proposal drafted.", "EUR 34 per unit per month"],
   ["Sent 4 minutes later.", "Sent 14:36"],
-  ["Call end to proposal sent", "Try it live"],
+  ["Call end to proposal sent", "Try it yourself"],
 ] as const;
 
 // F1, F4
@@ -34,7 +34,7 @@ test("ends on 2 days to 4 min with a link to live mode, with every API request b
   await expect(finale).toBeVisible({ timeout: 10_000 });
   await expect(finale).toContainText("2 days");
   await expect(finale).toContainText("4 min");
-  await expect(finale.getByRole("link", { name: "Try it live" })).toHaveAttribute("href", /\/live/);
+  await expect(finale.getByRole("link", { name: "Try it yourself" })).toHaveAttribute("href", /\/live/);
 });
 
 // F3

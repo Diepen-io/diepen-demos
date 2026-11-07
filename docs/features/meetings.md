@@ -46,7 +46,7 @@ Live mode fills the sample call from the visitor's profile, so every token reads
 | 1 | 3200 | The numbers, pulled from the call. | Three figures: 14 Apartments, 38 Days empty, 9 h A week on tenants | none |
 | 2 | 6400 | Proposal drafted. | Card, file icon: `{sellerCompany}`, the proposal title "{serviceName} for Becker Residential", value `{servicePrice}` | none |
 | 3 | 9600 | Sent 4 minutes later. | Card, mail icon: "Follow-up email", "Your proposal from {sellerCompany}", "To Tom Becker" | "Sent 14:36", pass |
-| 4 | 12800 | Finale | "Call end to proposal sent", "2 days" to "4 min", "Try it live", the fictional note | none |
+| 4 | 12800 | Finale | "Call end to proposal sent", "2 days" to "4 min", "Try it yourself", the fictional note | none |
 
 The call length (32:10) comes from `sampleCallStartsAt` and `sampleCallEndsAt`, and the three figures from the recorded outputs, never from literals.
 `?t=<ms>` opens the film paused on the step that holds that moment; `?record=1` hides the shell and shows the company with its "Fictional company" badge above the stage.
@@ -58,7 +58,7 @@ The call length (32:10) comes from `sampleCallStartsAt` and `sampleCallEndsAt`, 
 | Label | Call end to proposal sent |
 | Before | 2 days |
 | After | 4 min |
-| Note | A simulation with {sellerCompany}, a fictional company. 2 days is this scenario's manual routine: notes typed up that evening, proposal sent on Thursday. |
+| Note | A simulation with {sellerCompany}, a fictional company. Without help, this takes 2 days. You type the notes that evening and send the proposal on Thursday. |
 
 "After" is computed from the call end (14:32:10) and the send moment `proposalSentAt` (14:36:10), and the caption of step 3 uses the same minutes, so the two cannot drift.
 "Before" is a fixed fixture value that belongs to the fictional scenario, and the note says so.
@@ -115,6 +115,26 @@ It has 36 lines and runs from 00:00 to 32:10.
 ```
 
 The call ends at 32:10 (story time 14:32:10); the end time is a fixture constant `sampleCallEndsAt = "2026-11-10T14:32:10"`, not a transcript line.
+
+### Guide
+
+A guide bar above the input column shows one next step at a time (decision G1): "Step N of 3", one short instruction, and one large button or a brand ring on the one element to use.
+The page scrolls, so the bar stays at the top (`sticky`), and the input column sticks below it.
+`ui/live/live-guide.ts` works the step out from the call's status, whether the box holds a valid transcript, and whether it changed after drafting.
+The texts below are the defaults; tests check the step ids, never the words.
+
+| Step | Id | When | Instruction | Points at |
+| --- | --- | --- | --- | --- |
+| 1 | `load` | No valid transcript | You play the seller after a sales call. Start with our sample call. | Button "Load the sample call": opens the "Sample call" tab, which fills the box |
+| 2 | `submit` | A valid transcript, no outputs | Now let the AI read the call. Tap Turn this call into a proposal. | Ring on "Turn this call into a proposal" |
+| 2 | `reading` | Processing | The AI reads the call | "One moment" |
+| 2 | `stale` | The transcript changed after drafting | You changed the call. Tap Draft again. | Ring on "Draft again" |
+| 2 | `failed` | The model call failed | The draft failed. Tap Try again. | Ring on "Try again" |
+| 3 | `drafting` | Revealing | The AI writes the notes, the deal, the proposal and the email | "One moment" |
+| 3 | `send` | Revealed | Read the proposal and the email. Then tap Send. | Ring on "Send to {first name}" |
+| End | `end` | Sent | You sent the email with the proposal. The next meeting is in the calendar. | "Start over" and "Watch the film" |
+
+The lane roles read "Reads the call", "Your list of deals", "Ready to send" and "This week".
 
 ### Recorded outputs for the film
 
@@ -184,7 +204,7 @@ The visitor plays both sides of a call, or brings a real transcript, and gets al
 
 ### Flow
 
-1. `/live` opens with the shell's Film or Live switch, the active brand, the fictional note when `profile.fictional` is true, and "Demo answers. No API key is set." when the container's provider is `mock`.
+1. `/live` opens with the shell's Watch or Try it switch, the active brand, the fictional note when `profile.fictional` is true, and "You see sample answers. The AI is off here." when the container's provider is `mock`.
 2. The input column has three tabs: "Record", "Paste" and "Sample call". "Record" is selected when the browser supports speech recognition, otherwise "Paste".
 3. Every tab ends in the same editable transcript box with a counter, for example "1,240 / 30,000". The box text is 16 px on phones so iOS does not zoom.
 4. While the box holds a valid transcript, the AI lane says "Ready to read 12 turns"; otherwise "Waiting for a transcript".
@@ -193,8 +213,8 @@ The visitor plays both sides of a call, or brings a real transcript, and gets al
 7. When the response arrives, the six outputs appear one after the other, 700 ms apart, in this order: summary, numbers and pain points, CRM record, proposal, follow-up email, next meeting.
 8. The email card has "Send to {prospect first name}", or "Send the email" when the call never names the prospect, and the line "Simulated email."
 9. On send, the email shows "Sent HH:MM", the CRM stage changes to "Proposal sent", the CRM next step becomes "Proposal sent. Next: {meeting title} on {weekday day month} at {HH:MM}.", and a result bar shows "Transcript to proposal sent: 1 min 12 s", measured from the press in step 5 to the send. On desktop the bar spans the top of the output side; on a phone it shows right under the email, so the page does not jump.
-10. "Start over" clears the outputs and keeps the transcript.
-11. When the transcript changes after the outputs exist (an edit, a paste, more recording, a loaded sample), a note says "The transcript changed. These drafts are from the earlier version." with "Draft again". The outputs dim and cannot be sent until they are drafted again.
+10. "Start over" clears the outputs and keeps the transcript. It sits under the main button until the email is sent; then the guide offers it.
+11. When the transcript changes after the outputs exist (an edit, a paste, more recording, a loaded sample), a note says "You changed the call. These drafts belong to the earlier version." with "Draft again". The outputs dim and cannot be sent until they are drafted again.
 
 With `prefers-reduced-motion: reduce`, all six outputs appear at once without motion.
 
@@ -255,9 +275,9 @@ It normalises `crm.stage` to a domain deal stage, defaulting to "Proposal drafte
 
 ### Keyless mock and cost guards
 
-- Without `ANTHROPIC_API_KEY`, or with `AI_PROVIDER=mock`, the container returns the mock provider and the screen shows "Demo answers. No API key is set." (decision D4).
+- Without `ANTHROPIC_API_KEY`, or with `AI_PROVIDER=mock`, the container returns the mock provider and the screen shows "You see sample answers. The AI is off here." (decision D4).
 - When a guard trips, `/api/outputs` answers 429 `{ fallback: "film" }`. The live page then sends the visitor to the film with the shell's fallback note, at `/?fallback=limit` (`useFilmFallback`).
-- When the provider throws or its answer fails the schema, the route answers 503 with `unavailableResponse`, like the other apps, and the page shows "The draft did not come through. Try again." with a "Try again" button.
+- When the provider throws or its answer fails the schema, the route answers 503 with `unavailableResponse`, like the other apps, and the page shows "The draft failed. Try again." with a "Try again" button.
 
 ### What the mock provider answers
 
@@ -364,13 +384,14 @@ export function createSpeechRecognizer(scope: Window): SpeechRecognizer;
 | `ui/lanes/crm-lane.tsx` | The new deal record with its stage |
 | `ui/lanes/proposal-lane.tsx`, `proposal-paper.tsx`, `follow-up-email.tsx` | Proposal page and follow-up email (on the `EmailMessage` mockup) with attachment chip, draft and sent status, optional send action |
 | `ui/lanes/calendar-lane.tsx` | The working week as an agenda, one row per day, new meeting highlighted. A week grid is unreadable in a lane under 400 px wide |
-| `ui/live/live-demo.tsx` | The live page: input column and output lanes |
+| `ui/live/live-demo.tsx` | The live page: guide, input column and output lanes |
+| `ui/live/live-guide.ts`, `ui/live/meetings-guide-bar.tsx` | `meetingsGuide(input)`, the guide's current step, and the sticky guide bar on the shared `GuideBar` |
 | `ui/live/use-live-call.ts` | The live state: ready, processing, revealing, revealed, sent, failed, and the submitted transcript the stale check compares with |
 | `ui/live/transcript-input.tsx`, `input-tabs.tsx` | Tabs, transcript box, counter, inline issues |
 | `ui/live/record-panel.tsx`, `use-recording.ts` | Speaker toggle, Start and Stop, interim text, fallback notes, the 10-minute stop. `LiveDemo` holds the recording so the main button can stop it |
 | `ui/live/live-lanes.tsx`, `lane-panel.tsx` | The output lanes in live mode |
 | `ui/live/send-result.tsx` | "Transcript to proposal sent" bar |
-| `ui/live/stale-note.tsx` | "The transcript changed" note with "Draft again" |
+| `ui/live/stale-note.tsx` | "You changed the call" note with "Draft again" |
 | `ui/live/outputs-client.ts` | `fetch` to `/api/outputs`, zod parse of each response shape |
 | `ui/speech/speech-recognizer.ts`, `browser-recognizer.ts` | The interface and browser adapter above, and the hook that creates it once in the browser |
 
@@ -386,7 +407,7 @@ export function createSpeechRecognizer(scope: Window): SpeechRecognizer;
 
 | Route | File | Contract |
 | --- | --- | --- |
-| `/` | `page.tsx` | `KeynoteFilmView` with the film built from the Brickfern preset (decision F1) inside the demo shell (Film and Live switch, "Make it yours", the fallback note); reads `?t=`, `?brand=`, `?record=1` and `?fallback=limit` |
+| `/` | `page.tsx` | `KeynoteFilmView` with the film built from the Brickfern preset (decision F1) inside the demo shell (Watch and Try it switch, "Make it yours", the fallback note); reads `?t=`, `?brand=`, `?record=1` and `?fallback=limit` |
 | `/live` | `live/page.tsx` | Server component; passes `providerName` and the sample call to `LiveDemo` |
 | `POST /api/outputs` | `api/outputs/route.ts`, `api/outputs/request-schema.ts` | See below |
 | `POST /api/brand` | `api/brand/route.ts` | `createBrandHandler` from `@diepen/voice/brand-route` with the container's page fetcher, provider and guards; its request and response are the package's |
@@ -465,6 +486,7 @@ Every check names the feature id it proves. Flow tests carry `@<id>` in their ti
 | U16 | `meetings.make-it-yours` | `firstName` skips titles; `isPersonName` is false for "the team" and "Prospect"; `sellerOf` names a team profile by its company; the sample call filled from a titled, a team and an unpriced profile has 36 turns, finds Tom Becker and never reads "it's the from" or "is Price on request" |
 | U17 | `meetings.live-sample` | The mock labels each figure, skips the year 2015, reads "Becker Residential" and Tom's email from the call, names a recorded prospect from the greeting, and writes to "New contact" with "Hello," when no name is said |
 | U18 | `meetings.live-send` | `markProposalSent` sets "Proposal sent" and the next step "Proposal sent. Next: {meeting} on Friday 13 November at 10:00." |
+| U19 | `meetings.guide` | `meetingsGuide` returns each row of the guide table in section 4 |
 
 ### Flow checks (Playwright, mock provider, desktop and phone projects)
 
@@ -473,9 +495,9 @@ Every flow test fails on any `console` error or `pageerror` through one shared f
 | # | Feature | Check |
 | --- | --- | --- |
 | F1 | `meetings.film-controls` | `/?t=<step × 3200 + 400>` opens each of the five steps in order, `[data-keynote-step]` names the step, and each shows its caption and its element |
-| F2 | `meetings.film` | With every `/api/*` request except health aborted, `/?t=9600` plays to the finale, which shows "2 days", "4 min" and "Try it live" linking to `/live` |
+| F2 | `meetings.film` | With every `/api/*` request except health aborted, `/?t=9600` plays to the finale, which shows "2 days", "4 min" and "Try it yourself" linking to `/live` |
 | F3 | `meetings.film` | `/?record=1` hides the shell and shows the company and "Fictional company" |
-| F5 | `meetings.live-sample` | `/live`, "Sample call", "Turn this call into a proposal": all six `[data-output]` appear in sequence order, the CRM shows "Tom Becker", the proposal shows the preset's price, and "Demo answers. No API key is set." is visible |
+| F5 | `meetings.live-sample` | `/live`, "Sample call", "Turn this call into a proposal": all six `[data-output]` appear in sequence order, the CRM shows "Tom Becker", the proposal shows the preset's price, and "You see sample answers. The AI is off here." is visible |
 | F6 | `meetings.live-paste` | Paste a fictional 6-line transcript between the preset owner and "Rosa Lindqvist" with the numbers 12 and 40: all six outputs appear, the CRM contact is "Rosa Lindqvist", and the numbers output shows 12 and 40 |
 | F7 | `meetings.live-paste` | A 10-word paste disables the button and shows the 20-word message; the counter reads "30,000 / 30,000" when the box is full |
 | F8 | `meetings.live-record` | With both constructors removed by an init script, the Record tab shows the "Recording needs Chrome, Edge or Safari" note, no Start button, and the Paste path still works |
@@ -483,14 +505,15 @@ Every flow test fails on any `console` error or `pageerror` through one shared f
 | F10 | `meetings.live-record` | With a fake constructor that emits two final results, toggling the speaker in between, the transcript box holds two lines with the two speakers, and the button produces six outputs |
 | F11 | `meetings.live-send` | After the outputs, "Send to Tom" shows "Sent", the CRM stage "Proposal sent", the next step "Proposal sent. Next: …" and "Transcript to proposal sent:" with a duration |
 | F12 | `meetings.limit-fallback` | With `/api/outputs` routed to 429 `{ fallback: "film" }`, pressing the button lands on the film with the shell's fallback note |
-| F13 | `meetings.live-paste` | With `/api/outputs` routed to 503, the page shows "The draft did not come through. Try again." and "Try again" succeeds once the route is released |
+| F13 | `meetings.live-paste` | With `/api/outputs` routed to 503, the page shows "The draft failed. Try again." and "Try again" succeeds once the route is released |
 | F14 | `meetings.make-it-yours` | `/live?brand=<test profile>` (fictional, its own name, owner and price) shows its name in the header; the sample call uses its owner; the proposal shows its price |
 | F15 | `meetings.make-it-yours` | With `/api/brand` routed to return the test profile, the "Make it yours" panel applies it and the `--brand` CSS variable equals its brand colour |
 | F16 | `meetings.film` | At 375x812, each of the five film steps, `/live` and `/live` after the six outputs have `scrollWidth` at most 375 |
 | F10b | `meetings.live-record` | Pressing "Turn this call into a proposal" while recording stops the recording: Start shows again |
 | F18 | `meetings.live-sample` | With a pasted transcript in the box, "Sample call" keeps it until "Replace with the sample call" |
-| F19 | `meetings.live-paste` | A changed transcript after the outputs shows "The transcript changed.", disables send, and "Draft again" drafts from the new transcript |
+| F19 | `meetings.live-paste` | A changed transcript after the outputs shows the "Draft again" note, disables send, and "Draft again" drafts from the new transcript |
 | F20 | `meetings.live-sample` | After "Start over" the AI lane says "Ready to read 36 turns" |
+| F21 | `meetings.guide` | On `/live` the guide starts on `load`; its button, the ring on "Turn this call into a proposal" and the ring on Send walk `load`, `submit`, `send` to `end`, which links to the film |
 
 ## 9. Feature rows
 
@@ -503,6 +526,7 @@ Every flow test fails on any `console` error or `pageerror` through one shared f
 | `meetings.live-record` | Record a role-played call with the microphone, or see why recording is not available | `/live`, "Record", "Start" | anon | shipped |
 | `meetings.live-send` | Send the follow-up email (simulated) and see the time from transcript to proposal sent | `/live`, after the outputs, "Send to …" | anon | shipped |
 | `meetings.limit-fallback` | See the film with a short note when the live demo hits its limit | `/live`, "Turn this call into a proposal" while a guard trips | anon | shipped |
+| `meetings.guide` | Follow one guided step at a time from the sample call to the sent email, then start over or watch the film | `/live`, the guide bar | anon | shipped |
 | `meetings.make-it-yours` | See live mode in their own company's brand, voice and prices | `/live`, "Make it yours", or `/live?brand=…` | anon | shipped |
 
 ## 10. Open questions

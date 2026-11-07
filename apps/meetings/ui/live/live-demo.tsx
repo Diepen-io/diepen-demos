@@ -1,6 +1,7 @@
 "use client";
 
 import { useBrand } from "@diepen/ui/brand/brand-provider";
+import { spotlight } from "@diepen/ui/guide/spotlight";
 import { Button } from "@diepen/ui/primitives/button";
 import { Icon } from "@diepen/ui/primitives/icon";
 import { ProviderNote } from "@diepen/ui/shell/provider-note";
@@ -11,7 +12,9 @@ import { checkTranscript, parseTranscript } from "@/domain/transcript";
 import { useBrowserRecognizer } from "@/ui/speech/browser-recognizer";
 import type { SpeechRecognizer } from "@/ui/speech/speech-recognizer";
 import type { InputTab } from "./input-tabs";
+import { meetingsGuide } from "./live-guide";
 import { LiveLanes } from "./live-lanes";
+import { MeetingsGuideBar } from "./meetings-guide-bar";
 import { StaleNote } from "./stale-note";
 import { TranscriptInput } from "./transcript-input";
 import { useLiveCall } from "./use-live-call";
@@ -45,6 +48,7 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
   const busy = call.status === "processing" || call.status === "revealing";
   const ready = checkTranscript(transcript).length === 0;
   const stale = call.outputs !== null && !busy && call.submitted !== transcript.trim();
+  const guide = meetingsGuide({ status: call.status, ready, stale });
 
   function selectTab(next: InputTab) {
     if (next !== "record") recording.stop();
@@ -59,12 +63,13 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-4 py-5 md:px-8 lg:grid lg:grid-cols-[minmax(0,32fr)_minmax(0,68fr)] lg:items-start lg:gap-6">
-      <section aria-label="Your call" className="panel flex flex-col gap-4 p-4 sm:p-5 lg:sticky lg:top-5">
+      <MeetingsGuideBar guide={guide} onLoadSample={() => selectTab("sample")} onStartOver={call.startOver} className="lg:col-span-2" />
+      <section aria-label="Your call" className="panel flex flex-col gap-4 p-4 sm:p-5 lg:sticky lg:top-28">
         <header className="flex flex-col gap-1">
           <h2 className="text-[19px] font-semibold tracking-[-0.015em]">Turn a sales call into a proposal</h2>
           <p className="text-[14px] leading-snug text-muted">
-            Play both sides of a call {seller.person ? `as ${seller.short} of ${seller.company}` : `for ${seller.company}`}, paste a real
-            transcript, or load the sample call.
+            You play {seller.person ? `${seller.short} of ${seller.company}` : seller.company}. Record a call, paste one, or load our sample
+            call.
           </p>
           <ProviderNote providerName={providerName} className="mt-2 self-start" />
         </header>
@@ -77,24 +82,25 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
           recording={recording}
           sellerShortName={seller.short}
           sample={{
-            note: `A 32-minute discovery call between ${seller.person ?? seller.company} and Tom Becker, a fictional landlord with 14 apartments.`,
+            note: `A 32-minute sales call between ${seller.person ?? seller.company} and Tom Becker, a fictional landlord with 14 apartments.`,
             replaces: ownTranscript,
             onLoad: () => setTranscript(filledSample),
           }}
         />
-        <Button variant="brand" size="lg" disabled={!ready || busy} onClick={submit}>
+        <Button variant="brand" size="lg" disabled={!ready || busy} onClick={submit} {...spotlight(guide.spotlight === "submit")}>
           <Icon name="sparkle" size={18} />
           Turn this call into a proposal
         </Button>
-        {call.outputs && (
+        {/* Once the email is sent, the guide offers "Start over" itself. */}
+        {call.outputs && call.status !== "sent" && (
           <Button variant="ghost" className="-mt-2 self-center max-sm:h-11" onClick={call.startOver}>
             Start over
           </Button>
         )}
         {call.status === "failed" && (
           <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl bg-fail-soft px-3.5 py-3 text-[14px] text-fail">
-            <p className="min-w-0 flex-1">The draft did not come through. Try again.</p>
-            <Button variant="secondary" size="sm" onClick={submit} disabled={!ready}>
+            <p className="min-w-0 flex-1">The draft failed. Try again.</p>
+            <Button variant="secondary" size="sm" onClick={submit} disabled={!ready} {...spotlight(guide.spotlight === "try-again")}>
               Try again
             </Button>
           </div>
@@ -102,12 +108,13 @@ export function LiveDemo({ providerName, sampleCall, recognizer: injected }: Liv
       </section>
 
       <div className="flex min-w-0 flex-col gap-4">
-        {stale && <StaleNote onUpdate={submit} disabled={!ready} />}
+        {stale && <StaleNote onUpdate={submit} disabled={!ready} spotlight={guide.spotlight === "draft-again"} />}
         <LiveLanes
           call={call}
           profile={profile}
           stale={stale}
-          waitingFor={ready ? `Ready to read ${parseTranscript(transcript).length} turns` : "Waiting for a transcript"}
+          waitingFor={ready ? `Ready to read ${parseTranscript(transcript).length} turns` : "Waiting for a call"}
+          spotlightSend={guide.spotlight === "send"}
         />
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { EmailMessage } from "@diepen/ui/mockups/email-message";
 import { Avatar } from "@diepen/ui/primitives/avatar";
 import { cx } from "@diepen/ui/primitives/class-names";
+import { spotlight } from "@diepen/ui/guide/spotlight";
 import { Icon } from "@diepen/ui/primitives/icon";
 import type { ReactNode } from "react";
 
@@ -23,7 +24,14 @@ function snippet(body: string): string {
   return body.split("\n\n")[1]?.split("\n")[0] ?? "";
 }
 
-export function PhoneInbox({ emails, onOpen }: { emails: InboxEmail[]; onOpen?: (id: string) => void }) {
+export type PhoneInboxProps = {
+  emails: InboxEmail[];
+  onOpen?: (id: string) => void;
+  /** The email the live guide points at. */
+  spotlightId?: string;
+};
+
+export function PhoneInbox({ emails, onOpen, spotlightId }: PhoneInboxProps) {
   return (
     <div className="flex min-h-full flex-col bg-surface">
       <div className="flex items-baseline justify-between px-4 pt-4 pb-2">
@@ -41,6 +49,7 @@ export function PhoneInbox({ emails, onOpen }: { emails: InboxEmail[]; onOpen?: 
               <button
                 type="button"
                 onClick={() => onOpen?.(email.id)}
+                {...spotlight(email.id === spotlightId, "inset")}
                 className="flex w-full cursor-pointer gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-subtle"
               >
                 <span className="relative">

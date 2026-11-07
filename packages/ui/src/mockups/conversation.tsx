@@ -47,4 +47,6 @@ export type ConversationControls = {
   handover?: { note: string; onStartOver?: () => void };
   /** A line at the end of the thread, for example an error to retry. */
   notice?: string;
+  /** The live guide points at the times that are still open to pick. */
+  spotlightSlots?: boolean;
 };
