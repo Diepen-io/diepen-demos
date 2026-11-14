@@ -39,7 +39,7 @@ function identitySection(profile: CompanyProfile): string {
     "- Answer only from the company knowledge below. When it does not hold the answer, say so and hand over.",
     "- Never invent prices, discounts, dates or promises. Use only the prices listed in the services.",
     "- When a handover rule applies, hand over with the handover message. Do not try to solve it yourself.",
-    `- Stay in your role as ${people.assistantName}. If someone asks whether you are an AI, say yes.`,
+    `- In your first message to a customer, say in a few words that you are the AI assistant of ${name}. Stay in your role as ${people.assistantName}, and if someone asks whether you are an AI, say yes.`,
     `- ${dataRule}`,
   ].join("\n");
 }

@@ -55,7 +55,7 @@ const message = (id: string, time: string, role: FilmMessage["role"], text: stri
 
 export const filmMessages: FilmMessage[] = [
   message("C1-1", "21:42:00", "customer", "Hi there,\n\nI just moved to the area. Do you have room for someone new? I'd like to book {aServiceA}, but I can only do mornings. How much is it?\n\nThanks,\nAna"),
-  message("C1-2", "21:42:42", "assistant", "Hi Ana,\n\nWelcome to the area, and yes, we have room for you. [{ServiceA} costs {priceA}. ]Is anything urgent, or is this a routine visit? And which mornings suit you best?\n\n{signOff}", {
+  message("C1-2", "21:42:42", "assistant", "Hi Ana,\n\nI'm {assistant}, the AI assistant at {company}. Welcome to the area, and yes, we have room for you. [{ServiceA} costs {priceA}. ]Is anything urgent, or is this a routine visit? And which mornings suit you best?\n\n{signOff}", {
     intent: "Price and a first visit",
     status: "answered",
     qualifying: ["Is anything urgent, or is this a routine visit?", "Which mornings suit you best?"],
@@ -73,7 +73,7 @@ export const filmMessages: FilmMessage[] = [
     bookedSlot: "2026-11-12T09:00",
   }),
   message("C2-1", "22:14:00", "customer", "hi! do you do {serviceB}? how much is it"),
-  message("C2-2", "22:14:38", "assistant", "Hi Priya! Yes, we do.[ {ServiceB} is {priceB}.] Is it for a date you have in mind, or whenever suits you?", {
+  message("C2-2", "22:14:38", "assistant", "Hi Priya! I'm {assistant}, the AI assistant at {company}. Yes, we do.[ {ServiceB} is {priceB}.] Is it for a date you have in mind, or whenever suits you?", {
     intent: "Asks about {serviceB}",
     status: "answered",
     qualifying: ["Is it for a date you have in mind?"],
@@ -84,7 +84,7 @@ export const filmMessages: FilmMessage[] = [
     status: "answered",
   }),
   message("C3-1", "23:31:00", "customer", "Hello, I run the office at Fernhill Architects. We're a team of 14 and we'd like to offer {serviceA} as a staff benefit next year. Do you work with companies? Happy to set up a call."),
-  message("C3-2", "23:31:36", "assistant", "Hi Tom, thanks for getting in touch. Yes, {owner} sets up company arrangements personally. Two quick questions so the call is useful: about how many of the 14 would take part, and would you like one visit day or appointments spread over the year?\n\n{assistant}", {
+  message("C3-2", "23:31:36", "assistant", "Hi Tom, thanks for getting in touch. I'm {assistant}, the AI assistant at {company}. Yes, {owner} sets up company arrangements personally. Two quick questions so the call is useful: about how many of the 14 would take part, and would you like one visit day or appointments spread over the year?\n\n{assistant}", {
     intent: "Company offer for 14 people",
     status: "answered",
     qualifying: ["How many of the 14 would take part?", "One visit day or appointments spread over the year?"],
@@ -102,7 +102,7 @@ export const filmMessages: FilmMessage[] = [
     bookedSlot: "2026-11-13T10:30",
   }),
   message("C4-1", "00:33:00", "customer", "Hi. I had {aServiceA} with you on Monday and I'm really not happy with how it went. I'd like a refund."),
-  message("C4-2", "00:33:36", "assistant", "I'm sorry to hear that, Daniel. Refund requests go to {owner}, and I've passed yours on. What's the best way to reach you, here or by phone?", {
+  message("C4-2", "00:33:36", "assistant", "I'm sorry to hear that, Daniel. I'm {assistant}, the AI assistant at {company}. Refund requests go to {owner}, and I've passed yours on. What's the best way to reach you, here or by phone?", {
     intent: "Refund request",
     status: "needs_human",
     handoverReason: "Refund request after a visit on Monday",
