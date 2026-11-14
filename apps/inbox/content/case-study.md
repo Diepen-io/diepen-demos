@@ -51,10 +51,10 @@ In the live demo, open "Make it yours" and enter your website.
 Claude drafts your profile: name, logo, colours, tone, services and prices, and you can edit every field.
 The live demo then answers as your company while you play the customer on any channel.
 
-A 14-day build swaps the simulations for your real accounts: your inbox, your Instagram and LinkedIn messages, your website chat and your calendar.
+A build swaps the simulations for your real accounts: your inbox, your Instagram and LinkedIn messages, your website chat and your calendar.
 It runs inside the tools you already use and stays yours.
 We agree the handover rules and one number before the build, usually reply time.
-If that number does not move within 30 days, I keep working for free until it does.
+The number we agree on moves, or you get your money back.
 
 Book the free 15-minute intro call and tell me where your messages pile up.
 You get a straight answer on whether this is worth building for your business and roughly what it saves.

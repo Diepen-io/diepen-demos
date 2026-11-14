@@ -54,10 +54,10 @@ Your list of things the company never promises goes into every prompt, so for Br
 In the live demo, record a short role-play call, paste the transcript of a real one, or load the sample call.
 Open "Make it yours" and enter your website: the proposal then uses your services and prices, and the email your tone and sign-off.
 
-A 14-day build swaps the simulations for your real accounts: transcripts from your meeting tool, your CRM, your email, your calendar and your proposal template.
+A build swaps the simulations for your real accounts: transcripts from your meeting tool, your CRM, your email, your calendar and your proposal template.
 It runs inside the tools you already use and stays yours.
 We agree one number before the build, usually the time from call end to proposal sent.
-If that number does not move within 30 days, I keep working for free until it does.
+The number we agree on moves, or you get your money back.
 
 Book the free 15-minute intro call and tell me what happens after your sales calls today.
 You get a straight answer on whether this is worth building for your business and roughly what it saves.

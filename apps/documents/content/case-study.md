@@ -57,10 +57,10 @@ Upload a sample or your own PDF or photo, and Claude checks it on the spot.
 The demo keeps no copy.
 With "Make it yours", the emails, upload page and Drive folder carry your firm's name, logo, colours and voice.
 
-A 14-day build swaps the simulations for your real accounts: your document list, your email, your Google Drive, and reminders that run on real days.
+A build swaps the simulations for your real accounts: your document list, your email, your Google Drive, and reminders that run on real days.
 It runs inside the tools you already use and stays yours.
 We agree one number before the build, usually hours spent chasing.
-If that number does not move within 30 days, I keep working for free until it does.
+The number we agree on moves, or you get your money back.
 
 Book the free 15-minute intro call and tell me which documents you chase every month.
 You get a straight answer on whether this is worth building for your firm and roughly what it saves.
