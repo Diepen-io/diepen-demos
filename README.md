@@ -1,14 +1,24 @@
 # diepen demos
 
-Three working AI automations for service businesses, each with a short film and a live mode you can try in your own brand.
+Three demos that show how an AI system for a service business works, step by step.
+They are examples, not client work: every company and person in them is made up.
 Built by [diepen.ai](https://diepen.ai).
-Every company and person in them is fictional.
 
-| Demo | What it shows | Ends on |
-| --- | --- | --- |
-| [Inbox autopilot](apps/inbox) | Every inquiry on email, Instagram, LinkedIn and website chat answered in the company's voice, qualified and booked into the calendar, with handover to a person when the policy says so | Reply time: 9 hours before, 38 seconds now |
-| [Document chaser](apps/documents) | A client uploads and signs on one page; each file is checked, renamed and filed in Drive, and follow-ups name exactly what is missing | Hours a month chasing documents: 12 before, 1 now |
-| [Call to close](apps/meetings) | A sales call transcript becomes a summary, the client's numbers, a CRM record, a proposal at your price, a follow-up email and the next meeting | Call end to proposal sent: 2 days before, 4 minutes now |
+| Demo | What it shows |
+| --- | --- |
+| [Inbox autopilot](apps/inbox) | An inquiry on email, Instagram, LinkedIn or website chat gets an answer in the company's voice, is qualified and booked into the calendar, and goes to a person when a handover rule applies |
+| [Document chaser](apps/documents) | A client uploads and signs on one page; each file is checked, renamed and filed, and follow-ups name exactly what is missing |
+| [Call to close](apps/meetings) | A sales call transcript becomes a summary, a CRM record, a proposal with the listed price, a follow-up email and the next meeting |
+
+## Start here
+
+If you build AI systems for businesses, this is how to use the repo:
+
+1. Run one demo locally (see "Run it" below). It runs without an API key, on prepared sample answers.
+2. Read `packages/voice/src/prompt.ts`. Every AI reply goes through this one prompt builder, with the rules that always apply.
+3. Read `apps/inbox/domain/reply-rules.ts`. Plain code checks every offered time against the calendar before a reply goes out.
+4. Read `AGENTS.md` and `rules-template.md`. They are the rules the coding agents follow in this repo, and a template you can copy for your own.
+5. Run `pnpm check`. One command runs every check.
 
 ![Inbox autopilot film](docs/screenshots/inbox.jpg)
 ![Document chaser film](docs/screenshots/documents.jpg)
@@ -16,12 +26,12 @@ Every company and person in them is fictional.
 
 ## Two modes
 
-- **Film** (`/`): a five-beat film, one element per beat, ending on the one number. It runs from recorded fixtures, with no API key and no network.
-- **Live** (`/live`): you play the customer, the client or the seller, and Claude answers for real.
+- **Film** (`/`): a five-beat film, one element per beat. It runs from recorded fixtures, with no API key and no network.
+- **Live** (`/live`): you play the customer, the client or the seller. With an API key set, Claude answers. Without one, a mock gives prepared sample answers and the screen says so. The hosted demos run without a key.
 
 **Make it yours** reads a website and drafts a company profile: name, logo, colours, tone of voice, policies and knowledge.
 You can edit every field.
-Live mode then runs in that company's brand and voice.
+With an API key set, live mode then runs in that company's brand and voice.
 The profile stays in your browser and in the link you copy.
 
 ## Run it

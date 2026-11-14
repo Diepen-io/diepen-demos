@@ -1,7 +1,7 @@
 # diepen-demos
 
-Three open-source demos that prove diepen.ai's offer (the one task that eats a team's week, automated with AI and live in 14 days, at a fixed quote) before there are client case studies.
-Each demo is a case study page, a 60 to 90 second LinkedIn screen video and a live demo on sales calls in the prospect's own brand.
+Three open-source demos that show how the AI systems diepen.ai builds work, step by step, with made-up example companies.
+Each demo is a case study page, a short screen film and a live mode that runs on sample answers unless an API key is set.
 
 ## Project facts
 
