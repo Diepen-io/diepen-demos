@@ -7,7 +7,7 @@ metric:
   label: Hours a month spent chasing documents
   before: 12 hours
   after: 1 hour
-github: https://github.com/Diepen-io/diepen-demos/tree/main/apps/documents
+github: https://github.com/diepen-ai/diepen-demos/tree/main/apps/documents
 live: https://documents.demo.diepen.ai
 demo: true
 ---

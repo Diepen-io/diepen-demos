@@ -7,7 +7,7 @@ metric:
   label: Call end to proposal sent
   before: 2 days
   after: 4 minutes
-github: https://github.com/Diepen-io/diepen-demos/tree/main/apps/meetings
+github: https://github.com/diepen-ai/diepen-demos/tree/main/apps/meetings
 live: https://meetings.demo.diepen.ai
 demo: true
 ---

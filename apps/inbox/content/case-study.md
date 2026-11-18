@@ -7,7 +7,7 @@ metric:
   label: Reply time
   before: 9 hours
   after: 38 seconds
-github: https://github.com/Diepen-io/diepen-demos/tree/main/apps/inbox
+github: https://github.com/diepen-ai/diepen-demos/tree/main/apps/inbox
 live: https://inbox.demo.diepen.ai
 demo: true
 ---

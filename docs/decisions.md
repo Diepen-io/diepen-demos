@@ -8,7 +8,7 @@ Leander confirms or changes each open row.
 | Id | Question | Default we use | Blocks | Asked |
 | --- | --- | --- | --- | --- |
 | D1 | Where do the demos live? | `inbox.demo.diepen.ai`, `documents.demo.diepen.ai`, `meetings.demo.diepen.ai`, used as the live links in the case studies | Case study links | 2026-11-01 |
-| D2 | Which GitHub repo do the case studies link to? | `https://github.com/Diepen-io/diepen-demos` | Case study links, README | 2026-11-01 |
+| D2 | Which GitHub repo do the case studies link to? | `https://github.com/diepen-ai/diepen-demos` | Case study links, README | 2026-11-01 |
 | D3 | Rate limit and daily cap count in server memory, so each Vercel instance keeps its own count. Is that enough? | In memory. Move to Upstash Redis if the Anthropic bill shows abuse | Cost | 2026-11-01 |
 | D5 | Which OCR do the document checks use? | An `OcrService` port with two adapters. Claude reads PDFs and images directly by default (one key). Google Document AI runs when `OCR_PROVIDER=google-document-ai` and its Google Cloud settings are set | Document chaser | 2026-11-01 |
 | D6 | Where do long-running and scheduled jobs run? | A `JobScheduler` port. The demos use an in-process adapter because their film and live modes compress time. Client builds use Trigger.dev (durable waits of days, retries, TypeScript tasks next to a Vercel app); Google Cloud stays for heavy compute | Document chaser reminders, client builds | 2026-11-01 |

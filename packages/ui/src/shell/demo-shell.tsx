@@ -15,7 +15,7 @@ import { PageTitleContext } from "./page-title";
 import { useRecordMode } from "./record-mode";
 import { setUrlParam, useUrlParam } from "./url-param";
 
-export const repositoryUrl = "https://github.com/Diepen-io/diepen-demos";
+export const repositoryUrl = "https://github.com/diepen-ai/diepen-demos";
 const studioUrl = "https://diepen.ai";
 
 export type DemoMode = "film" | "live";

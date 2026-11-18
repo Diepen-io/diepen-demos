@@ -26,7 +26,7 @@ describe("DemoShell", () => {
     renderShell();
     expect(screen.getByRole("button", { name: "Make it yours" })).toBeTruthy();
     expect(screen.getByText(new RegExp(`${preset.name}, a fictional company`))).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Source code on GitHub" }).getAttribute("href")).toBe("https://github.com/Diepen-io/diepen-demos");
+    expect(screen.getByRole("link", { name: "Source code on GitHub" }).getAttribute("href")).toBe("https://github.com/diepen-ai/diepen-demos");
   });
 
   it("hides the top bar and footer with ?record=1", () => {
